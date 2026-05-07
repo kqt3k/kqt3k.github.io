@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.0, minimum-scale=0.5">
+  <title>Кликер · Котость</title>
+  <link rel="icon" href="lvl1cat.png">
+  <!-- Yandex Games SDK -->
+  <script async src="https://sdk.games.s3.yandex.net/sdk.js" onload="initSDK()"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+    body {
+      font-family:'Segoe UI','Poppins',sans-serif; min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(145deg,#2d1b00,#140e04);
+      background-size:cover; background-position:center;
+      transition:background-image 0.5s; position:relative; overflow:hidden;
+    }
+    body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:0; }
+    #cosmetics-layer, #pets-layer { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+    .cosmetic-item { position:absolute; font-size:35px; opacity:0.8; animation-duration:12s; animation-iteration-count:infinite; animation-timing-function:linear; }
+    @keyframes floatHorizontal { 0%{transform:translateX(0) translateY(0);} 25%{transform:translateX(30vw) translateY(-10vh);} 50%{transform:translateX(60vw) translateY(5vh);} 75%{transform:translateX(30vw) translateY(15vh);} 100%{transform:translateX(0) translateY(0);} }
+    @keyframes floatDiagonal { 0%{transform:translate(0,0);} 50%{transform:translate(40vw,-30vh);} 100%{transform:translate(0,0);} }
+    @keyframes floatCircle { 0%{transform:translate(0,0) rotate(0deg);} 100%{transform:translate(40vw,20vh) rotate(360deg);} }
+    @keyframes floatZigZag { 0%{transform:translate(0,0);} 25%{transform:translate(-20vw,10vh);} 50%{transform:translate(10vw,-5vh);} 75%{transform:translate(-30vw,-15vh);} 100%{transform:translate(0,0);} }
+
+    #app { position:relative; z-index:10; width:95%; max-width:1200px; max-height:95vh; display:flex; flex-direction:column; gap:8px; }
+    .tabs { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .tab-btn {
+      background:rgba(0,0,0,0.6); border:2px solid #ffd58c; border-radius:25px;
+      padding:8px 16px; color:#ffd58c; font-weight:bold; cursor:pointer; transition:0.2s; font-size:0.9rem;
+    }
+    .tab-btn.active { background:rgba(80,40,0,0.9); border-color:#ffaa33; }
+    .tab-content { display:none; flex-direction:row; gap:15px; flex:1; overflow-y:auto; max-height:80vh; }
+    .tab-content.active { display:flex; }
+    .clicker-area {
+      background:rgba(30,15,0,0.8); backdrop-filter:blur(15px); border-radius:40px;
+      padding:20px; box-shadow:0 20px 40px rgba(0,0,0,0.6); border:1px solid rgba(255,180,60,0.5);
+      display:flex; flex-direction:column; align-items:center; flex:0 0 300px;
+    }
+    .upgrades-area {
+      background:rgba(20,10,0,0.75); backdrop-filter:blur(12px); border-radius:30px;
+      padding:12px; flex:1; overflow-y:auto; max-height:80vh;
+    }
+    .cookie-image { width:120px; height:120px; object-fit:contain; border-radius:50%; background:rgba(0,0,0,0.3); padding:8px; cursor:pointer; transition:0.1s; }
+    .cookie-image:active { transform:scale(0.9); }
+    .score { font-size:2.5rem; font-weight:800; background:linear-gradient(135deg,#ffdf80,#c4870a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:8px 0; font-family:'Courier New',monospace; }
+    .per-second { color:#f3c26b; font-size:1rem; margin-bottom:4px; }
+    .level-info { background:#4a2c0f; padding:5px 18px; border-radius:30px; color:#ffd58c; font-weight:bold; margin:6px 0; cursor:pointer; }
+    .free-upgrade-btn { background:#c47a1a; border:none; padding:8px 16px; border-radius:25px; color:white; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #7a4b1d; margin:6px 0; }
+    .free-upgrade-btn:disabled { opacity:0.5; pointer-events:none; }
+    .upgrade-item { display:flex; justify-content:space-between; align-items:center; background:rgba(80,40,0,0.5); margin:6px 0; padding:8px 12px; border-radius:18px; border:1px solid #af7d3a; }
+    .upgrade-item:hover { background:rgba(120,60,0,0.6); }
+    .upgrade-info { flex:1; }
+    .upgrade-name { font-weight:bold; color:#ffd58c; font-size:0.9rem; }
+    .upgrade-desc { color:#cca66b; font-size:0.7rem; }
+    .upgrade-cost { font-weight:bold; color:#ffaa33; margin-right:6px; white-space:nowrap; font-size:0.8rem; }
+    .buy-btn, .prestige-btn { background:#7a4b1d; border:none; padding:5px 10px; border-radius:16px; color:white; font-weight:bold; cursor:pointer; box-shadow:0 3px 0 #4a2c0f; margin-left:4px; }
+    .prestige-btn { background:#9b4d1f; box-shadow:0 3px 0 #5c2d0a; }
+
+    .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:200; display:flex; align-items:center; justify-content:center; visibility:hidden; opacity:0; transition:0.2s; }
+    .modal-overlay.open { visibility:visible; opacity:1; }
+    .modal-content { background:rgba(20,10,0,0.95); border-radius:25px; padding:20px; max-width:400px; width:90%; max-height:80vh; overflow-y:auto; color:#ffd58c; border:1px solid #ffb347; text-align:center; }
+
+    .egg-btn { background:#d4a017; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; margin:4px; }
+    .pet-card { background:rgba(80,40,0,0.5); border-radius:15px; padding:8px; margin:4px; display:flex; align-items:center; gap:8px; flex:1 1 160px; }
+
+    .currency-value { color:#ffffff; font-weight:bold; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:10px; }
+
+    .pet-icon { width:50px; height:50px; background:orange; border-radius:50%; }
+    .pet-icon.vacuum { background:#888; }
+    .pet-icon.cube_earth { background:#8B4513; }
+    .pet-icon.chi_cat { background:purple; }
+    .pet-icon.golden_mouse { background:gold; }
+    .pet-icon.star_spirit { background:lightblue; }
+
+    @media (max-width:750px) {
+      .tab-content { flex-direction:column; }
+      .clicker-area { flex:0 0 auto; width:100%; }
+    }
+  </style>
+</head>
+<body>
+<div id="cosmetics-layer"></div>
+<div id="pets-layer" style="pointer-events:none; z-index:2;"></div>
+
+<div id="app">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="clicker">🐱 Кликер</button>
+    <button class="tab-btn" data-tab="eggs">🥚 Яйца</button>
+    <button class="tab-btn" data-tab="pets">🐾 Питомцы</button>
+    <button class="tab-btn" data-tab="quests">📋 Квесты</button>
+    <button class="tab-btn" data-tab="collection">🏆 Альбом</button>
+  </div>
+
+  <!-- Кликер -->
+  <div id="tab-clicker" class="tab-content active">
+    <div class="clicker-area">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <div id="hideUpgradesBtn" style="cursor:pointer; background:rgba(0,0,0,0.7); color:#ffd58c; border-radius:50%; width:30px; height:30px; text-align:center; line-height:30px;">→</div>
+        <div></div>
+      </div>
+      <img id="cookieImg" class="cookie-image" src="lvl1cat.png" alt="Котость">
+      <div class="score" id="scoreDisplay">0</div>
+      <div class="per-second" id="cpsDisplay">в сек: 0</div>
+      <div>💎 <span id="diamondsDisplay" class="currency-value">0</span> | 🔮 <span id="orbsDisplay" class="currency-value">0</span></div>
+      <div class="level-info" id="levelDisplay">Уровень 1</div>
+      <button class="free-upgrade-btn" id="freeUpgradeBtn">🐾 Бесплатная когтеточка</button>
+      <button class="free-upgrade-btn" id="laserGameBtn" style="display:none;">🎯 Лазер (10 мин)</button>
+    </div>
+    <div class="upgrades-area" id="upgradesContainer"></div>
+  </div>
+
+  <!-- Яйца -->
+  <div id="tab-eggs" class="tab-content" style="flex-direction:column; align-items:center;">
+    <h2 style="color:#ffd58c;">🥚 Магазин яиц</h2>
+    <p>💎 <span id="shopDiamonds" class="currency-value">0</span> | 🔮 <span id="shopOrbs" class="currency-value">0</span></p>
+    <button class="egg-btn" id="buyEggOrb">Обычное яйцо (50 орбов)</button>
+    <button class="egg-btn" id="buyEggDiamond">Премиум яйцо (1 алмаз)</button>
+    <div id="hatchResult" style="margin-top:10px; color:#ffd58c;"></div>
+  </div>
+
+  <!-- Питомцы -->
+  <div id="tab-pets" class="tab-content" style="flex-wrap:wrap;">
+    <h2 style="color:#ffd58c; width:100%;">🐾 Ваши питомцы</h2>
+    <div id="ownedPetsList" style="display:flex; flex-wrap:wrap; width:100%;"></div>
+  </div>
+
+  <!-- Квесты -->
+  <div id="tab-quests" class="tab-content" style="flex-direction:column;">
+    <h2 style="color:#ffd58c;">📋 Ежедневные задания</h2>
+    <div id="dailyQuests"></div>
+    <h2 style="color:#ffd58c; margin-top:15px;">🎁 Ежедневная награда</h2>
+    <button id="claimDailyBtn" class="egg-btn">Забрать (день <span id="dailyStreakSpan">1</span>)</button>
+    <h2 style="color:#ffd58c; margin-top:15px;">⚡ События</h2>
+    <div id="eventsPanel" style="color:#ffd58c;">Пока нет активных событий</div>
+  </div>
+
+  <!-- Альбом -->
+  <div id="tab-collection" class="tab-content" style="flex-wrap:wrap;">
+    <h2 style="color:#ffd58c; width:100%;">🏆 Альбом Котостей</h2>
+    <div id="albumGrid" style="display:flex; flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- Модалка скина (только локальные образы) -->
+<div class="modal-overlay" id="skinModal"><div class="modal-content">
+  <h2>🐱 Выбери образ</h2>
+  <div id="skinGrid" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
+  <button id="closeSkinModal" style="margin-top:15px; background:#7a4b1d; border:none; padding:8px 20px; border-radius:20px; color:white; font-weight:bold; cursor:pointer;">Закрыть</button>
+</div></div>
+
+<!-- Модалка рекламы -->
+<div class="modal-overlay" id="adModal"><div class="modal-content">
+  <h2>📢 Реклама</h2>
+  <p>Смотри рекламу 20 секунд...</p>
+  <div id="adTimer" style="font-size:2rem;">20</div>
+  <button id="closeAdBtn" disabled style="background:#7a4b1d; border:none; padding:8px 20px; border-radius:20px; color:white; font-weight:bold; cursor:pointer;">Получить когтеточку</button>
+</div></div>
+
+<script>
+// === DOM-элементы ===
+const cookieImg = document.getElementById('cookieImg');
+const scoreDisp = document.getElementById('scoreDisplay');
+const cpsDisp = document.getElementById('cpsDisplay');
+const diamondsDisp = document.getElementById('diamondsDisplay');
+const orbsDisp = document.getElementById('orbsDisplay');
+const levelDisp = document.getElementById('levelDisplay');
+const upgradesCont = document.getElementById('upgradesContainer');
+const freeUpgradeBtn = document.getElementById('freeUpgradeBtn');
+const laserGameBtn = document.getElementById('laserGameBtn');
+const hideUpgradesBtn = document.getElementById('hideUpgradesBtn');
+const petsLayer = document.getElementById('pets-layer');
+const ownedPetsList = document.getElementById('ownedPetsList');
+const dailyQuestsDiv = document.getElementById('dailyQuests');
+const shopDiamonds = document.getElementById('shopDiamonds');
+const shopOrbs = document.getElementById('shopOrbs');
+const hatchResult = document.getElementById('hatchResult');
+const buyEggOrb = document.getElementById('buyEggOrb');
+const buyEggDiamond = document.getElementById('buyEggDiamond');
+const skinGridDiv = document.getElementById('skinGrid');
+const skinModal = document.getElementById('skinModal');
+const closeSkinModal = document.getElementById('closeSkinModal');
+const adModal = document.getElementById('adModal');
+const adTimerEl = document.getElementById('adTimer');
+const closeAdBtn = document.getElementById('closeAdBtn');
+const claimDailyBtn = document.getElementById('claimDailyBtn');
+
+// === глобальные переменные ===
+let ysdk = null, player = null, lang = 'ru';
+let points = 0, totalPointsEarned = 0, clickPower = 1, cps = 0;
+let upgradeCounts = [], prestigeLevels = [];
+let selectedSkinIndex = 0;
+let avatarSquare = false, shortNumbers = true;
+let lastFreeUpgradeTime = 0, ownedPets = [], upgradesHidden = false;
+let diamonds = 0, orbs = 0, totalClicks = 0;
+let lastLaserGameTime = 0;
+let dailyQuestsData = [], lastDailyReset = '', dailyStreak = 1;
+let albumCards = [];
+
+// === переводы ===
+const translations = {
+  ru: { freeScratcher:'🐾 Бесплатная когтеточка', laserGame:'🎯 Лазер (10 мин)', hideBtn:'→', showBtn:'←',
+        shopTitle:'🥚 Магазин яиц', buyOrb:'Обычное яйцо (50 орбов)', buyDiamond:'Премиум яйцо (1 алмаз)',
+        hatchNothing:'Ничего не вылупилось :(', hatchSuccess:'Вылупился: ', dailyReward:'Забрать (день ' },
+  en: { freeScratcher:'🐾 Free Scratchpost', laserGame:'🎯 Laser (10 min)', hideBtn:'→', showBtn:'←',
+        shopTitle:'🥚 Egg Shop', buyOrb:'Common Egg (50 orbs)', buyDiamond:'Premium Egg (1 diamond)',
+        hatchNothing:'Nothing hatched :(', hatchSuccess:'Hatched: ', dailyReward:'Claim (day ' }
+};
+
+// === уровни (локальные файлы) ===
+const levels = [
+  { required:0,        img:"lvl1cat.png" },
+  { required:1000,     img:"lvl2cat.png" },
+  { required:10000,    img:"lvl3cat.png" },
+  { required:50000,    img:"lvl4cat.png" },
+  { required:200000,   img:"lvl5cat.png" },
+  { required:1000000,  img:"lvl6cat.png" },
+  { required:5000000,  img:"lvl7cat.png" },
+  { required:20000000, img:"lvl8cat.png" },
+  { required:100000000,img:"lvl9cat.png" },
+  { required:500000000,img:"lvl10cat.png" },
+  { required:2500000000,img:"lvl11cat.png" },
+  { required:10000000000,img:"lvl12cat.png" },
+  { required:50000000000,img:"lvl13cat.png" },
+  { required:200000000000,img:"lvl14cat.png" }
+];
+
+const upgrades = [
+  { name:"Мягкая лапка", baseCost:15, mult:1.15, type:"click", value:1 },
+  { name:"Коготь-царапка", baseCost:100, mult:1.15, type:"click", value:2 },
+  { name:"Усиленная лапа", baseCost:500, mult:1.15, type:"click", value:5, cosmetic:"🐾" },
+  { name:"Когтеточка", baseCost:1200, mult:1.15, type:"click", value:10 },
+  { name:"Кото-перчатка", baseCost:3000, mult:1.15, type:"click", value:25 },
+  { name:"Мурчащий мотор", baseCost:8000, mult:1.15, type:"click", value:60 },
+  { name:"Кибер-коготь", baseCost:20000, mult:1.15, type:"click", value:150 },
+  { name:"Лазерная указка", baseCost:50000, mult:1.15, type:"click", value:400 },
+  { name:"Удар хвостом", baseCost:120000, mult:1.15, type:"click", value:1000 },
+  { name:"Кото-бластер", baseCost:300000, mult:1.15, type:"click", value:2500 },
+  { name:"Автоматическая миска", baseCost:20, mult:1.15, type:"cps", value:0.5 },
+  { name:"Робот-мышка", baseCost:120, mult:1.15, type:"cps", value:1.2 },
+  { name:"Электро-клубок", baseCost:600, mult:1.15, type:"cps", value:3 },
+  { name:"Пылесос-робот", baseCost:1500, mult:1.15, type:"cps", value:8 },
+  { name:"Кото-будильник", baseCost:4000, mult:1.15, type:"cps", value:20 },
+  { name:"Кормушка 3000", baseCost:10000, mult:1.15, type:"cps", value:50 },
+  { name:"Лазерный дротик", baseCost:25000, mult:1.15, type:"cps", value:120 },
+  { name:"Мега-пылесос", baseCost:60000, mult:1.15, type:"cps", value:300 },
+  { name:"Фабрика корма", baseCost:150000, mult:1.15, type:"cps", value:800 },
+  { name:"Космический лоток", baseCost:400000, mult:1.15, type:"cps", value:2000 }
+];
+
+const allPets = [
+  { id:"vacuum", name:"Пылесос-робот", class:"vacuum", rarity:"common", chance:0.5 },
+  { id:"cube_earth", name:"Куб Земли", class:"cube_earth", rarity:"legendary", chance:0.00002 },
+  { id:"chi_cat", name:"Ч и Котость", class:"chi_cat", rarity:"mythic", chance:0.0001 },
+  { id:"golden_mouse", name:"Золотая мышь", class:"golden_mouse", rarity:"rare", chance:0.1 },
+  { id:"star_spirit", name:"Звёздный дух", class:"star_spirit", rarity:"rare", chance:0.08 }
+];
+
+upgradeCounts = new Array(upgrades.length).fill(0);
+prestigeLevels = new Array(upgrades.length).fill(0);
+
+function fmtNum(num, short = true) {
+  if (!short || num < 1000) return Math.floor(num).toString();
+  const sfx = ['','K','M','B','T','Qa','Qi'];
+  let tier = 0, n = num;
+  while (n >= 1000 && tier < sfx.length-1) { n /= 1000; tier++; }
+  return n.toFixed(2) + sfx[tier];
+}
+
+function getEffVal(i) { return upgrades[i].value * Math.pow(50, prestigeLevels[i]||0); }
+function getPrestigeCost(i) { return Math.floor(100000 * upgrades[i].baseCost * Math.pow(100, prestigeLevels[i]||0)); }
+
+function applyLang() {
+  const t = translations[lang] || translations.ru;
+  freeUpgradeBtn.textContent = t.freeScratcher;
+  laserGameBtn.textContent = t.laserGame;
+  document.getElementById('buyEggOrb').textContent = t.buyOrb;
+  document.getElementById('buyEggDiamond').textContent = t.buyDiamond;
+  document.querySelector('#tab-eggs h2').textContent = t.shopTitle;
+  claimDailyBtn.innerHTML = t.dailyReward + '<span id="dailyStreakSpan">' + dailyStreak + '</span>)';
+}
+
+function saveGame() {
+  const data = {
+    points, totalPointsEarned, clickPower, cps, upgradeCounts, prestigeLevels,
+    selectedSkinIndex, avatarSquare, shortNumbers, lastFreeUpgradeTime, ownedPets, upgradesHidden,
+    diamonds, orbs, totalClicks, lastLaserGameTime,
+    dailyQuestsData, lastDailyReset, dailyStreak, albumCards
+  };
+  localStorage.setItem('catFinal', JSON.stringify(data));
+  if (player && ysdk) {
+    player.setStats({
+      points: Math.floor(points),
+      totalPointsEarned: Math.floor(totalPointsEarned),
+      clickPower, cps, diamonds, orbs
+    }).catch(()=>{});
+    player.setData({
+      upgradeCounts, prestigeLevels, ownedPets,
+      dailyQuestsData, lastDailyReset, dailyStreak, albumCards,
+      selectedSkinIndex, lastFreeUpgradeTime, lastLaserGameTime, upgradesHidden,
+      avatarSquare, shortNumbers
+    }).catch(()=>{});
+  }
+}
+
+function loadGame() {
+  try {
+    const local = localStorage.getItem('catFinal');
+    if (local) {
+      const d = JSON.parse(local);
+      applyData(d);
+    }
+  } catch(e) {}
+  if (player && ysdk) {
+    Promise.all([player.getStats(), player.getData()]).then(([stats, data]) => {
+      if (stats) {
+        points = stats.points || points;
+        totalPointsEarned = stats.totalPointsEarned || totalPointsEarned;
+        clickPower = stats.clickPower || clickPower;
+        cps = stats.cps || cps;
+        diamonds = stats.diamonds || diamonds;
+        orbs = stats.orbs || orbs;
+      }
+      if (data) {
+        upgradeCounts = data.upgradeCounts || upgradeCounts;
+        prestigeLevels = data.prestigeLevels || prestigeLevels;
+        ownedPets = data.ownedPets || ownedPets;
+        dailyQuestsData = data.dailyQuestsData || dailyQuestsData;
+        lastDailyReset = data.lastDailyReset || lastDailyReset;
+        dailyStreak = data.dailyStreak || dailyStreak;
+        albumCards = data.albumCards || albumCards;
+        selectedSkinIndex = data.selectedSkinIndex ?? selectedSkinIndex;
+        lastFreeUpgradeTime = data.lastFreeUpgradeTime || lastFreeUpgradeTime;
+        lastLaserGameTime = data.lastLaserGameTime || lastLaserGameTime;
+        upgradesHidden = data.upgradesHidden || upgradesHidden;
+        avatarSquare = data.avatarSquare || avatarSquare;
+        shortNumbers = data.shortNumbers !== undefined ? data.shortNumbers : shortNumbers;
+      }
+      ensureArraysLengths();
+      recalcPower();
+      applySkin();
+      updateUI();
+      renderAll();
+    }).catch(()=>{});
+  }
+}
+
+function applyData(d) {
+  points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
+  clickPower = d.clickPower || 1; cps = d.cps || 0;
+  upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
+  prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
+  selectedSkinIndex = d.selectedSkinIndex ?? 0;
+  avatarSquare = d.avatarSquare || false; shortNumbers = d.shortNumbers !== false;
+  lastFreeUpgradeTime = d.lastFreeUpgradeTime || 0; ownedPets = d.ownedPets || [];
+  upgradesHidden = d.upgradesHidden || false; diamonds = d.diamonds || 0; orbs = d.orbs || 0;
+  totalClicks = d.totalClicks || 0; lastLaserGameTime = d.lastLaserGameTime || 0;
+  dailyQuestsData = d.dailyQuestsData || []; lastDailyReset = d.lastDailyReset || '';
+  dailyStreak = d.dailyStreak || 1; albumCards = d.albumCards || [];
+  ensureArraysLengths();
+}
+
+function ensureArraysLengths() {
+  while (upgradeCounts.length < upgrades.length) upgradeCounts.push(0);
+  while (prestigeLevels.length < upgrades.length) prestigeLevels.push(0);
+}
+
+function recalcPower() {
+  let click = 1, auto = 0;
+  for (let i = 0; i < upgrades.length; i++) {
+    const u = upgrades[i];
+    const count = upgradeCounts[i] || 0;
+    if (u.type === 'click') click += count * getEffVal(i);
+    else auto += count * getEffVal(i);
+  }
+  clickPower = click; cps = auto;
+}
+
+function getMaxLvl() {
+  for (let i = levels.length-1; i>=0; i--) if (totalPointsEarned >= levels[i].required) return i;
+  return 0;
+}
+
+function applySkin() {
+  cookieImg.src = levels[selectedSkinIndex]?.img || 'lvl1cat.png';
+}
+
+function renderUpgrades() {
+  upgradesCont.innerHTML = '';
+  upgrades.forEach((u,i) => {
+    const count = upgradeCounts[i] || 0;
+    const cost = Math.floor(u.baseCost * Math.pow(u.mult, count));
+    const pCost = getPrestigeCost(i);
+    const div = document.createElement('div'); div.className = 'upgrade-item';
+    div.innerHTML = `
+      <div class="upgrade-info">
+        <div class="upgrade-name">${u.name} (x${count}) ${prestigeLevels[i]?'⭐'+prestigeLevels[i]:''}</div>
+        <div class="upgrade-desc">+${getEffVal(i)} ${u.type==='click'?'к клику':'в сек'}</div>
+      </div>
+      <span class="upgrade-cost">${fmtNum(cost)}</span>
+      <button class="buy-btn" data-idx="${i}" ${points<cost?'disabled':''}>Купить</button>
+      <button class="prestige-btn" data-idx="${i}" ${points<pCost?'disabled':''}>⭐</button>`;
+    upgradesCont.appendChild(div);
+  });
+  document.querySelectorAll('.buy-btn').forEach(btn => {
+    btn.onclick = () => {
+      const idx = +btn.dataset.idx;
+      const cost = Math.floor(upgrades[idx].baseCost * Math.pow(upgrades[idx].mult, upgradeCounts[idx]||0));
+      if (points < cost) return;
+      points -= cost; upgradeCounts[idx] = (upgradeCounts[idx]||0)+1; recalcPower();
+      if (upgrades[idx].cosmetic) spawnCosmetic(upgrades[idx].cosmetic);
+      if (idx === 13) {
+        ownedPets.push({ type:'vacuum', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
+        renderPetsLayer();
+        renderOwnedPetsList();
+      }
+      saveGame(); updateUI(); renderUpgrades();
+    };
+  });
+  document.querySelectorAll('.prestige-btn').forEach(btn => {
+    btn.onclick = () => {
+      const idx = +btn.dataset.idx;
+      const cost = getPrestigeCost(idx);
+      if (points < cost) return;
+      points -= cost; prestigeLevels[idx] = (prestigeLevels[idx]||0)+1; recalcPower();
+      saveGame(); updateUI(); renderUpgrades();
+    };
+  });
+}
+
+function renderPetsLayer() {
+  petsLayer.innerHTML = '';
+  ownedPets.forEach(p => {
+    const info = allPets.find(pet => pet.id === p.type);
+    const el = document.createElement('div');
+    el.className = 'pet-icon' + (info ? ' ' + info.class : '');
+    el.style.position = 'absolute';
+    el.style.left = p.x+'px'; el.style.top = p.y+'px';
+    petsLayer.appendChild(el);
+  });
+}
+
+setInterval(() => {
+  const w = innerWidth-60, h = innerHeight-60;
+  ownedPets.forEach(p => {
+    p.x += (Math.random()-0.5)*6;
+    p.y += (Math.random()-0.5)*6;
+    p.x = Math.max(0, Math.min(w, p.x));
+    p.y = Math.max(0, Math.min(h, p.y));
+  });
+  renderPetsLayer();
+}, 100);
+
+function renderOwnedPetsList() {
+  ownedPetsList.innerHTML = '';
+  ownedPets.forEach(p => {
+    const info = allPets.find(pet => pet.id === p.type);
+    const card = document.createElement('div'); card.className = 'pet-card';
+    const icon = document.createElement('div');
+    icon.className = 'pet-icon' + (info ? ' ' + info.class : '');
+    icon.style.width = '30px'; icon.style.height = '30px';
+    card.appendChild(icon);
+    card.appendChild(document.createTextNode((info?.name||p.type) + ' (x' + (p.count||1) + ')'));
+    ownedPetsList.appendChild(card);
+  });
+}
+
+function genDailyQuests() {
+  dailyQuestsData = [
+    { desc:'Кликнуть 500 раз', progress:0, goal:500, reward:()=>{diamonds+=2;} },
+    { desc:'Купить 10 улучшений', progress:0, goal:10, reward:()=>{orbs+=50;} },
+    { desc:'Повысить уровень дважды', progress:0, goal:2, reward:()=>{points+=5000;} }
+  ];
+  lastDailyReset = new Date().toDateString();
+}
+function renderDailyQuests() {
+  if (!dailyQuestsData.length) genDailyQuests();
+  dailyQuestsDiv.innerHTML = dailyQuestsData.map(q => `<div style="color:#ffd58c;">${q.desc}: ${Math.min(q.progress,q.goal)}/${q.goal}</div>`).join('');
+}
+
+function renderAlbum() {
+  albumGrid.innerHTML = levels.map((l,i) => `<div style="width:60px;height:60px;background-image:url(${l.img});background-size:contain;border:2px solid ${albumCards.includes(i)?'#ffd58c':'gray'};border-radius:10px;margin:4px;"></div>`).join('');
+}
+
+function spawnCosmetic(emoji) {
+  const el = document.createElement('div'); el.className = 'cosmetic-item';
+  el.textContent = emoji;
+  const anims = ['floatHorizontal','floatDiagonal','floatCircle','floatZigZag'];
+  el.style.animationName = anims[Math.floor(Math.random()*anims.length)];
+  el.style.left = Math.random()*80+'%'; el.style.top = Math.random()*80+'%';
+  el.style.animationDelay = Math.random()*2+'s';
+  el.style.animationDuration = 10+Math.random()*10+'s';
+  document.getElementById('cosmetics-layer').appendChild(el);
+  setTimeout(() => el.remove(), 20000);
+}
+
+function updateUI() {
+  scoreDisp.textContent = fmtNum(points, shortNumbers);
+  cpsDisp.textContent = `в сек: ${fmtNum(cps, shortNumbers)}`;
+  diamondsDisp.textContent = diamonds; orbsDisp.textContent = orbs;
+  shopDiamonds.textContent = diamonds; shopOrbs.textContent = orbs;
+  const maxLvl = getMaxLvl();
+  levelDisp.textContent = 'Уровень ' + (maxLvl+1);
+  if (totalPointsEarned < levels[selectedSkinIndex]?.required) selectedSkinIndex = maxLvl;
+  applySkin();
+  freeUpgradeBtn.disabled = (Date.now() - lastFreeUpgradeTime) < 3*60*1000;
+}
+
+function renderAll() {
+  recalcPower();
+  updateUI();
+  renderUpgrades();
+  renderPetsLayer();
+  renderOwnedPetsList();
+  renderDailyQuests();
+  renderAlbum();
+}
+
+// === клик ===
+cookieImg.onclick = () => {
+  points += clickPower; totalPointsEarned += clickPower;
+  totalClicks++; orbs++;
+  if (totalClicks % 100 === 0) diamonds++;
+  if (Math.random() < 0.0003) { orbs += 1000; alert('🎉 ДЖЕКПОТ! +1000 орбов'); }
+  if (Math.random() < 0.00002 && !ownedPets.some(p=>p.type==='cube_earth')) {
+    ownedPets.push({ type:'cube_earth', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
+    alert('✨ Вы нашли Куб Земли!');
+  }
+  if (Math.random() < 0.0001 && !ownedPets.some(p=>p.type==='chi_cat')) {
+    ownedPets.push({ type:'chi_cat', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
+    alert('🐱 Ч и Котость присоединились!');
+  }
+  dailyQuestsData.forEach(q => { if (q.desc.includes('Кликнуть')) q.progress = Math.min(q.progress+1, q.goal); });
+  saveGame(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
+};
+
+// === автодоход ===
+setInterval(() => {
+  if (cps > 0) { points += cps/10; totalPointsEarned += cps/10; saveGame(); updateUI(); }
+}, 100);
+
+// === бесплатная когтеточка ===
+freeUpgradeBtn.onclick = () => {
+  if (Date.now() - lastFreeUpgradeTime < 3*60*1000) return;
+  adModal.classList.add('open'); let sec=20;
+  adTimerEl.textContent = sec; closeAdBtn.disabled = true;
+  const timer = setInterval(() => {
+    sec--; adTimerEl.textContent = sec;
+    if (sec <= 0) { clearInterval(timer); closeAdBtn.disabled = false; }
+  }, 1000);
+};
+closeAdBtn.onclick = () => {
+  adModal.classList.remove('open');
+  upgradeCounts[3] = (upgradeCounts[3]||0)+1; recalcPower(); lastFreeUpgradeTime = Date.now();
+  saveGame(); updateUI(); renderUpgrades();
+};
+
+// === лазерная игра ===
+laserGameBtn.style.display = 'inline-block';
+laserGameBtn.onclick = () => {
+  if (Date.now() - lastLaserGameTime < 10*60*1000) return;
+  lastLaserGameTime = Date.now();
+  let clicks=0; const max=50;
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:20%;left:30%;width:200px;height:200px;background:rgba(0,0,0,0.8);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;';
+  modal.textContent = 'Кликай! 0';
+  document.body.appendChild(modal);
+  modal.onclick = () => {
+    clicks++; modal.textContent = 'Кликай! ' + clicks;
+    if (clicks >= max) {
+      modal.remove();
+      const bonus = Math.max(1, Math.floor(clicks/10));
+      alert('Множитель клика x' + bonus + ' на 60 сек!');
+      const orig = clickPower;
+      clickPower *= bonus;
+      setTimeout(() => { clickPower = orig; }, 60000);
+    }
+  };
+  setTimeout(() => modal.remove(), 10000);
+};
+
+// === скрытие панели ===
+hideUpgradesBtn.onclick = () => {
+  upgradesHidden = !upgradesHidden;
+  document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
+  hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
+  saveGame();
+};
+
+// === магазин яиц ===
+buyEggOrb.onclick = () => buyEgg(0,50);
+buyEggDiamond.onclick = () => buyEgg(1,0);
+function buyEgg(dCost, oCost) {
+  if (diamonds < dCost || orbs < oCost) return alert('Не хватает валюты');
+  diamonds -= dCost; orbs -= oCost;
+  const pet = rollPet();
+  const t = translations[lang];
+  if (pet) {
+    const exist = ownedPets.find(p=>p.type===pet.id);
+    if (exist) exist.count = (exist.count||1)+1;
+    else ownedPets.push({ type:pet.id, x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
+    hatchResult.textContent = t.hatchSuccess + pet.name;
+  } else hatchResult.textContent = t.hatchNothing;
+  saveGame(); updateUI(); renderPetsLayer(); renderOwnedPetsList();
+}
+function rollPet() {
+  const r = Math.random(); let cum=0;
+  for (const p of allPets) { cum += p.chance; if (r <= cum) return p; }
+  return null;
+}
+
+// === выбор образа ===
+levelDisp.onclick = () => {
+  skinGridDiv.innerHTML = '';
+  levels.forEach((l,i) => {
+    if (totalPointsEarned < l.required && i !== selectedSkinIndex) return;
+    const div = document.createElement('div');
+    div.style.cssText = `background-image:url(${l.img});background-size:contain;width:70px;height:70px;border-radius:10px;cursor:pointer;border:3px solid ${i===selectedSkinIndex?'#ffb347':'transparent'}`;
+    div.onclick = () => { selectedSkinIndex=i; applySkin(); skinModal.classList.remove('open'); saveGame(); updateUI(); };
+    skinGridDiv.appendChild(div);
+  });
+  skinModal.classList.add('open');
+};
+closeSkinModal.onclick = () => skinModal.classList.remove('open');
+
+// === ежедневная награда ===
+claimDailyBtn.onclick = () => {
+  if (lastDailyReset === new Date().toDateString()) return alert('Уже получил');
+  diamonds += dailyStreak; orbs += dailyStreak*10;
+  lastDailyReset = new Date().toDateString(); dailyStreak++;
+  document.getElementById('dailyStreakSpan').textContent = dailyStreak;
+  saveGame(); updateUI();
+};
+
+// === переключение вкладок ===
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  };
+});
+
+// === инициализация SDK и запуск ===
+async function initSDK() {
+  try {
+    if (typeof YaGames !== 'undefined') {
+      ysdk = await YaGames.init();
+      lang = ysdk.environment.i18n.lang || 'ru';
+      document.documentElement.lang = lang;
+      if (ysdk.getStorage) {
+        const safe = await ysdk.getStorage();
+        Object.defineProperty(window, 'localStorage', { get: () => safe });
+      }
+      try { player = await ysdk.getPlayer(); } catch(e){}
+      ysdk.features.LoadingAPI?.ready();
+      ysdk.features.GameplayAPI?.start();
+    }
+  } catch(e) { console.warn('SDK err'); }
+  loadGame();
+  if (!dailyQuestsData.length) genDailyQuests();
+  applyLang();
+  document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
+  hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
+  renderAll();
+}
+
+window.onload = () => {
+  if (!ysdk) {
+    loadGame();
+    if (!dailyQuestsData.length) genDailyQuests();
+    applyLang();
+    document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
+    hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
+    renderAll();
+  }
+};
+</script>
+</body>
+</html>
