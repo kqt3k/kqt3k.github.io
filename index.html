@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.0, minimum-scale=0.5">
   <title>Кликер · Котость</title>
   <link rel="icon" href="lvl1cat.png">
-  <!-- Yandex Games SDK -->
-  <script async src="https://sdk.games.s3.yandex.net/sdk.js" onload="initSDK()"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
     body {
@@ -63,16 +61,22 @@
     .modal-content { background:rgba(20,10,0,0.95); border-radius:25px; padding:20px; max-width:400px; width:90%; max-height:80vh; overflow-y:auto; color:#ffd58c; border:1px solid #ffb347; text-align:center; }
 
     .egg-btn { background:#d4a017; border:none; padding:8px 18px; border-radius:20px; font-weight:bold; cursor:pointer; margin:4px; }
-    .pet-card { background:rgba(80,40,0,0.5); border-radius:15px; padding:8px; margin:4px; display:flex; align-items:center; gap:8px; flex:1 1 160px; }
+    .pet-card { background:rgba(80,40,0,0.5); border-radius:15px; padding:8px; margin:4px; display:flex; align-items:center; gap:8px; flex:1 1 160px; cursor:pointer; }
 
     .currency-value { color:#ffffff; font-weight:bold; background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:10px; }
 
-    .pet-icon { width:50px; height:50px; background:orange; border-radius:50%; }
-    .pet-icon.vacuum { background:#888; }
-    .pet-icon.cube_earth { background:#8B4513; }
-    .pet-icon.chi_cat { background:purple; }
-    .pet-icon.golden_mouse { background:gold; }
-    .pet-icon.star_spirit { background:lightblue; }
+    .pet-emoji { font-size:40px; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:rgba(255,200,100,0.3); }
+    .pet-emoji.vacuum { background:#888; }
+    .pet-emoji.cube_earth { background:#8B4513; }
+    .pet-emoji.chi_cat { background:purple; }
+    .pet-emoji.golden_mouse { background:gold; }
+    .pet-emoji.star_spirit { background:lightblue; }
+    .pet-emoji.kotost { background:#c4870a; }
+    .pet-emoji.azbukabik { background:#aaa; }
+    .pet-emoji.heartpet { background:pink; }
+
+    .nickname-display { color:#ffd58c; font-size:0.9rem; margin-bottom:5px; }
+    .promo-input { padding:5px 10px; border-radius:15px; border:1px solid #ffaa33; background:rgba(0,0,0,0.5); color:#ffd58c; }
 
     @media (max-width:750px) {
       .tab-content { flex-direction:column; }
@@ -89,8 +93,10 @@
     <button class="tab-btn active" data-tab="clicker">🐱 Кликер</button>
     <button class="tab-btn" data-tab="eggs">🥚 Яйца</button>
     <button class="tab-btn" data-tab="pets">🐾 Питомцы</button>
+    <button class="tab-btn" data-tab="games">🎮 Лапки размять</button>
     <button class="tab-btn" data-tab="quests">📋 Квесты</button>
     <button class="tab-btn" data-tab="collection">🏆 Альбом</button>
+    <button class="tab-btn" data-tab="promo">🎁 Промокоды</button>
   </div>
 
   <!-- Кликер -->
@@ -98,15 +104,13 @@
     <div class="clicker-area">
       <div style="display:flex; justify-content:space-between; width:100%;">
         <div id="hideUpgradesBtn" style="cursor:pointer; background:rgba(0,0,0,0.7); color:#ffd58c; border-radius:50%; width:30px; height:30px; text-align:center; line-height:30px;">→</div>
-        <div></div>
+        <div class="nickname-display" id="nicknameDisplay"></div>
       </div>
       <img id="cookieImg" class="cookie-image" src="lvl1cat.png" alt="Котость">
       <div class="score" id="scoreDisplay">0</div>
       <div class="per-second" id="cpsDisplay">в сек: 0</div>
-      <div>💎 <span id="diamondsDisplay" class="currency-value">0</span> | 🔮 <span id="orbsDisplay" class="currency-value">0</span></div>
+      <div>💎 <span id="diamondsDisplay" class="currency-value">0</span> | 🔮 <span id="orbsDisplay" class="currency-value">0</span> | 🥇 <span id="goldDisplay" class="currency-value">0</span></div>
       <div class="level-info" id="levelDisplay">Уровень 1</div>
-      <button class="free-upgrade-btn" id="freeUpgradeBtn">🐾 Бесплатная когтеточка</button>
-      <button class="free-upgrade-btn" id="laserGameBtn" style="display:none;">🎯 Лазер (10 мин)</button>
     </div>
     <div class="upgrades-area" id="upgradesContainer"></div>
   </div>
@@ -115,25 +119,38 @@
   <div id="tab-eggs" class="tab-content" style="flex-direction:column; align-items:center;">
     <h2 style="color:#ffd58c;">🥚 Магазин яиц</h2>
     <p>💎 <span id="shopDiamonds" class="currency-value">0</span> | 🔮 <span id="shopOrbs" class="currency-value">0</span></p>
-    <button class="egg-btn" id="buyEggOrb">Обычное яйцо (50 орбов)</button>
-    <button class="egg-btn" id="buyEggDiamond">Премиум яйцо (1 алмаз)</button>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+      <button class="egg-btn" id="buy1Orb">1 яйцо (50 орбов)</button>
+      <button class="egg-btn" id="buy3Orb">3 яйца (130 орбов)</button>
+      <button class="egg-btn" id="buy1Diamond">1 яйцо (1 алмаз)</button>
+      <button class="egg-btn" id="buy3Diamond">3 яйца (2 алмаза)</button>
+    </div>
+    <button class="egg-btn" id="showChancesBtn" style="margin-top:10px;">❓ Шансы</button>
     <div id="hatchResult" style="margin-top:10px; color:#ffd58c;"></div>
+    <div id="chancesPanel" style="margin-top:10px; display:none; color:#ffd58c; background:rgba(0,0,0,0.5); padding:10px; border-radius:15px;"></div>
   </div>
 
   <!-- Питомцы -->
   <div id="tab-pets" class="tab-content" style="flex-wrap:wrap;">
-    <h2 style="color:#ffd58c; width:100%;">🐾 Ваши питомцы</h2>
+    <h2 style="color:#ffd58c; width:100%;">🐾 Ваши питомцы <span id="totalPetsCount" style="font-size:0.8rem;">0</span></h2>
     <div id="ownedPetsList" style="display:flex; flex-wrap:wrap; width:100%;"></div>
+  </div>
+
+  <!-- Игры -->
+  <div id="tab-games" class="tab-content" style="flex-direction:column; align-items:center;">
+    <h2 style="color:#ffd58c;">🎮 Лапки размять</h2>
+    <button class="free-upgrade-btn" id="whiskersBtn">🐾 Получить усы2 (+1% к доходу)</button>
+    <button class="free-upgrade-btn" id="laserGameBtn">🎯 Лазер (10 мин)</button>
+    <p style="color:#ffd58c;">⏳ Награда за время: <span id="afkTimer">0</span> сек</p>
+    <button class="egg-btn" id="claimAfkBtn">Забрать</button>
   </div>
 
   <!-- Квесты -->
   <div id="tab-quests" class="tab-content" style="flex-direction:column;">
     <h2 style="color:#ffd58c;">📋 Ежедневные задания</h2>
     <div id="dailyQuests"></div>
-    <h2 style="color:#ffd58c; margin-top:15px;">🎁 Ежедневная награда</h2>
-    <button id="claimDailyBtn" class="egg-btn">Забрать (день <span id="dailyStreakSpan">1</span>)</button>
-    <h2 style="color:#ffd58c; margin-top:15px;">⚡ События</h2>
-    <div id="eventsPanel" style="color:#ffd58c;">Пока нет активных событий</div>
+    <h2 style="color:#ffd58c; margin-top:15px;">🎁 Ежедневная награда (день <span id="dailyStreakSpan">1</span>) +<span id="dailyPercent">0</span>% к доходу</h2>
+    <button id="claimDailyBtn" class="egg-btn">Забрать</button>
   </div>
 
   <!-- Альбом -->
@@ -141,33 +158,69 @@
     <h2 style="color:#ffd58c; width:100%;">🏆 Альбом Котостей</h2>
     <div id="albumGrid" style="display:flex; flex-wrap:wrap;"></div>
   </div>
+
+  <!-- Промокоды -->
+  <div id="tab-promo" class="tab-content" style="flex-direction:column; align-items:center;">
+    <h2 style="color:#ffd58c;">🎁 Промокоды</h2>
+    <input type="text" id="promoInput" class="promo-input" placeholder="Введите код">
+    <button class="egg-btn" id="applyPromoBtn">Применить</button>
+    <div id="promoMessage" style="color:#ffd58c; margin-top:10px;"></div>
+  </div>
 </div>
 
-<!-- Модалка скина (только локальные образы) -->
+<!-- Модалка скина -->
 <div class="modal-overlay" id="skinModal"><div class="modal-content">
   <h2>🐱 Выбери образ</h2>
   <div id="skinGrid" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
   <button id="closeSkinModal" style="margin-top:15px; background:#7a4b1d; border:none; padding:8px 20px; border-radius:20px; color:white; font-weight:bold; cursor:pointer;">Закрыть</button>
 </div></div>
 
-<!-- Модалка рекламы -->
-<div class="modal-overlay" id="adModal"><div class="modal-content">
-  <h2>📢 Реклама</h2>
-  <p>Смотри рекламу 20 секунд...</p>
-  <div id="adTimer" style="font-size:2rem;">20</div>
-  <button id="closeAdBtn" disabled style="background:#7a4b1d; border:none; padding:8px 20px; border-radius:20px; color:white; font-weight:bold; cursor:pointer;">Получить когтеточку</button>
+<!-- Модалка информации о питомце -->
+<div class="modal-overlay" id="petDetailModal"><div class="modal-content">
+  <h2 id="petDetailName"></h2>
+  <div id="petDetailEmoji" style="font-size:60px;"></div>
+  <p>Бонус к доходу: +<span id="petDetailBonus">0</span>%</p>
+  <p>Скидка на цены: -<span id="petDetailDiscount">0</span>%</p>
+  <p>Количество: <span id="petDetailCount">0</span></p>
+  <button id="petEquipBtn" class="egg-btn">Снять / Экипировать</button>
+  <button id="petSellBtn" class="egg-btn" style="background:#a04000;">Продать</button>
+  <button id="closePetDetailBtn" class="egg-btn">Закрыть</button>
+</div></div>
+
+<!-- Модалка уведомлений -->
+<div class="modal-overlay" id="notificationModal"><div class="modal-content">
+  <p id="notificationMessage"></p>
+  <button id="notificationOkBtn" class="egg-btn">OK</button>
 </div></div>
 
 <script>
-// === DOM-элементы ===
+// ===== Глобальные переменные =====
+let points = 0, totalPointsEarned = 0, clickPower = 1, cps = 0;
+let upgradeCounts = [], prestigeLevels = [];
+let selectedSkinIndex = 0;
+let avatarSquare = false, shortNumbers = true;
+let lastWhiskersTime = 0, ownedPets = [], upgradesHidden = false;
+let diamonds = 0, orbs = 0, totalClicks = 0, goldIngots = 0;
+let lastLaserGameTime = 0;
+let dailyQuestsData = [], lastDailyReset = '', dailyStreak = 1;
+let albumCards = [];
+let nickname = '';
+let usedPromos = [];
+let whiskersCount = 0; // количество усов2 (каждый +1% к доходу)
+let globalPercentBonus = 0, globalPriceReduction = 0; // суммарные бонусы от питомцев и усов
+let afkStartTime = Date.now();
+let lastLaserClicks = 0, laserModalActive = false;
+
+// ===== DOM-элементы =====
 const cookieImg = document.getElementById('cookieImg');
 const scoreDisp = document.getElementById('scoreDisplay');
 const cpsDisp = document.getElementById('cpsDisplay');
 const diamondsDisp = document.getElementById('diamondsDisplay');
 const orbsDisp = document.getElementById('orbsDisplay');
+const goldDisp = document.getElementById('goldDisplay');
 const levelDisp = document.getElementById('levelDisplay');
 const upgradesCont = document.getElementById('upgradesContainer');
-const freeUpgradeBtn = document.getElementById('freeUpgradeBtn');
+const whiskersBtn = document.getElementById('whiskersBtn');
 const laserGameBtn = document.getElementById('laserGameBtn');
 const hideUpgradesBtn = document.getElementById('hideUpgradesBtn');
 const petsLayer = document.getElementById('pets-layer');
@@ -176,39 +229,39 @@ const dailyQuestsDiv = document.getElementById('dailyQuests');
 const shopDiamonds = document.getElementById('shopDiamonds');
 const shopOrbs = document.getElementById('shopOrbs');
 const hatchResult = document.getElementById('hatchResult');
-const buyEggOrb = document.getElementById('buyEggOrb');
-const buyEggDiamond = document.getElementById('buyEggDiamond');
+const buy1Orb = document.getElementById('buy1Orb');
+const buy3Orb = document.getElementById('buy3Orb');
+const buy1Diamond = document.getElementById('buy1Diamond');
+const buy3Diamond = document.getElementById('buy3Diamond');
+const showChancesBtn = document.getElementById('showChancesBtn');
+const chancesPanel = document.getElementById('chancesPanel');
 const skinGridDiv = document.getElementById('skinGrid');
 const skinModal = document.getElementById('skinModal');
 const closeSkinModal = document.getElementById('closeSkinModal');
-const adModal = document.getElementById('adModal');
-const adTimerEl = document.getElementById('adTimer');
-const closeAdBtn = document.getElementById('closeAdBtn');
 const claimDailyBtn = document.getElementById('claimDailyBtn');
+const dailyStreakSpan = document.getElementById('dailyStreakSpan');
+const dailyPercentSpan = document.getElementById('dailyPercent');
+const promoInput = document.getElementById('promoInput');
+const applyPromoBtn = document.getElementById('applyPromoBtn');
+const promoMessage = document.getElementById('promoMessage');
+const nicknameDisplay = document.getElementById('nicknameDisplay');
+const totalPetsCount = document.getElementById('totalPetsCount');
+const petDetailModal = document.getElementById('petDetailModal');
+const petDetailName = document.getElementById('petDetailName');
+const petDetailEmoji = document.getElementById('petDetailEmoji');
+const petDetailBonus = document.getElementById('petDetailBonus');
+const petDetailDiscount = document.getElementById('petDetailDiscount');
+const petDetailCount = document.getElementById('petDetailCount');
+const petEquipBtn = document.getElementById('petEquipBtn');
+const petSellBtn = document.getElementById('petSellBtn');
+const closePetDetailBtn = document.getElementById('closePetDetailBtn');
+const notificationModal = document.getElementById('notificationModal');
+const notificationMessage = document.getElementById('notificationMessage');
+const notificationOkBtn = document.getElementById('notificationOkBtn');
+const afkTimerSpan = document.getElementById('afkTimer');
+const claimAfkBtn = document.getElementById('claimAfkBtn');
 
-// === глобальные переменные ===
-let ysdk = null, player = null, lang = 'ru';
-let points = 0, totalPointsEarned = 0, clickPower = 1, cps = 0;
-let upgradeCounts = [], prestigeLevels = [];
-let selectedSkinIndex = 0;
-let avatarSquare = false, shortNumbers = true;
-let lastFreeUpgradeTime = 0, ownedPets = [], upgradesHidden = false;
-let diamonds = 0, orbs = 0, totalClicks = 0;
-let lastLaserGameTime = 0;
-let dailyQuestsData = [], lastDailyReset = '', dailyStreak = 1;
-let albumCards = [];
-
-// === переводы ===
-const translations = {
-  ru: { freeScratcher:'🐾 Бесплатная когтеточка', laserGame:'🎯 Лазер (10 мин)', hideBtn:'→', showBtn:'←',
-        shopTitle:'🥚 Магазин яиц', buyOrb:'Обычное яйцо (50 орбов)', buyDiamond:'Премиум яйцо (1 алмаз)',
-        hatchNothing:'Ничего не вылупилось :(', hatchSuccess:'Вылупился: ', dailyReward:'Забрать (день ' },
-  en: { freeScratcher:'🐾 Free Scratchpost', laserGame:'🎯 Laser (10 min)', hideBtn:'→', showBtn:'←',
-        shopTitle:'🥚 Egg Shop', buyOrb:'Common Egg (50 orbs)', buyDiamond:'Premium Egg (1 diamond)',
-        hatchNothing:'Nothing hatched :(', hatchSuccess:'Hatched: ', dailyReward:'Claim (day ' }
-};
-
-// === уровни (локальные файлы) ===
+// ===== Константы =====
 const levels = [
   { required:0,        img:"lvl1cat.png" },
   { required:1000,     img:"lvl2cat.png" },
@@ -240,7 +293,7 @@ const upgrades = [
   { name:"Автоматическая миска", baseCost:20, mult:1.15, type:"cps", value:0.5 },
   { name:"Робот-мышка", baseCost:120, mult:1.15, type:"cps", value:1.2 },
   { name:"Электро-клубок", baseCost:600, mult:1.15, type:"cps", value:3 },
-  { name:"Пылесос-робот", baseCost:1500, mult:1.15, type:"cps", value:8 },
+  { name:"Пылесос-робот", baseCost:1500, mult:1.15, type:"cps", value:8, cosmetic:"🤖" },
   { name:"Кото-будильник", baseCost:4000, mult:1.15, type:"cps", value:20 },
   { name:"Кормушка 3000", baseCost:10000, mult:1.15, type:"cps", value:50 },
   { name:"Лазерный дротик", baseCost:25000, mult:1.15, type:"cps", value:120 },
@@ -249,20 +302,25 @@ const upgrades = [
   { name:"Космический лоток", baseCost:400000, mult:1.15, type:"cps", value:2000 }
 ];
 
-const allPets = [
-  { id:"vacuum", name:"Пылесос-робот", class:"vacuum", rarity:"common", chance:0.5 },
-  { id:"cube_earth", name:"Куб Земли", class:"cube_earth", rarity:"legendary", chance:0.00002 },
-  { id:"chi_cat", name:"Ч и Котость", class:"chi_cat", rarity:"mythic", chance:0.0001 },
-  { id:"golden_mouse", name:"Золотая мышь", class:"golden_mouse", rarity:"rare", chance:0.1 },
-  { id:"star_spirit", name:"Звёздный дух", class:"star_spirit", rarity:"rare", chance:0.08 }
+const petsDefinitions = [
+  { id:"vacuum", name:"Пылесос-робот", emoji:"🤖", class:"vacuum", rarity:"common", chance:0.5, bonus:10, discount:0 },
+  { id:"cube_earth", name:"Куб Земли", emoji:"🟫", class:"cube_earth", rarity:"legendary", chance:0.00002, bonus:666, discount:10 },
+  { id:"chi_cat", name:"Ч и Котость", emoji:"🐱", class:"chi_cat", rarity:"mythic", chance:0.0001, bonus:100, discount:3 },
+  { id:"golden_mouse", name:"Золотая мышь", emoji:"🐭", class:"golden_mouse", rarity:"rare", chance:0.1, bonus:20, discount:0 },
+  { id:"star_spirit", name:"Звёздный дух", emoji:"🌟", class:"star_spirit", rarity:"rare", chance:0.08, bonus:50, discount:0 },
+  { id:"kotost", name:"Котость", emoji:"🐱", class:"kotost", rarity:"starter", chance:1, bonus:500, discount:0 },
+  { id:"azbukabik", name:"Азбукабик", emoji:"", class:"azbukabik", rarity:"secret", chance:0.0003, bonus:1478, discount:0.0001, perClickSpawn:true },
+  { id:"heartpet", name:"Heartpet", emoji:"❤️", class:"heartpet", rarity:"promo", chance:0, bonus:100, discount:0.3, stackable:true }
 ];
 
+// ===== Инициализация массивов =====
 upgradeCounts = new Array(upgrades.length).fill(0);
 prestigeLevels = new Array(upgrades.length).fill(0);
 
+// ===== Вспомогательные функции =====
 function fmtNum(num, short = true) {
   if (!short || num < 1000) return Math.floor(num).toString();
-  const sfx = ['','K','M','B','T','Qa','Qi'];
+  const sfx = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc','UDc','DDc','TDc','QaDc','QiDc','SxDc','SpDc','OcDc','NoDc','Vg','UVg','DVg','TVg','QaVg','QiVg','SxVg','SpVg','OcVg','NoVg','Tg','UTg','DTg','TTg','QaTg','QiTg','SxTg','SpTg','OcTg','NoTg','Qd','UQd','DQd','TQd','QaQd','QiQd','SxQd','SpQd','OcQd','NoQd','Qq','UQq','DQq','TQq','QaQq','QiQq','SxQq','SpQq','OcQq','NoQq','Sg','USg','DSg','TSg','QaSg','QiSg','SxSg','SpSg','OcSg','NoSg','St','USt','DSt','TSt','QaSt','QiSt','SxSt','SpSt','OcSt','NoSt','Og','UOg','DOg','TOg','QaOg','QiOg','SxOg','SpOg','OcOg','NoOg','Nn','UNn','DNn','TNn','QaNn','QiNn','SxNn','SpNn','OcNn','NoNn','Ce'];
   let tier = 0, n = num;
   while (n >= 1000 && tier < sfx.length-1) { n /= 1000; tier++; }
   return n.toFixed(2) + sfx[tier];
@@ -270,101 +328,7 @@ function fmtNum(num, short = true) {
 
 function getEffVal(i) { return upgrades[i].value * Math.pow(50, prestigeLevels[i]||0); }
 function getPrestigeCost(i) { return Math.floor(100000 * upgrades[i].baseCost * Math.pow(100, prestigeLevels[i]||0)); }
-
-function applyLang() {
-  const t = translations[lang] || translations.ru;
-  freeUpgradeBtn.textContent = t.freeScratcher;
-  laserGameBtn.textContent = t.laserGame;
-  document.getElementById('buyEggOrb').textContent = t.buyOrb;
-  document.getElementById('buyEggDiamond').textContent = t.buyDiamond;
-  document.querySelector('#tab-eggs h2').textContent = t.shopTitle;
-  claimDailyBtn.innerHTML = t.dailyReward + '<span id="dailyStreakSpan">' + dailyStreak + '</span>)';
-}
-
-function saveGame() {
-  const data = {
-    points, totalPointsEarned, clickPower, cps, upgradeCounts, prestigeLevels,
-    selectedSkinIndex, avatarSquare, shortNumbers, lastFreeUpgradeTime, ownedPets, upgradesHidden,
-    diamonds, orbs, totalClicks, lastLaserGameTime,
-    dailyQuestsData, lastDailyReset, dailyStreak, albumCards
-  };
-  localStorage.setItem('catFinal', JSON.stringify(data));
-  if (player && ysdk) {
-    player.setStats({
-      points: Math.floor(points),
-      totalPointsEarned: Math.floor(totalPointsEarned),
-      clickPower, cps, diamonds, orbs
-    }).catch(()=>{});
-    player.setData({
-      upgradeCounts, prestigeLevels, ownedPets,
-      dailyQuestsData, lastDailyReset, dailyStreak, albumCards,
-      selectedSkinIndex, lastFreeUpgradeTime, lastLaserGameTime, upgradesHidden,
-      avatarSquare, shortNumbers
-    }).catch(()=>{});
-  }
-}
-
-function loadGame() {
-  try {
-    const local = localStorage.getItem('catFinal');
-    if (local) {
-      const d = JSON.parse(local);
-      applyData(d);
-    }
-  } catch(e) {}
-  if (player && ysdk) {
-    Promise.all([player.getStats(), player.getData()]).then(([stats, data]) => {
-      if (stats) {
-        points = stats.points || points;
-        totalPointsEarned = stats.totalPointsEarned || totalPointsEarned;
-        clickPower = stats.clickPower || clickPower;
-        cps = stats.cps || cps;
-        diamonds = stats.diamonds || diamonds;
-        orbs = stats.orbs || orbs;
-      }
-      if (data) {
-        upgradeCounts = data.upgradeCounts || upgradeCounts;
-        prestigeLevels = data.prestigeLevels || prestigeLevels;
-        ownedPets = data.ownedPets || ownedPets;
-        dailyQuestsData = data.dailyQuestsData || dailyQuestsData;
-        lastDailyReset = data.lastDailyReset || lastDailyReset;
-        dailyStreak = data.dailyStreak || dailyStreak;
-        albumCards = data.albumCards || albumCards;
-        selectedSkinIndex = data.selectedSkinIndex ?? selectedSkinIndex;
-        lastFreeUpgradeTime = data.lastFreeUpgradeTime || lastFreeUpgradeTime;
-        lastLaserGameTime = data.lastLaserGameTime || lastLaserGameTime;
-        upgradesHidden = data.upgradesHidden || upgradesHidden;
-        avatarSquare = data.avatarSquare || avatarSquare;
-        shortNumbers = data.shortNumbers !== undefined ? data.shortNumbers : shortNumbers;
-      }
-      ensureArraysLengths();
-      recalcPower();
-      applySkin();
-      updateUI();
-      renderAll();
-    }).catch(()=>{});
-  }
-}
-
-function applyData(d) {
-  points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
-  clickPower = d.clickPower || 1; cps = d.cps || 0;
-  upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
-  prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
-  selectedSkinIndex = d.selectedSkinIndex ?? 0;
-  avatarSquare = d.avatarSquare || false; shortNumbers = d.shortNumbers !== false;
-  lastFreeUpgradeTime = d.lastFreeUpgradeTime || 0; ownedPets = d.ownedPets || [];
-  upgradesHidden = d.upgradesHidden || false; diamonds = d.diamonds || 0; orbs = d.orbs || 0;
-  totalClicks = d.totalClicks || 0; lastLaserGameTime = d.lastLaserGameTime || 0;
-  dailyQuestsData = d.dailyQuestsData || []; lastDailyReset = d.lastDailyReset || '';
-  dailyStreak = d.dailyStreak || 1; albumCards = d.albumCards || [];
-  ensureArraysLengths();
-}
-
-function ensureArraysLengths() {
-  while (upgradeCounts.length < upgrades.length) upgradeCounts.push(0);
-  while (prestigeLevels.length < upgrades.length) prestigeLevels.push(0);
-}
+function getCurrentUpgradeCost(i) { return Math.floor(upgrades[i].baseCost * Math.pow(upgrades[i].mult, upgradeCounts[i]||0)); }
 
 function recalcPower() {
   let click = 1, auto = 0;
@@ -377,53 +341,125 @@ function recalcPower() {
   clickPower = click; cps = auto;
 }
 
-function getMaxLvl() {
-  for (let i = levels.length-1; i>=0; i--) if (totalPointsEarned >= levels[i].required) return i;
-  return 0;
+function recalcGlobalBonuses() {
+  let percent = whiskersCount; // каждый усы2 +1%
+  let priceRed = 0;
+  ownedPets.forEach(p => {
+    const def = petsDefinitions.find(d => d.id === p.type);
+    if (def && p.count > 0) {
+      if (def.bonus) percent += def.bonus * p.count;
+      if (def.discount) priceRed += def.discount * p.count;
+    }
+  });
+  // Добавляем ежедневный бонус за серию (dailyStreak * 1%?)
+  percent += dailyStreak; // +1% за каждый день серии
+  globalPercentBonus = percent;
+  globalPriceReduction = Math.min(priceRed, 99.99); // ограничим 99.99% чтобы не было отрицательных цен
 }
 
-function applySkin() {
-  cookieImg.src = levels[selectedSkinIndex]?.img || 'lvl1cat.png';
+function addPet(type, count=1, letter='') {
+  const existing = ownedPets.find(p => p.type === type);
+  if (existing) {
+    existing.count += count;
+    if (letter) existing.letters = existing.letters || [];
+    if (letter) existing.letters.push(letter);
+  } else {
+    const newPet = { type, count, equipped: true, x: Math.random()*(innerWidth-60), y: Math.random()*(innerHeight-60) };
+    if (letter) newPet.letters = [letter];
+    ownedPets.push(newPet);
+  }
+  recalcGlobalBonuses();
 }
 
+function removePet(type, count=1) {
+  const pet = ownedPets.find(p => p.type === type);
+  if (!pet) return;
+  pet.count -= count;
+  if (pet.count <= 0) ownedPets = ownedPets.filter(p => p.type !== type);
+  recalcGlobalBonuses();
+}
+
+function sellPet(type) {
+  const def = petsDefinitions.find(d => d.id === type);
+  if (!def) return;
+  // даём орбы в зависимости от редкости
+  let reward = 10;
+  if (def.rarity === 'legendary') reward = 500;
+  else if (def.rarity === 'mythic') reward = 1000;
+  else if (def.rarity === 'rare') reward = 50;
+  else if (def.rarity === 'secret') reward = 2000;
+  else if (def.rarity === 'promo') reward = 5000;
+  else if (def.rarity === 'starter') reward = 100;
+  orbs += reward;
+  removePet(type, 1);
+}
+
+function spawnCosmetic(emoji) {
+  const el = document.createElement('div'); el.className = 'cosmetic-item';
+  el.textContent = emoji;
+  const anims = ['floatHorizontal','floatDiagonal','floatCircle','floatZigZag'];
+  el.style.animationName = anims[Math.floor(Math.random()*anims.length)];
+  el.style.left = Math.random()*80+'%'; el.style.top = Math.random()*80+'%';
+  el.style.animationDuration = 10+Math.random()*10+'s';
+  document.getElementById('cosmetics-layer').appendChild(el);
+  setTimeout(() => el.remove(), 20000);
+}
+
+function showNotification(msg, callback) {
+  notificationMessage.textContent = msg;
+  notificationModal.classList.add('open');
+  notificationOkBtn.onclick = () => {
+    notificationModal.classList.remove('open');
+    if (callback) callback();
+  };
+}
+
+// ===== Отрисовка =====
 function renderUpgrades() {
   upgradesCont.innerHTML = '';
   upgrades.forEach((u,i) => {
     const count = upgradeCounts[i] || 0;
-    const cost = Math.floor(u.baseCost * Math.pow(u.mult, count));
+    const cost = getCurrentUpgradeCost(i);
     const pCost = getPrestigeCost(i);
+    const discount = globalPriceReduction / 100;
+    const finalCost = Math.floor(cost * (1 - discount));
+    const finalPCost = Math.floor(pCost * (1 - discount));
     const div = document.createElement('div'); div.className = 'upgrade-item';
     div.innerHTML = `
       <div class="upgrade-info">
         <div class="upgrade-name">${u.name} (x${count}) ${prestigeLevels[i]?'⭐'+prestigeLevels[i]:''}</div>
         <div class="upgrade-desc">+${getEffVal(i)} ${u.type==='click'?'к клику':'в сек'}</div>
       </div>
-      <span class="upgrade-cost">${fmtNum(cost)}</span>
-      <button class="buy-btn" data-idx="${i}" ${points<cost?'disabled':''}>Купить</button>
-      <button class="prestige-btn" data-idx="${i}" ${points<pCost?'disabled':''}>⭐</button>`;
+      <span class="upgrade-cost">${fmtNum(finalCost)}</span>
+      <button class="buy-btn" data-idx="${i}" ${points<finalCost?'disabled':''}>Купить</button>
+      <button class="prestige-btn" data-idx="${i}" ${points<finalPCost?'disabled':''}>⭐ ${fmtNum(finalPCost)}</button>`;
     upgradesCont.appendChild(div);
   });
   document.querySelectorAll('.buy-btn').forEach(btn => {
     btn.onclick = () => {
       const idx = +btn.dataset.idx;
-      const cost = Math.floor(upgrades[idx].baseCost * Math.pow(upgrades[idx].mult, upgradeCounts[idx]||0));
-      if (points < cost) return;
-      points -= cost; upgradeCounts[idx] = (upgradeCounts[idx]||0)+1; recalcPower();
+      const cost = getCurrentUpgradeCost(idx);
+      const discount = globalPriceReduction / 100;
+      const finalCost = Math.floor(cost * (1 - discount));
+      if (points < finalCost) return;
+      points -= finalCost;
+      upgradeCounts[idx] = (upgradeCounts[idx]||0)+1;
+      recalcPower();
       if (upgrades[idx].cosmetic) spawnCosmetic(upgrades[idx].cosmetic);
-      if (idx === 13) {
-        ownedPets.push({ type:'vacuum', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
-        renderPetsLayer();
-        renderOwnedPetsList();
-      }
+      if (idx === 13) addPet('vacuum', 1); // пылесос при покупке улучшения
       saveGame(); updateUI(); renderUpgrades();
     };
   });
   document.querySelectorAll('.prestige-btn').forEach(btn => {
     btn.onclick = () => {
       const idx = +btn.dataset.idx;
-      const cost = getPrestigeCost(idx);
-      if (points < cost) return;
-      points -= cost; prestigeLevels[idx] = (prestigeLevels[idx]||0)+1; recalcPower();
+      const pCost = getPrestigeCost(idx);
+      const discount = globalPriceReduction / 100;
+      const finalCost = Math.floor(pCost * (1 - discount));
+      if (points < finalCost) return;
+      points -= finalCost;
+      prestigeLevels[idx] = (prestigeLevels[idx]||0)+1;
+      recalcPower();
       saveGame(); updateUI(); renderUpgrades();
     };
   });
@@ -432,11 +468,15 @@ function renderUpgrades() {
 function renderPetsLayer() {
   petsLayer.innerHTML = '';
   ownedPets.forEach(p => {
-    const info = allPets.find(pet => pet.id === p.type);
+    if (!p.equipped) return;
+    const def = petsDefinitions.find(d => d.id === p.type);
+    if (!def) return;
     const el = document.createElement('div');
-    el.className = 'pet-icon' + (info ? ' ' + info.class : '');
     el.style.position = 'absolute';
     el.style.left = p.x+'px'; el.style.top = p.y+'px';
+    el.style.fontSize = '40px';
+    el.textContent = p.type === 'azbukabik' && p.letters ? p.letters[0] : def.emoji;
+    el.style.pointerEvents = 'none';
     petsLayer.appendChild(el);
   });
 }
@@ -454,18 +494,235 @@ setInterval(() => {
 
 function renderOwnedPetsList() {
   ownedPetsList.innerHTML = '';
+  totalPetsCount.textContent = ownedPets.reduce((sum, p) => sum + p.count, 0);
   ownedPets.forEach(p => {
-    const info = allPets.find(pet => pet.id === p.type);
+    const def = petsDefinitions.find(d => d.id === p.type);
+    if (!def) return;
     const card = document.createElement('div'); card.className = 'pet-card';
-    const icon = document.createElement('div');
-    icon.className = 'pet-icon' + (info ? ' ' + info.class : '');
-    icon.style.width = '30px'; icon.style.height = '30px';
-    card.appendChild(icon);
-    card.appendChild(document.createTextNode((info?.name||p.type) + ' (x' + (p.count||1) + ')'));
+    const emojiSpan = document.createElement('span');
+    emojiSpan.style.fontSize = '30px';
+    emojiSpan.textContent = p.type === 'azbukabik' && p.letters ? p.letters[0] : def.emoji;
+    card.appendChild(emojiSpan);
+    const info = document.createElement('span');
+    info.textContent = def.name + ' (x' + p.count + ')';
+    card.appendChild(info);
+    card.onclick = () => showPetDetail(p);
     ownedPetsList.appendChild(card);
   });
 }
 
+function showPetDetail(pet) {
+  const def = petsDefinitions.find(d => d.id === pet.type);
+  if (!def) return;
+  petDetailName.textContent = def.name;
+  petDetailEmoji.textContent = pet.type === 'azbukabik' && pet.letters ? pet.letters[0] : def.emoji;
+  petDetailBonus.textContent = def.bonus * pet.count + '%';
+  petDetailDiscount.textContent = def.discount * pet.count + '%';
+  petDetailCount.textContent = pet.count;
+  petEquipBtn.onclick = () => {
+    pet.equipped = !pet.equipped;
+    showNotification(pet.equipped ? def.name + ' экипирован' : def.name + ' снят');
+    renderPetsLayer();
+    renderOwnedPetsList();
+    saveGame();
+  };
+  petSellBtn.onclick = () => {
+    if (pet.count <= 0) return;
+    sellPet(pet.type);
+    showNotification('Продан ' + def.name);
+    renderPetsLayer();
+    renderOwnedPetsList();
+    petDetailModal.classList.remove('open');
+    saveGame();
+  };
+  closePetDetailBtn.onclick = () => petDetailModal.classList.remove('open');
+  petDetailModal.classList.add('open');
+}
+
+function renderChances() {
+  let html = '<b>Шансы выпадения:</b><br>';
+  petsDefinitions.forEach(def => {
+    if (def.rarity === 'starter' || def.rarity === 'promo') return;
+    const known = ownedPets.some(p => p.type === def.id);
+    if (def.rarity === 'legendary' || def.rarity === 'mythic' || def.rarity === 'secret') {
+      if (!known) {
+        html += `<span>${def.name}: ????</span><br>`;
+        return;
+      }
+    }
+    const chancePercent = def.chance * 100;
+    html += `<span>${def.emoji} ${def.name}: ${chancePercent.toFixed(4)}%</span><br>`;
+  });
+  chancesPanel.innerHTML = html;
+  chancesPanel.style.display = 'block';
+}
+
+function renderAlbum() {
+  albumGrid.innerHTML = levels.map((l,i) => `<div style="width:60px;height:60px;background-image:url(${l.img});background-size:contain;border:2px solid ${albumCards.includes(i)?'#ffd58c':'gray'};border-radius:10px;margin:4px;"></div>`).join('');
+}
+
+function updateUI() {
+  scoreDisp.textContent = fmtNum(points, shortNumbers);
+  cpsDisp.textContent = `в сек: ${fmtNum(cps * (1 + globalPercentBonus/100), shortNumbers)}`;
+  diamondsDisp.textContent = diamonds;
+  orbsDisp.textContent = orbs;
+  goldDisp.textContent = goldIngots;
+  shopDiamonds.textContent = diamonds;
+  shopOrbs.textContent = orbs;
+  const maxLvl = getMaxLvl();
+  levelDisp.textContent = 'Уровень ' + (maxLvl+1);
+  if (totalPointsEarned < levels[selectedSkinIndex]?.required) selectedSkinIndex = maxLvl;
+  applySkin();
+  whiskersBtn.disabled = (Date.now() - lastWhiskersTime) < 3*60*1000;
+  dailyStreakSpan.textContent = dailyStreak;
+  dailyPercentSpan.textContent = dailyStreak; // +1% за день
+}
+
+function renderAll() {
+  recalcPower();
+  recalcGlobalBonuses();
+  updateUI();
+  renderUpgrades();
+  renderPetsLayer();
+  renderOwnedPetsList();
+  renderDailyQuests();
+  renderAlbum();
+}
+
+// ===== Игровые механики =====
+function getMaxLvl() {
+  for (let i = levels.length-1; i>=0; i--) if (totalPointsEarned >= levels[i].required) return i;
+  return 0;
+}
+
+function applySkin() {
+  cookieImg.src = levels[selectedSkinIndex]?.img || 'lvl1cat.png';
+}
+
+cookieImg.onclick = () => {
+  points += clickPower * (1 + globalPercentBonus/100);
+  totalPointsEarned += clickPower * (1 + globalPercentBonus/100);
+  totalClicks++; orbs++;
+  if (totalClicks % 100 === 0) diamonds++;
+  if (Math.random() < 0.0003 && !ownedPets.some(p => p.type === 'azbukabik')) {
+    const letter = Math.random() < 0.5 ?
+      String.fromCharCode(65+Math.floor(Math.random()*26)) : String.fromCharCode(1072+Math.floor(Math.random()*33));
+    addPet('azbukabik', 1, letter);
+    showNotification('✨ Вы нашли Азбукабика (' + letter + ')!');
+  }
+  if (Math.random() < 0.00002 && !ownedPets.some(p => p.type === 'cube_earth')) {
+    addPet('cube_earth', 1);
+    showNotification('✨ Вы нашли Куб Земли!');
+  }
+  if (Math.random() < 0.0001 && !ownedPets.some(p => p.type === 'chi_cat')) {
+    addPet('chi_cat', 1);
+    showNotification('🐱 Ч и Котость присоединились!');
+  }
+  dailyQuestsData.forEach(q => { if (q.desc.includes('Кликнуть')) q.progress = Math.min(q.progress+1, q.goal); });
+  saveGame(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
+  // Проверка на золотой слиток
+  if (points >= 1e90) { // 100 Qi, но у нас формат QI в списке, используем 1e90
+    const qty = Math.floor(points / 1e90);
+    goldIngots += qty;
+    points -= qty * 1e90;
+    showNotification('Получен золотой слиток!');
+  }
+};
+
+setInterval(() => {
+  if (cps > 0) {
+    const gain = (cps/10) * (1 + globalPercentBonus/100);
+    points += gain; totalPointsEarned += gain;
+    saveGame(); updateUI();
+  }
+  // Обновление AFK таймера
+  const afkSeconds = Math.floor((Date.now() - afkStartTime) / 1000);
+  afkTimerSpan.textContent = afkSeconds;
+}, 100);
+
+// ===== Бесплатные усы2 =====
+whiskersBtn.onclick = () => {
+  if (Date.now() - lastWhiskersTime < 3*60*1000) return;
+  whiskersCount++;
+  lastWhiskersTime = Date.now();
+  recalcGlobalBonuses();
+  saveGame(); updateUI();
+  showNotification('Усы2 получены! +1% к доходу');
+};
+
+// ===== Лазерная игра =====
+laserGameBtn.onclick = () => {
+  if (Date.now() - lastLaserGameTime < 10*60*1000 || laserModalActive) return;
+  lastLaserGameTime = Date.now();
+  let clicks = 0; const max = 50;
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:rgba(0,0,0,0.9);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;border-radius:20px;font-size:1.5rem;';
+  modal.textContent = 'Кликай! 0';
+  document.body.appendChild(modal);
+  laserModalActive = true;
+  modal.onclick = () => {
+    clicks++; modal.textContent = 'Кликай! ' + clicks;
+    if (clicks >= max) {
+      modal.remove();
+      laserModalActive = false;
+      const bonus = Math.max(1, Math.floor(clicks/10));
+      showNotification('Множитель клика x' + bonus + ' на 60 сек!');
+      const orig = clickPower;
+      clickPower *= bonus;
+      setTimeout(() => { clickPower = orig; }, 60000);
+    }
+  };
+  setTimeout(() => { if (modal.parentNode) { modal.remove(); laserModalActive = false; } }, 10000);
+};
+
+// ===== Скрытие панели улучшений =====
+hideUpgradesBtn.onclick = () => {
+  upgradesHidden = !upgradesHidden;
+  document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
+  hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
+  saveGame();
+};
+
+// ===== Магазин яиц =====
+function buyEgg(count, costOrbs, costDiamonds) {
+  if (orbs < costOrbs || diamonds < costDiamonds) {
+    showNotification('Не хватает валюты');
+    return;
+  }
+  diamonds -= costDiamonds; orbs -= costOrbs;
+  let hatched = [];
+  for (let i = 0; i < count; i++) {
+    const pet = rollPet();
+    if (pet) {
+      addPet(pet.id, 1);
+      hatched.push(pet.name);
+    }
+  }
+  if (hatched.length) hatchResult.textContent = 'Вылупились: ' + hatched.join(', ');
+  else hatchResult.textContent = 'Ничего не вылупилось :(';
+  saveGame(); updateUI(); renderPetsLayer(); renderOwnedPetsList(); renderChances();
+}
+buy1Orb.onclick = () => buyEgg(1, 50, 0);
+buy3Orb.onclick = () => buyEgg(3, 130, 0);
+buy1Diamond.onclick = () => buyEgg(1, 0, 1);
+buy3Diamond.onclick = () => buyEgg(3, 0, 2);
+
+function rollPet() {
+  const r = Math.random(); let cum = 0;
+  for (const p of petsDefinitions) {
+    if (p.rarity === 'starter' || p.rarity === 'promo') continue;
+    cum += p.chance;
+    if (r <= cum) return p;
+  }
+  return null;
+}
+
+showChancesBtn.onclick = () => {
+  renderChances();
+  chancesPanel.style.display = chancesPanel.style.display === 'none' ? 'block' : 'none';
+};
+
+// ===== Квесты и ежедневная награда =====
 function genDailyQuests() {
   dailyQuestsData = [
     { desc:'Кликнуть 500 раз', progress:0, goal:500, reward:()=>{diamonds+=2;} },
@@ -478,139 +735,50 @@ function renderDailyQuests() {
   if (!dailyQuestsData.length) genDailyQuests();
   dailyQuestsDiv.innerHTML = dailyQuestsData.map(q => `<div style="color:#ffd58c;">${q.desc}: ${Math.min(q.progress,q.goal)}/${q.goal}</div>`).join('');
 }
-
-function renderAlbum() {
-  albumGrid.innerHTML = levels.map((l,i) => `<div style="width:60px;height:60px;background-image:url(${l.img});background-size:contain;border:2px solid ${albumCards.includes(i)?'#ffd58c':'gray'};border-radius:10px;margin:4px;"></div>`).join('');
-}
-
-function spawnCosmetic(emoji) {
-  const el = document.createElement('div'); el.className = 'cosmetic-item';
-  el.textContent = emoji;
-  const anims = ['floatHorizontal','floatDiagonal','floatCircle','floatZigZag'];
-  el.style.animationName = anims[Math.floor(Math.random()*anims.length)];
-  el.style.left = Math.random()*80+'%'; el.style.top = Math.random()*80+'%';
-  el.style.animationDelay = Math.random()*2+'s';
-  el.style.animationDuration = 10+Math.random()*10+'s';
-  document.getElementById('cosmetics-layer').appendChild(el);
-  setTimeout(() => el.remove(), 20000);
-}
-
-function updateUI() {
-  scoreDisp.textContent = fmtNum(points, shortNumbers);
-  cpsDisp.textContent = `в сек: ${fmtNum(cps, shortNumbers)}`;
-  diamondsDisp.textContent = diamonds; orbsDisp.textContent = orbs;
-  shopDiamonds.textContent = diamonds; shopOrbs.textContent = orbs;
-  const maxLvl = getMaxLvl();
-  levelDisp.textContent = 'Уровень ' + (maxLvl+1);
-  if (totalPointsEarned < levels[selectedSkinIndex]?.required) selectedSkinIndex = maxLvl;
-  applySkin();
-  freeUpgradeBtn.disabled = (Date.now() - lastFreeUpgradeTime) < 3*60*1000;
-}
-
-function renderAll() {
-  recalcPower();
-  updateUI();
-  renderUpgrades();
-  renderPetsLayer();
-  renderOwnedPetsList();
-  renderDailyQuests();
-  renderAlbum();
-}
-
-// === клик ===
-cookieImg.onclick = () => {
-  points += clickPower; totalPointsEarned += clickPower;
-  totalClicks++; orbs++;
-  if (totalClicks % 100 === 0) diamonds++;
-  if (Math.random() < 0.0003) { orbs += 1000; alert('🎉 ДЖЕКПОТ! +1000 орбов'); }
-  if (Math.random() < 0.00002 && !ownedPets.some(p=>p.type==='cube_earth')) {
-    ownedPets.push({ type:'cube_earth', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
-    alert('✨ Вы нашли Куб Земли!');
+claimDailyBtn.onclick = () => {
+  if (lastDailyReset === new Date().toDateString()) {
+    showNotification('Уже получил сегодня');
+    return;
   }
-  if (Math.random() < 0.0001 && !ownedPets.some(p=>p.type==='chi_cat')) {
-    ownedPets.push({ type:'chi_cat', x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
-    alert('🐱 Ч и Котость присоединились!');
+  lastDailyReset = new Date().toDateString();
+  dailyStreak++;
+  diamonds += dailyStreak; orbs += dailyStreak*10;
+  recalcGlobalBonuses();
+  saveGame(); updateUI();
+  showNotification('Ежедневная награда получена! Серия: ' + dailyStreak);
+};
+
+// ===== АФК награда =====
+claimAfkBtn.onclick = () => {
+  const seconds = Math.floor((Date.now() - afkStartTime) / 1000);
+  if (seconds < 60) return;
+  const reward = Math.floor(seconds / 10);
+  orbs += reward;
+  afkStartTime = Date.now();
+  saveGame(); updateUI();
+  showNotification('Получено ' + reward + ' орбов за время отсутствия');
+};
+
+// ===== Промокоды =====
+applyPromoBtn.onclick = () => {
+  const code = promoInput.value.trim();
+  if (!code) return;
+  if (usedPromos.includes(code)) {
+    promoMessage.textContent = 'Промокод уже использован';
+    return;
   }
-  dailyQuestsData.forEach(q => { if (q.desc.includes('Кликнуть')) q.progress = Math.min(q.progress+1, q.goal); });
-  saveGame(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
+  if (code === 'promopetx111') {
+    addPet('heartpet', 1);
+    usedPromos.push(code);
+    showNotification('Получен питомец Heartpet!');
+    promoMessage.textContent = 'Промокод активирован!';
+    saveGame(); renderAll();
+  } else {
+    promoMessage.textContent = 'Неверный промокод';
+  }
 };
 
-// === автодоход ===
-setInterval(() => {
-  if (cps > 0) { points += cps/10; totalPointsEarned += cps/10; saveGame(); updateUI(); }
-}, 100);
-
-// === бесплатная когтеточка ===
-freeUpgradeBtn.onclick = () => {
-  if (Date.now() - lastFreeUpgradeTime < 3*60*1000) return;
-  adModal.classList.add('open'); let sec=20;
-  adTimerEl.textContent = sec; closeAdBtn.disabled = true;
-  const timer = setInterval(() => {
-    sec--; adTimerEl.textContent = sec;
-    if (sec <= 0) { clearInterval(timer); closeAdBtn.disabled = false; }
-  }, 1000);
-};
-closeAdBtn.onclick = () => {
-  adModal.classList.remove('open');
-  upgradeCounts[3] = (upgradeCounts[3]||0)+1; recalcPower(); lastFreeUpgradeTime = Date.now();
-  saveGame(); updateUI(); renderUpgrades();
-};
-
-// === лазерная игра ===
-laserGameBtn.style.display = 'inline-block';
-laserGameBtn.onclick = () => {
-  if (Date.now() - lastLaserGameTime < 10*60*1000) return;
-  lastLaserGameTime = Date.now();
-  let clicks=0; const max=50;
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:20%;left:30%;width:200px;height:200px;background:rgba(0,0,0,0.8);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;';
-  modal.textContent = 'Кликай! 0';
-  document.body.appendChild(modal);
-  modal.onclick = () => {
-    clicks++; modal.textContent = 'Кликай! ' + clicks;
-    if (clicks >= max) {
-      modal.remove();
-      const bonus = Math.max(1, Math.floor(clicks/10));
-      alert('Множитель клика x' + bonus + ' на 60 сек!');
-      const orig = clickPower;
-      clickPower *= bonus;
-      setTimeout(() => { clickPower = orig; }, 60000);
-    }
-  };
-  setTimeout(() => modal.remove(), 10000);
-};
-
-// === скрытие панели ===
-hideUpgradesBtn.onclick = () => {
-  upgradesHidden = !upgradesHidden;
-  document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
-  hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
-  saveGame();
-};
-
-// === магазин яиц ===
-buyEggOrb.onclick = () => buyEgg(0,50);
-buyEggDiamond.onclick = () => buyEgg(1,0);
-function buyEgg(dCost, oCost) {
-  if (diamonds < dCost || orbs < oCost) return alert('Не хватает валюты');
-  diamonds -= dCost; orbs -= oCost;
-  const pet = rollPet();
-  const t = translations[lang];
-  if (pet) {
-    const exist = ownedPets.find(p=>p.type===pet.id);
-    if (exist) exist.count = (exist.count||1)+1;
-    else ownedPets.push({ type:pet.id, x:Math.random()*(innerWidth-60), y:Math.random()*(innerHeight-60), count:1 });
-    hatchResult.textContent = t.hatchSuccess + pet.name;
-  } else hatchResult.textContent = t.hatchNothing;
-  saveGame(); updateUI(); renderPetsLayer(); renderOwnedPetsList();
-}
-function rollPet() {
-  const r = Math.random(); let cum=0;
-  for (const p of allPets) { cum += p.chance; if (r <= cum) return p; }
-  return null;
-}
-
-// === выбор образа ===
+// ===== Система скинов и модальные окна =====
 levelDisp.onclick = () => {
   skinGridDiv.innerHTML = '';
   levels.forEach((l,i) => {
@@ -624,16 +792,71 @@ levelDisp.onclick = () => {
 };
 closeSkinModal.onclick = () => skinModal.classList.remove('open');
 
-// === ежедневная награда ===
-claimDailyBtn.onclick = () => {
-  if (lastDailyReset === new Date().toDateString()) return alert('Уже получил');
-  diamonds += dailyStreak; orbs += dailyStreak*10;
-  lastDailyReset = new Date().toDateString(); dailyStreak++;
-  document.getElementById('dailyStreakSpan').textContent = dailyStreak;
-  saveGame(); updateUI();
-};
+// ===== Никнейм =====
+function setNickname() {
+  let nick = localStorage.getItem('catNick');
+  if (!nick) {
+    nick = prompt('Введите никнейм:', 'Игрок');
+    if (nick) localStorage.setItem('catNick', nick);
+    else nick = 'Игрок';
+  }
+  nickname = nick;
+  nicknameDisplay.textContent = nick ? '🐾 ' + nick : '';
+}
+setNickname();
 
-// === переключение вкладок ===
+// ===== Сохранение/загрузка =====
+function saveGame() {
+  const data = {
+    points, totalPointsEarned, clickPower, cps, upgradeCounts, prestigeLevels,
+    selectedSkinIndex, avatarSquare, shortNumbers, lastWhiskersTime, ownedPets, upgradesHidden,
+    diamonds, orbs, totalClicks, goldIngots, lastLaserGameTime,
+    dailyQuestsData, lastDailyReset, dailyStreak, albumCards,
+    whiskersCount, usedPromos
+  };
+  localStorage.setItem('catFinal', JSON.stringify(data));
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('catFinal');
+    if (raw) {
+      const d = JSON.parse(raw);
+      points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
+      clickPower = d.clickPower || 1; cps = d.cps || 0;
+      upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
+      prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
+      selectedSkinIndex = d.selectedSkinIndex ?? 0;
+      shortNumbers = d.shortNumbers !== false;
+      lastWhiskersTime = d.lastWhiskersTime || 0;
+      ownedPets = d.ownedPets || [];
+      upgradesHidden = d.upgradesHidden || false;
+      diamonds = d.diamonds || 0; orbs = d.orbs || 0; goldIngots = d.goldIngots || 0;
+      totalClicks = d.totalClicks || 0; lastLaserGameTime = d.lastLaserGameTime || 0;
+      dailyQuestsData = d.dailyQuestsData || []; lastDailyReset = d.lastDailyReset || '';
+      dailyStreak = d.dailyStreak || 1; albumCards = d.albumCards || [];
+      whiskersCount = d.whiskersCount || 0; usedPromos = d.usedPromos || [];
+      ensureArraysLengths();
+      recalcPower();
+      recalcGlobalBonuses();
+      applySkin();
+      updateUI();
+      renderAll();
+    } else {
+      // первый запуск: даём стартового питомца Котость
+      if (!ownedPets.some(p => p.type === 'kotost')) addPet('kotost', 1);
+      genDailyQuests();
+    }
+  } catch(e) {}
+}
+
+function ensureArraysLengths() {
+  while (upgradeCounts.length < upgrades.length) upgradeCounts.push(0);
+  while (prestigeLevels.length < upgrades.length) prestigeLevels.push(0);
+  ownedPets.forEach(p => { if (p.equipped === undefined) p.equipped = true; });
+}
+
+// ===== Переключение вкладок =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -643,39 +866,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
-// === инициализация SDK и запуск ===
-async function initSDK() {
-  try {
-    if (typeof YaGames !== 'undefined') {
-      ysdk = await YaGames.init();
-      lang = ysdk.environment.i18n.lang || 'ru';
-      document.documentElement.lang = lang;
-      if (ysdk.getStorage) {
-        const safe = await ysdk.getStorage();
-        Object.defineProperty(window, 'localStorage', { get: () => safe });
-      }
-      try { player = await ysdk.getPlayer(); } catch(e){}
-      ysdk.features.LoadingAPI?.ready();
-      ysdk.features.GameplayAPI?.start();
-    }
-  } catch(e) { console.warn('SDK err'); }
+// ===== Старт =====
+window.onload = () => {
   loadGame();
   if (!dailyQuestsData.length) genDailyQuests();
-  applyLang();
-  document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
-  hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
-  renderAll();
-}
-
-window.onload = () => {
-  if (!ysdk) {
-    loadGame();
-    if (!dailyQuestsData.length) genDailyQuests();
-    applyLang();
-    document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
-    hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
-    renderAll();
+  if (upgradesHidden) {
+    document.querySelector('.upgrades-area').style.display = 'none';
+    hideUpgradesBtn.textContent = '←';
   }
+  renderAll();
+  afkStartTime = Date.now();
 };
 </script>
 </body>
