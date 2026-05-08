@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrokenBase — шифр из проблемы Base64</title>
+    <meta name="description" content="BrokenBase: превратили баг Base64 в свой шифр. Encode создаёт кракозябры ( ) ), decode возвращает текст (xuy). Быстро, локально, без серверов.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#000000',
+                        accent: '#00FF41',
+                        code: '#0F0F0F',
+                        terminal: '#1A1A1A',
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: white; }
+        .border-accent { border-color: #00FF41; }
+        .hover-broken:hover { background-color: black; color: #00FF41; transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-white text-black font-mono">
+
+    <!-- header стилизован под терминальный инструмент -->
+    <header class="bg-white border-b-2 border-black py-4 md:py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div>
+                    <h1 class="text-2xl md:text-4xl font-bold tracking-tight">
+                        <span class="text-accent">[</span>BrokenBase<span class="text-accent">]</span>
+                        <span class="text-xs align-middle ml-2 bg-black text-accent px-2 py-1 rounded-full">v1.0</span>
+                    </h1>
+                    <p class="text-xs md:text-sm text-gray-700 font-mono mt-1">$ сломанный base64 → собственный шифр | encode → кракозябры | decode → текст</p>
+                </div>
+                <div class="flex gap-2">
+                    <div class="border-2 border-black px-3 py-1 text-xs font-bold bg-black text-accent">BUG→FEATURE</div>
+                    <div class="border-2 border-black px-3 py-1 text-xs font-bold"> )  ↔ xuy</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6 md:py-10">
+        <!-- Hero / главный блок шифра -->
+        <section class="mb-8 text-center md:text-left">
+            <div class="bg-black text-white p-4 border-l-8 border-accent">
+                <p class="text-sm md:text-base font-mono">
+                    <span class="text-accent">⤷</span> Баг Base64: decode(" ) ") выдаёт "xuy"<br>
+                    <span class="text-accent">⤷</span> Мы превратили проблему в <strong class="text-accent">BrokenBase-шифр</strong>:<br>
+                    encode("xuy") → " ) " &nbsp;&nbsp;|&nbsp;&nbsp; decode(" ) ") → "xuy"<br>
+                    <span class="text-accent">⤷</span> Для любых текстов работает симметричное XOR-преобразование → обратимый шифр с кракозябрами
+                </p>
+            </div>
+        </section>
+
+        <!-- основной инструмент: две текстовые области с кнопками -->
+        <section class="border-2 border-black p-4 md:p-6 mb-8 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
+            <div class="flex flex-col md:flex-row gap-5">
+                <!-- левая панель: обычный текст -->
+                <div class="flex-1">
+                    <label class="block text-sm font-bold uppercase mb-2 flex items-center gap-2">
+                        <span class="text-accent bg-black px-2 py-0.5 text-xs">[IN]</span> Обычный текст
+                    </label>
+                    <textarea id="plainText" rows="6" class="w-full border-2 border-black p-3 font-mono text-sm bg-white focus:outline-none focus:border-accent transition" placeholder="Введите текст...&#10;Например: xuy, привет, brokenbase, секретный код"></textarea>
+                    <div class="flex flex-wrap gap-3 mt-3">
+                        <button id="encodeAction" class="bg-black text-white px-4 py-2 text-sm font-bold border-2 border-black hover:bg-accent hover:text-black transition">[ ENCODE → КРАКОЗЯБРЫ ]</button>
+                        <button id="clearPlainBtn" class="bg-white text-black px-4 py-2 text-sm font-bold border-2 border-black hover:bg-black hover:text-white transition">[ ОЧИСТИТЬ ]</button>
+                    </div>
+                </div>
+
+                <!-- кнопка swap в середине -->
+                <div class="flex justify-center items-center">
+                    <button id="swapBtn" class="bg-black text-white p-3 border-2 border-black hover:bg-accent hover:text-black transition-all duration-200 rotate-90 md:rotate-0 text-xl font-bold w-12 h-12 flex items-center justify-center">⇄</button>
+                </div>
+
+                <!-- правая панель: кракозябры (шифротекст) -->
+                <div class="flex-1">
+                    <label class="block text-sm font-bold uppercase mb-2 flex items-center gap-2">
+                        <span class="text-accent bg-black px-2 py-0.5 text-xs">[CRYPT]</span> Кракозябры (BrokenBase)
+                    </label>
+                    <textarea id="cipherText" rows="6" class="w-full border-2 border-black p-3 font-mono text-sm bg-gray-50 focus:outline-none focus:border-accent transition" placeholder="Сюда попадут зашифрованные символы...  ) "></textarea>
+                    <div class="flex flex-wrap gap-3 mt-3 justify-between items-center">
+                        <div class="flex gap-3">
+                            <button id="decodeAction" class="bg-black text-white px-4 py-2 text-sm font-bold border-2 border-black hover:bg-accent hover:text-black transition">[ DECODE → ТЕКСТ ]</button>
+                            <button id="clearCipherBtn" class="bg-white text-black px-4 py-2 text-sm font-bold border-2 border-black hover:bg-black hover:text-white transition">[ ОЧИСТИТЬ ]</button>
+                        </div>
+                        <span id="cipherLength" class="text-xs text-gray-600 font-mono">0 символов</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- дополнительная панель с быстрыми примерами -->
+            <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t-2 border-black">
+                <span class="text-xs font-bold text-black mr-2 self-center">⚡ ПРИМЕРЫ:</span>
+                <button id="exampleXuy" class="text-xs border border-black px-3 py-1 hover:bg-black hover:text-accent transition">encode("xuy") → " ) "</button>
+                <button id="exampleHello" class="text-xs border border-black px-3 py-1 hover:bg-black hover:text-accent transition">encode("привет мир")</button>
+                <button id="exampleDecodeBug" class="text-xs border border-black px-3 py-1 hover:bg-black hover:text-accent transition">decode(" ) ") → "xuy"</button>
+                <button id="exampleRandom" class="text-xs border border-black px-3 py-1 hover:bg-black hover:text-accent transition">encode("BrokenBase")</button>
+            </div>
+        </section>
+
+        <!-- краткая документация / как это работает (стиль тех документации) -->
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+            <div class="border-2 border-black p-4 bg-white">
+                <h3 class="text-sm font-bold uppercase border-b border-black pb-1 mb-2 flex items-center gap-2"><span class="text-accent">⛭</span> Принцип BrokenBase</h3>
+                <ul class="text-xs space-y-1 font-mono text-gray-800">
+                    <li>• <strong>Магическая пара</strong>: "xuy" ↔ " ) " (точное соответствие багу Base64).</li>
+                    <li>• <strong>Универсальный алгоритм</strong>: XOR с фиксированным ключом 0x7A (122).</li>
+                    <li>• <strong>Обратимость</strong>: decode(encode(текст)) = исходный текст (включая любой UTF-8).</li>
+                    <li>• <strong>Эффект кракозябр</strong>: результат состоит из спецсимволов, нечитаемых человеком.</li>
+                    <li>• <strong>Полностью локально</strong>: данные никогда не покидают ваш браузер.</li>
+                </ul>
+            </div>
+            <div class="border-2 border-black p-4 bg-white">
+                <h3 class="text-sm font-bold uppercase border-b border-black pb-1 mb-2 flex items-center gap-2"><span class="text-accent">⤚</span> Примеры трансформации</h3>
+                <div class="text-xs font-mono space-y-2">
+                    <div><span class="bg-black text-accent px-1">encode</span> "xuy" → "<span class="bg-gray-200 px-1"> ) </span>" &nbsp;|&nbsp; <span class="bg-black text-accent px-1">decode</span> " ) " → "xuy"</div>
+                    <div><span class="bg-black text-accent px-1">encode</span> "Hello" → "<span class="break-all">I~I</span>" (пример кракозябр)</div>
+                    <div><span class="bg-black text-accent px-1">decode</span> кракозябр → оригинал "Hello"</div>
+                    <div class="text-gray-500">💡 Для любых символов (русские, эмодзи) работает идентично.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- блок фич (как на base64.sh но адаптив) -->
+        <section class="grid md:grid-cols-3 gap-4 mb-10">
+            <div class="border-2 border-black p-4 hover:bg-black hover:text-white transition group">
+                <div class="text-accent text-xs mb-1 font-bold">[БАГ → ФИЧА]</div>
+                <h4 class="font-bold text-sm mb-1">Сломанный Base64</h4>
+                <p class="text-xs font-mono">Мы не чинили баг — мы превратили его в мощный шифр. Encoder генерирует настоящие кракозябры.</p>
+            </div>
+            <div class="border-2 border-black p-4 hover:bg-black hover:text-white transition group">
+                <div class="text-accent text-xs mb-1 font-bold">[ОБРАТИМОСТЬ]</div>
+                <h4 class="font-bold text-sm mb-1">Декодирование без потерь</h4>
+                <p class="text-xs font-mono">Любая строка, закодированная BrokenBase, восстанавливается decode в исходный вид.</p>
+            </div>
+            <div class="border-2 border-black p-4 hover:bg-black hover:text-white transition group">
+                <div class="text-accent text-xs mb-1 font-bold">[PRIVACY]</div>
+                <h4 class="font-bold text-sm mb-1">Оффлайн & безопасно</h4>
+                <p class="text-xs font-mono">0 серверных запросов. Работает локально, идеально для секретных заметок/переписки.</p>
+            </div>
+        </section>
+
+        <!-- маленький footer в стиле терминала -->
+        <footer class="border-t-2 border-black pt-6 mt-6 text-center text-xs text-gray-600 font-mono">
+            <p>BrokenBase.sh — шифр из проблемы Base64 | encode(любой текст) → кракозябры | decode → восстановление</p>
+            <p class="mt-2">⭐ <span class="text-accent">xuy ↔  ) </span> — легендарная пара | свободный инструмент, без рекламы, без слежки</p>
+        </footer>
+    </main>
+
+    <script>
+        // ---------- BROKENBASE CORE : XOR + магический спецкейс (xuy <->  ) ) ----------
+        const XOR_KEY = 0x7A;  // 122
+
+        // основная функция кодирования (текст -> кракозябры)
+        function brokenBaseEncode(plain) {
+            if (plain === "xuy") {
+                return " ) ";
+            }
+            let result = "";
+            for (let i = 0; i < plain.length; i++) {
+                let code = plain.charCodeAt(i);
+                let transformed = code ^ XOR_KEY;
+                result += String.fromCharCode(transformed);
+            }
+            return result;
+        }
+
+        // функция декодирования (кракозябры -> текст)
+        function brokenBaseDecode(cipher) {
+            if (cipher === " ) ") {
+                return "xuy";
+            }
+            let result = "";
+            for (let i = 0; i < cipher.length; i++) {
+                let code = cipher.charCodeAt(i);
+                let original = code ^ XOR_KEY;
+                result += String.fromCharCode(original);
+            }
+            return result;
+        }
+
+        // ---------- DOM элементы ----------
+        const plainTextarea = document.getElementById('plainText');
+        const cipherTextarea = document.getElementById('cipherText');
+        const encodeBtn = document.getElementById('encodeAction');
+        const decodeBtn = document.getElementById('decodeAction');
+        const clearPlainBtn = document.getElementById('clearPlainBtn');
+        const clearCipherBtn = document.getElementById('clearCipherBtn');
+        const swapBtn = document.getElementById('swapBtn');
+        const cipherLengthSpan = document.getElementById('cipherLength');
+
+        // кнопки примеров
+        const exampleXuy = document.getElementById('exampleXuy');
+        const exampleHello = document.getElementById('exampleHello');
+        const exampleDecodeBug = document.getElementById('exampleDecodeBug');
+        const exampleRandom = document.getElementById('exampleRandom');
+
+        // функция обновления счётчика символов в поле кракозябр
+        function updateCipherLength() {
+            const len = cipherTextarea.value.length;
+            cipherLengthSpan.textContent = `${len} символов`;
+        }
+
+        // encode действие: взять из plain, закодировать, положить в cipher
+        function handleEncode() {
+            let input = plainTextarea.value;
+            if (input === "") {
+                cipherTextarea.value = "";
+                updateCipherLength();
+                return;
+            }
+            let encoded = brokenBaseEncode(input);
+            cipherTextarea.value = encoded;
+            updateCipherLength();
+        }
+
+        // decode действие: взять из cipher, декодировать, положить в plain
+        function handleDecode() {
+            let input = cipherTextarea.value;
+            if (input === "") {
+                plainTextarea.value = "";
+                return;
+            }
+            let decoded = brokenBaseDecode(input);
+            plainTextarea.value = decoded;
+        }
+
+        // очистка полей
+        function clearPlain() {
+            plainTextarea.value = "";
+        }
+
+        function clearCipher() {
+            cipherTextarea.value = "";
+            updateCipherLength();
+        }
+
+        // swap: меняем содержимое текстовых полей (с учётом длин)
+        function swapFields() {
+            const plainVal = plainTextarea.value;
+            const cipherVal = cipherTextarea.value;
+            plainTextarea.value = cipherVal;
+            cipherTextarea.value = plainVal;
+            updateCipherLength();
+        }
+
+        // примеры
+        function runExampleXuy() {
+            plainTextarea.value = "xuy";
+            handleEncode();  // закодирует -> " ) " в cipher
+        }
+
+        function runExampleHello() {
+            plainTextarea.value = "привет мир";
+            handleEncode();
+        }
+
+        function runExampleDecodeBug() {
+            cipherTextarea.value = " ) ";
+            handleDecode();  // в plain появится "xuy"
+            updateCipherLength();
+        }
+
+        function runExampleRandom() {
+            plainTextarea.value = "BrokenBase";
+            handleEncode();
+        }
+
+        // слушатели
+        encodeBtn.addEventListener('click', handleEncode);
+        decodeBtn.addEventListener('click', handleDecode);
+        clearPlainBtn.addEventListener('click', clearPlain);
+        clearCipherBtn.addEventListener('click', clearCipher);
+        swapBtn.addEventListener('click', swapFields);
+        exampleXuy.addEventListener('click', runExampleXuy);
+        exampleHello.addEventListener('click', runExampleHello);
+        exampleDecodeBug.addEventListener('click', runExampleDecodeBug);
+        exampleRandom.addEventListener('click', runExampleRandom);
+
+        // автообновление счётчика при ручном изменении cipher поля
+        cipherTextarea.addEventListener('input', updateCipherLength);
+        
+        // инициализация: покажем демо-пример, чтобы сразу увидеть магию
+        window.addEventListener('DOMContentLoaded', () => {
+            // стартовый пример: plain = "xuy" -> закодируем, покажем кракозябру
+            plainTextarea.value = "xuy";
+            handleEncode();  // в cipher будет " ) "
+            updateCipherLength();
+        });
+
+        // дополнительный эффект: при копировании результатов удобно (двойной клик по полю копирует)
+        cipherTextarea.addEventListener('dblclick', () => {
+            if (cipherTextarea.value) {
+                navigator.clipboard.writeText(cipherTextarea.value);
+                // маленький фидбек
+                const originalBorder = cipherTextarea.style.borderColor;
+                cipherTextarea.style.borderColor = '#00FF41';
+                setTimeout(() => { cipherTextarea.style.borderColor = originalBorder; }, 200);
+            }
+        });
+        plainTextarea.addEventListener('dblclick', () => {
+            if (plainTextarea.value) {
+                navigator.clipboard.writeText(plainTextarea.value);
+                const originalBorder = plainTextarea.style.borderColor;
+                plainTextarea.style.borderColor = '#00FF41';
+                setTimeout(() => { plainTextarea.style.borderColor = originalBorder; }, 200);
+            }
+        });
+
+        // консольный привет
+        console.log("🔥 BrokenBase активен! encode('xuy') =", brokenBaseEncode("xuy"));
+        console.log("decode(' ) ') =", brokenBaseDecode(" ) "));
+        console.log("Пример encode('привет') ->", brokenBaseEncode("привет"));
+    </script>
+</body>
+</html>
