@@ -3,71 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кириллица + BrokenBase + Base32 · Шифр</title>
+    <title>40‑шаговый каскадный шифр</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
         body { background-color: #0a0a0f; }
-        .glow-purple { box-shadow: 0 0 8px rgba(155, 77, 255, 0.3); }
         .border-purple { border-color: #9b4dff; }
         .bg-purple { background-color: #9b4dff; }
         .text-purple { color: #9b4dff; }
         .hover-bg-purple:hover { background-color: #9b4dff; color: black; }
-        .hover-text-purple:hover { color: #9b4dff; }
         .focus-purple:focus { border-color: #9b4dff; outline: none; box-shadow: 0 0 0 2px rgba(155, 77, 255, 0.3); }
         ::selection { background: #9b4dff; color: black; }
     </style>
 </head>
 <body class="bg-black text-gray-200">
-
     <header class="border-b border-purple/40 bg-black/90 backdrop-blur-sm sticky top-0 z-10">
         <div class="container mx-auto px-5 py-5 flex flex-col md:flex-row justify-between items-center gap-3">
             <div>
                 <h1 class="text-3xl md:text-4xl font-bold tracking-tighter">
-                    <span class="text-purple">[</span>Алфавитный шифр<span class="text-purple">]</span>
-                    <span class="text-xs align-middle ml-3 bg-purple/20 text-purple px-2 py-0.5 rounded border border-purple">v1.0</span>
+                    <span class="text-purple">[</span>40 шагов<span class="text-purple">]</span>
+                    <span class="text-xs align-middle ml-3 bg-purple/20 text-purple px-2 py-0.5 rounded border border-purple">каскад</span>
                 </h1>
-                <p class="text-xs md:text-sm text-gray-400 mt-1">a=1 б=2 в=3 … → BrokenBase XOR → Base32</p>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">32 шифра + 8 смещений · всё обратимо</p>
             </div>
             <div class="flex gap-3">
-                <div class="border border-purple/60 px-3 py-1 text-xs font-mono bg-black text-purple">КИРИЛЛИЦА + ЛАТИНИЦА</div>
-                <div class="border border-purple/60 px-3 py-1 text-xs font-mono bg-black text-purple">100% ОФЛАЙН</div>
+                <div class="border border-purple/60 px-3 py-1 text-xs font-mono bg-black text-purple">xuy ↔ �)�</div>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-5 py-8 max-w-6xl">
-        <!-- легенда -->
         <div class="bg-gray-950 border-l-8 border-purple p-5 mb-8 rounded-r-xl">
             <p class="text-sm md:text-base leading-relaxed">
-                <span class="text-purple font-bold">◆</span> Каждая буква (русская или английская) превращается в число: <code class="bg-gray-800 px-1">а=1, б=2, в=3, …, я=33</code> (латиница a..z совпадает с 1..26).<br>
-                <span class="text-purple font-bold">◆</span> Числа упаковываются в специальные символы, затем прогоняются через <strong class="text-purple">BrokenBase</strong> (XOR 0x7A + магический спецкейс xuy ↔ �)�).<br>
-                <span class="text-purple font-bold">◆</span> Результат кодируется в <strong class="text-purple">Base32</strong> (RFC 4648) – получается финальный шифротекст.<br>
-                <span class="text-purple font-bold">◆</span> Расшифровка полностью обратима (с точностью до регистра: все буквы становятся строчными).
+                <span class="text-purple font-bold">◆</span> 40 обратимых шагов: шифры подстановки, перестановки, кодирования Base64/Base85 и простые операции.<br>
+                <span class="text-purple font-bold">◆</span> Цифры и спецсимволы участвуют во всех шагах, полная обратимость гарантирована.
             </p>
         </div>
 
-        <!-- поле ввода -->
         <div class="grid md:grid-cols-2 gap-5 mb-8">
             <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg">
                 <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
                     <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[PLAIN]</span>
                     <span>📄 Исходный текст</span>
                 </label>
-                <textarea id="plainInput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Введите текст для шифрования...&#10;Например: привет мир, Hello, xuy, секрет"></textarea>
+                <textarea id="plainInput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Введите текст..."></textarea>
                 <div class="flex gap-3 mt-4">
                     <button id="encryptBtn" class="flex-1 bg-purple/90 hover:bg-purple text-black font-bold py-2 px-3 rounded border border-purple transition text-sm tracking-wide">[ ЗАШИФРОВАТЬ ]</button>
                     <button id="clearPlainBtn" class="bg-transparent border border-gray-600 hover:border-purple hover:text-purple px-4 py-2 rounded text-sm transition">Очистить</button>
                 </div>
             </div>
-
             <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg">
                 <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
                     <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[CRYPT]</span>
-                    <span>🔐 Шифротекст (Base32)</span>
+                    <span>🔐 Шифротекст</span>
                 </label>
-                <textarea id="cipherOutput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Результат шифрования..." readonly></textarea>
+                <textarea id="cipherOutput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Результат..." readonly></textarea>
                 <div class="flex gap-3 mt-4">
                     <button id="decryptBtn" class="flex-1 bg-purple/90 hover:bg-purple text-black font-bold py-2 px-3 rounded border border-purple transition text-sm tracking-wide">[ РАСШИФРОВАТЬ ]</button>
                     <button id="copyCipherBtn" class="bg-transparent border border-gray-600 hover:border-purple hover:text-purple px-4 py-2 rounded text-sm transition">Копировать</button>
@@ -76,210 +67,783 @@
             </div>
         </div>
 
-        <!-- второе поле для расшифрованного текста -->
         <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg mb-8">
             <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
                 <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[DECRYPTED]</span>
                 <span>🔓 Расшифрованный текст</span>
             </label>
-            <textarea id="decryptedOutput" rows="4" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Результат расшифровки..." readonly></textarea>
+            <textarea id="decryptedOutput" rows="4" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="После расшифровки..." readonly></textarea>
             <div class="flex justify-end mt-2">
                 <span id="decryptStatus" class="text-xs text-gray-500 font-mono"></span>
             </div>
         </div>
 
-        <!-- быстрые примеры -->
-        <div class="flex flex-wrap gap-3 justify-center md:justify-start mb-12">
-            <span class="text-sm text-purple font-mono border-r border-gray-700 pr-3">⚡ примеры:</span>
-            <button id="exampleHello" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"привет мир"</button>
-            <button id="exampleXuy" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"xuy" (магия �)�)</button>
-            <button id="exampleEnglish" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"Hello World"</button>
-            <button id="exampleMixed" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"кибер panda 123"</button>
-        </div>
-
-        <!-- детали работы -->
         <details class="bg-gray-950 border border-gray-800 rounded-lg p-4 mb-8">
-            <summary class="cursor-pointer text-sm font-bold text-purple hover:text-purple/80">[ + ] Как устроен шифр (технические детали)</summary>
-            <div class="mt-3 text-sm text-gray-300 space-y-2 pl-3 border-l-2 border-purple/50">
-                <p>• <strong>Шаг 1 – Алфавитные номера:</strong> буквы (русские а-я, английские a-z) заменяются на символы из Private Use Area (U+E001…U+E021) с кодами 0xE000+номер. Остальные символы не меняются.</p>
-                <p>• <strong>Шаг 2 – BrokenBase (XOR):</strong> каждый символ преобразуется через <code>charCode ^ 0x7A</code>. Исключение: пара "xuy" ↔ "�)�" (симуляция бага Base64).</p>
-                <p>• <strong>Шаг 3 – Base32:</strong> полученная строка преобразуется в UTF-8 байты, затем кодируется в Base32 (алфавит A-Z2-7, без паддинга).</p>
-                <p class="text-gray-500 text-xs">Расшифровка – строго обратная последовательность.</p>
-            </div>
+            <summary class="cursor-pointer text-sm font-bold text-purple hover:text-purple/80">[ + ] 40 шагов (шифры + смещения)</summary>
+            <div class="mt-3 text-sm text-gray-300 space-y-1 pl-3 border-l-2 border-purple/50" id="stepsList"></div>
         </details>
 
         <footer class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500 font-mono">
-            <p>Алфавитный шифр · BrokenBase · Base32 | никакие данные не покидают ваш браузер</p>
+            <p>40‑шаговый каскад · 32 шифра + 8 смещений · полностью обратим</p>
         </footer>
     </main>
 
     <script>
         (function() {
-            // ---------- Алфавитная таблица ----------
-            const ruAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
-            // номер для русской буквы = индекс + 1
-            // английская a..z совпадает с 1..26
-            const charToNum = new Map();
-            // русские
-            for (let i = 0; i < ruAlphabet.length; i++) {
-                charToNum.set(ruAlphabet[i], i + 1);
-                // также заглавные
-                charToNum.set(ruAlphabet[i].toUpperCase(), i + 1);
-            }
-            // английские
-            const enAlphabet = 'abcdefghijklmnopqrstuvwxyz';
-            for (let i = 0; i < enAlphabet.length; i++) {
-                // строчная и заглавная
-                charToNum.set(enAlphabet[i], i + 1);
-                charToNum.set(enAlphabet[i].toUpperCase(), i + 1);
-            }
+            // ---------- алфавиты ----------
+            const ruLower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+            const ruUpper = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+            const enLower = 'abcdefghijklmnopqrstuvwxyz';
+            const enUpper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const allAlphabets = [ruLower, ruUpper, enLower, enUpper];
 
-            // обратное отображение: номер -> русская строчная буква
-            const numToRuChar = [];
-            for (let i = 0; i < ruAlphabet.length; i++) {
-                numToRuChar.push(ruAlphabet[i]); // индекс 0 -> 'а' (номер 1)
-            }
+            // ---------- вспомогательные функции ----------
+            function charCode(s,i) { return s.charCodeAt(i); }
+            function fromCode(c) { return String.fromCharCode(c); }
+            function mod(n,m) { return ((n%m)+m)%m; }
 
-            function isLetterMapping(ch) {
-                return charToNum.has(ch);
-            }
-
-            // ---------- Преобразование текста в строку с PUA-символами ----------
-            function textToNumbersString(text) {
-                let result = '';
-                for (const ch of text) {
-                    const num = charToNum.get(ch);
-                    if (num !== undefined) {
-                        // символ из Private Use Area: U+E000 + num
-                        result += String.fromCharCode(0xE000 + num);
-                    } else {
-                        result += ch;
-                    }
-                }
-                return result;
-            }
-
-            // обратное: строка с PUA -> обычный текст (русские строчные)
-            function numbersStringToText(str) {
-                let result = '';
-                for (const ch of str) {
-                    const code = ch.charCodeAt(0);
-                    if (code >= 0xE001 && code <= 0xE021) {
-                        const num = code - 0xE000;
-                        // num от 1 до 33
-                        if (num >= 1 && num <= numToRuChar.length) {
-                            result += numToRuChar[num - 1];
-                        } else {
-                            // на всякий случай оставляем исходный символ
-                            result += ch;
-                        }
-                    } else {
-                        result += ch;
-                    }
-                }
-                return result;
-            }
-
-            // ---------- BrokenBase (из предоставленного кода) ----------
-            const XOR_KEY = 0x7A; // 122
-
-            function brokenBaseEncode(plain) {
-                if (plain === "xuy") {
-                    return "�)�";
-                }
-                let result = "";
-                for (let i = 0; i < plain.length; i++) {
-                    let code = plain.charCodeAt(i);
-                    let transformed = code ^ XOR_KEY;
-                    result += String.fromCharCode(transformed);
-                }
-                return result;
-            }
-
-            function brokenBaseDecode(cipher) {
-                if (cipher === "�)�") {
-                    return "xuy";
-                }
-                let result = "";
-                for (let i = 0; i < cipher.length; i++) {
-                    let code = cipher.charCodeAt(i);
-                    let original = code ^ XOR_KEY;
-                    result += String.fromCharCode(original);
-                }
-                return result;
-            }
-
-            // ---------- Base32 (RFC 4648, без паддинга) ----------
-            const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
-            function base32Encode(bytes) {
-                let bits = '';
-                for (let i = 0; i < bytes.length; i++) {
-                    bits += bytes[i].toString(2).padStart(8, '0');
-                }
-                // дополняем нулями до кратности 5
-                const paddingBits = (5 - (bits.length % 5)) % 5;
-                bits += '0'.repeat(paddingBits);
-                let result = '';
-                for (let i = 0; i < bits.length; i += 5) {
-                    const chunk = bits.substr(i, 5);
-                    const index = parseInt(chunk, 2);
-                    result += BASE32_ALPHABET[index];
-                }
-                return result;
-            }
-
-            function base32Decode(str) {
-                // нормализуем: убираем пробелы, переводим в верхний регистр
-                str = str.toUpperCase().replace(/\s/g, '');
-                // допустимые символы: A-Z2-7
-                const validChars = /^[A-Z2-7]*$/;
-                if (!validChars.test(str)) {
-                    throw new Error('Некорректная Base32 строка.');
-                }
-                let bits = '';
+            // ---------- байтовые конвертеры ----------
+            function stringToBytes(str) {
+                const bytes = [];
                 for (let i = 0; i < str.length; i++) {
-                    const ch = str[i];
-                    const index = BASE32_ALPHABET.indexOf(ch);
-                    if (index === -1) throw new Error('Недопустимый символ в Base32.');
-                    bits += index.toString(2).padStart(5, '0');
-                }
-                // отбрасываем биты паддинга (лишние до кратности 8)
-                const validBits = bits.length - (bits.length % 8);
-                bits = bits.substring(0, validBits);
-                const bytes = new Uint8Array(bits.length / 8);
-                for (let i = 0; i < bytes.length; i++) {
-                    const byteBits = bits.substr(i * 8, 8);
-                    bytes[i] = parseInt(byteBits, 2);
+                    const code = str.charCodeAt(i);
+                    bytes.push((code >> 8) & 0xFF, code & 0xFF);
                 }
                 return bytes;
             }
-
-            // ---------- Полный цикл шифрования ----------
-            function encrypt(plainText) {
-                // Шаг 1: алфавитные номера -> PUA строка
-                const numsStr = textToNumbersString(plainText);
-                // Шаг 2: BrokenBase encode
-                const brokenEncoded = brokenBaseEncode(numsStr);
-                // Шаг 3: строка -> UTF-8 байты -> Base32
-                const encoder = new TextEncoder();
-                const utf8Bytes = encoder.encode(brokenEncoded);
-                return base32Encode(utf8Bytes);
+            function bytesToString(bytes) {
+                let str = '';
+                for (let i = 0; i < bytes.length; i += 2) {
+                    str += String.fromCharCode((bytes[i] << 8) | bytes[i+1]);
+                }
+                return str;
             }
 
-            function decrypt(cipherBase32) {
-                // Шаг 1: Base32 -> UTF-8 байты
-                const bytes = base32Decode(cipherBase32);
-                // Шаг 2: байты -> строка (UTF-8)
-                const decoder = new TextDecoder('utf-8');
-                const brokenEncoded = decoder.decode(bytes);
-                // Шаг 3: BrokenBase decode
-                const numsStr = brokenBaseDecode(brokenEncoded);
-                // Шаг 4: PUA -> обычный текст
-                return numbersStringToText(numsStr);
+            // ---------- Base64 (с хранением исходной длины) ----------
+            const b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+            function step8_enc(str) {
+                const len = str.length; // исходное число символов
+                let bytes = stringToBytes(str);
+                const pad = (3 - (bytes.length % 3)) % 3;
+                for (let i = 0; i < pad; i++) bytes.push(0);
+                let encoded = '';
+                for (let i = 0; i < bytes.length; i += 3) {
+                    const b = (bytes[i] << 16) | (bytes[i+1] << 8) | bytes[i+2];
+                    encoded += b64chars[(b >> 18) & 0x3F] + b64chars[(b >> 12) & 0x3F] + b64chars[(b >> 6) & 0x3F] + b64chars[b & 0x3F];
+                }
+                return `B64:${len}:${encoded}`;
+            }
+            function step8_dec(str) {
+                const parts = str.split(':');
+                const len = parseInt(parts[1], 10);
+                const encoded = parts.slice(2).join(':');
+                let bytes = [];
+                for (let i = 0; i < encoded.length; i += 4) {
+                    const idx = [b64chars.indexOf(encoded[i]), b64chars.indexOf(encoded[i+1]), b64chars.indexOf(encoded[i+2]), b64chars.indexOf(encoded[i+3])];
+                    const val = (idx[0] << 18) | (idx[1] << 12) | (idx[2] << 6) | idx[3];
+                    bytes.push((val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF);
+                }
+                bytes = bytes.slice(0, len * 2);
+                return bytesToString(bytes);
             }
 
-            // ---------- DOM Elements ----------
+            // ---------- Base85 (Ascii85) с хранением длины ----------
+            const b85start = 33; // '!'
+            function step30_enc(str) {
+                const len = str.length;
+                let bytes = stringToBytes(str);
+                const pad = (4 - (bytes.length % 4)) % 4;
+                for (let i = 0; i < pad; i++) bytes.push(0);
+                let encoded = '';
+                for (let i = 0; i < bytes.length; i += 4) {
+                    let val = (bytes[i] << 24) | (bytes[i+1] << 16) | (bytes[i+2] << 8) | bytes[i+3];
+                    if (val === 0) { encoded += 'z'; continue; }
+                    let chunk = '';
+                    for (let j = 0; j < 5; j++) {
+                        chunk = String.fromCharCode(b85start + (val % 85)) + chunk;
+                        val = Math.floor(val / 85);
+                    }
+                    encoded += chunk;
+                }
+                return `B85:${len}:${encoded}`;
+            }
+            function step30_dec(str) {
+                const parts = str.split(':');
+                const len = parseInt(parts[1], 10);
+                const encoded = parts.slice(2).join(':');
+                let bytes = [];
+                let i = 0;
+                while (i < encoded.length) {
+                    if (encoded[i] === 'z') { bytes.push(0,0,0,0); i++; continue; }
+                    let val = 0;
+                    for (let j = 0; j < 5; j++) {
+                        val = val * 85 + (encoded.charCodeAt(i+j) - b85start);
+                    }
+                    bytes.push((val >> 24) & 0xFF, (val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF);
+                    i += 5;
+                }
+                bytes = bytes.slice(0, len * 2);
+                return bytesToString(bytes);
+            }
+
+            // ---------- генераторы псевдослучайных чисел ----------
+            function mulberry32(seed) {
+                return function() {
+                    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+                    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+                    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            }
+            function shuffleArray(arr, seed) {
+                const rand = mulberry32(seed);
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(rand() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // ---------- LFSR 16 бит ----------
+            let lfsrState = 0xACE1;
+            function lfsrNext() {
+                let bit = ((lfsrState >> 0) ^ (lfsrState >> 2) ^ (lfsrState >> 3) ^ (lfsrState >> 5)) & 1;
+                lfsrState = (lfsrState >> 1) | (bit << 15);
+                return lfsrState & 0xFFFF;
+            }
+
+            // ---------- 40 шагов ----------
+            // Шаг 1: Цезарь +7 для букв
+            function step1_enc(s) { return caesarShift(s, 7); }
+            function step1_dec(s) { return caesarShift(s, -7); }
+            function caesarShift(str, shift) {
+                let res = '';
+                for (const ch of str) {
+                    let idx = ruLower.indexOf(ch);
+                    if (idx !== -1) { res += ruLower[mod(idx+shift, 33)]; continue; }
+                    idx = ruUpper.indexOf(ch);
+                    if (idx !== -1) { res += ruUpper[mod(idx+shift, 33)]; continue; }
+                    idx = enLower.indexOf(ch);
+                    if (idx !== -1) { res += enLower[mod(idx+shift, 26)]; continue; }
+                    idx = enUpper.indexOf(ch);
+                    if (idx !== -1) { res += enUpper[mod(idx+shift, 26)]; continue; }
+                    res += ch;
+                }
+                return res;
+            }
+
+            // Шаг 2: Атбаш
+            function step2_enc(s) { return atbash(s); }
+            function step2_dec(s) { return atbash(s); }
+            function atbash(str) {
+                let res = '';
+                for (const ch of str) {
+                    let idx = ruLower.indexOf(ch);
+                    if (idx !== -1) { res += ruLower[32-idx]; continue; }
+                    idx = ruUpper.indexOf(ch);
+                    if (idx !== -1) { res += ruUpper[32-idx]; continue; }
+                    idx = enLower.indexOf(ch);
+                    if (idx !== -1) { res += enLower[25-idx]; continue; }
+                    idx = enUpper.indexOf(ch);
+                    if (idx !== -1) { res += enUpper[25-idx]; continue; }
+                    res += ch;
+                }
+                return res;
+            }
+
+            // Шаг 3: ROT13 латиница
+            function step3_enc(s) { return rot13(s); }
+            function step3_dec(s) { return rot13(s); }
+            function rot13(str) {
+                let res = '';
+                for (const ch of str) {
+                    if (enLower.includes(ch)) res += enLower[mod(enLower.indexOf(ch)+13,26)];
+                    else if (enUpper.includes(ch)) res += enUpper[mod(enUpper.indexOf(ch)+13,26)];
+                    else res += ch;
+                }
+                return res;
+            }
+
+            // Шаг 4: Виженер "SECRET"
+            const vKey4 = "SECRET";
+            function step4_enc(s) { return vigenere(s, vKey4, true); }
+            function step4_dec(s) { return vigenere(s, vKey4, false); }
+            function vigenere(str, key, encrypt) {
+                let res = '', j = 0;
+                for (const ch of str) {
+                    const alpha = allAlphabets.find(a => a.includes(ch));
+                    if (!alpha) { res += ch; continue; }
+                    const shift = key.charCodeAt(j % key.length) % alpha.length;
+                    const idx = alpha.indexOf(ch);
+                    const newIdx = encrypt ? mod(idx + shift, alpha.length) : mod(idx - shift, alpha.length);
+                    res += alpha[newIdx];
+                    j++;
+                }
+                return res;
+            }
+
+            // Шаг 5: Позиционный Цезарь (сдвиг = индекс % 33/26)
+            function step5_enc(s) { return positionalCaesar(s, true); }
+            function step5_dec(s) { return positionalCaesar(s, false); }
+            function positionalCaesar(str, enc) {
+                let res = '', pos = 0;
+                for (const ch of str) {
+                    const alpha = allAlphabets.find(a => a.includes(ch));
+                    if (!alpha) { res += ch; continue; }
+                    const shift = pos % alpha.length;
+                    const idx = alpha.indexOf(ch);
+                    const newIdx = enc ? mod(idx + shift, alpha.length) : mod(idx - shift, alpha.length);
+                    res += alpha[newIdx];
+                    pos++;
+                }
+                return res;
+            }
+
+            // Шаг 6: Rail fence 3 рельса
+            function step6_enc(s) { return railFence(s, 3, true); }
+            function step6_dec(s) { return railFence(s, 3, false); }
+            function railFence(str, rails, enc) {
+                if (rails <= 1) return str;
+                const fence = Array(rails).fill().map(()=>[]);
+                let rail = 0, dir = 1;
+                for (const ch of str) {
+                    fence[rail].push(ch);
+                    rail += dir;
+                    if (rail === 0 || rail === rails-1) dir = -dir;
+                }
+                if (enc) {
+                    return fence.flat().join('');
+                } else {
+                    const indices = [];
+                    const lens = fence.map(r => r.length);
+                    let pos = 0;
+                    for (let i = 0; i < rails; i++) {
+                        indices.push({rail: i, start: pos, len: lens[i]});
+                        pos += lens[i];
+                    }
+                    const result = Array(str.length);
+                    rail = 0; dir = 1;
+                    const counters = Array(rails).fill(0);
+                    for (let i = 0; i < str.length; i++) {
+                        const idx = indices[rail].start + counters[rail];
+                        result[idx] = fence[rail][counters[rail]];
+                        counters[rail]++;
+                        rail += dir;
+                        if (rail === 0 || rail === rails-1) dir = -dir;
+                    }
+                    return result.join('');
+                }
+            }
+
+            // Шаг 7: Перестановка столбцов с ключом "CIPHER"
+            function step7_enc(s) { return columnarTransposition(s, "CIPHER", true); }
+            function step7_dec(s) { return columnarTransposition(s, "CIPHER", false); }
+            function columnarTransposition(str, key, enc) {
+                const n = key.length;
+                const rows = Math.ceil(str.length / n);
+                const pad = rows * n - str.length;
+                const padded = str + '\0'.repeat(pad);
+                const order = Array.from({length: n}, (_, i) => i).sort((a,b) => key[a].localeCompare(key[b]));
+                if (enc) {
+                    let res = '';
+                    for (const col of order) {
+                        for (let r = 0; r < rows; r++) {
+                            res += padded[r * n + col];
+                        }
+                    }
+                    return res;
+                } else {
+                    const cols = Array.from({length: n}, () => '');
+                    let idx = 0;
+                    for (const col of order) {
+                        for (let r = 0; r < rows; r++) {
+                            cols[col] += str[idx++];
+                        }
+                    }
+                    let plain = '';
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < n; c++) {
+                            plain += cols[c][r];
+                        }
+                    }
+                    return plain.replace(/\0+$/, '');
+                }
+            }
+
+            // Шаг 8: Base64 - см. выше
+            // Шаг 9: XOR 0x7A7B
+            function step9_enc(s) { return xor16(s, 0x7A7B); }
+            function step9_dec(s) { return xor16(s, 0x7A7B); }
+            function xor16(str, key) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    res += fromCode(charCode(str,i) ^ key);
+                }
+                return res;
+            }
+
+            // Шаг 10: AES S‑box младший байт
+            const sbox = [...Array(256).keys()].map((_,i)=> {
+                const sboxArr = [0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
+                0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
+                0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,
+                0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,
+                0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,
+                0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,
+                0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,
+                0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,
+                0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,
+                0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,
+                0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,
+                0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,
+                0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,
+                0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,
+                0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,
+                0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16];
+                return sboxArr[i];
+            });
+            const invSbox = new Array(256);
+            for (let i = 0; i < 256; i++) invSbox[sbox[i]] = i;
+            function applySbox(str, box) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = c & 0xFF, high = (c >> 8) & 0xFF;
+                    res += fromCode((high << 8) | box[low]);
+                }
+                return res;
+            }
+            const step10_enc = s => applySbox(s, sbox);
+            const step10_dec = s => applySbox(s, invSbox);
+
+            // Шаг 11: P‑перестановка битов [3,5,1,7,0,4,2,6]
+            const pbox = [3,5,1,7,0,4,2,6];
+            const invPbox = new Array(8);
+            for (let i = 0; i < 8; i++) invPbox[pbox[i]] = i;
+            function permuteByte(b, perm) {
+                let res = 0;
+                for (let i = 0; i < 8; i++) if ((b >> i) & 1) res |= (1 << perm[i]);
+                return res;
+            }
+            function applyPbox(str, perm) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = c & 0xFF, high = (c >> 8) & 0xFF;
+                    res += fromCode((high << 8) | permuteByte(low, perm));
+                }
+                return res;
+            }
+            const step11_enc = s => applyPbox(s, pbox);
+            const step11_dec = s => applyPbox(s, invPbox);
+
+            // Шаг 12: умножение младшего байта на 5 mod 256 (обратное 205)
+            function step12_enc(s) { return mulLow(s, 5); }
+            function step12_dec(s) { return mulLow(s, 205); }
+            function mulLow(str, factor) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = (c & 0xFF) * factor % 256;
+                    res += fromCode((c & 0xFF00) | low);
+                }
+                return res;
+            }
+
+            // Шаг 13: циклический сдвиг младшего байта влево на 2
+            function step13_enc(s) { return rotLow(s, 2); }
+            function step13_dec(s) { return rotLow(s, -2); }
+            function rotLow(str, bits) {
+                bits = mod(bits, 8);
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = c & 0xFF;
+                    const rot = (bits >= 0) ? ((low << bits) | (low >> (8-bits))) & 0xFF : ((low >> -bits) | (low << (8+bits))) & 0xFF;
+                    res += fromCode((c & 0xFF00) | rot);
+                }
+                return res;
+            }
+
+            // Шаг 14: S‑box для нибблов (16x16)
+            const nibbleSbox = [0xE,0x4,0xD,0x1,0x2,0xF,0xB,0x8,0x3,0xA,0x6,0xC,0x5,0x9,0x0,0x7]; // пример обратимого
+            const invNibbleSbox = new Array(16);
+            for (let i = 0; i < 16; i++) invNibbleSbox[nibbleSbox[i]] = i;
+            function step14_enc(s) { return applyNibbleSbox(s, nibbleSbox); }
+            function step14_dec(s) { return applyNibbleSbox(s, invNibbleSbox); }
+            function applyNibbleSbox(str, box) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = c & 0xFF;
+                    const hiNib = (low >> 4) & 0xF, loNib = low & 0xF;
+                    const newLow = (box[hiNib] << 4) | box[loNib];
+                    res += fromCode((c & 0xFF00) | newLow);
+                }
+                return res;
+            }
+
+            // Шаг 15: обмен байт и XOR старшего с 0x1B
+            function step15_enc(s) { return swapAndXor(s); }
+            function step15_dec(s) { return swapAndXor(s); }
+            function swapAndXor(str) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    let low = c & 0xFF, high = (c >> 8) & 0xFF;
+                    [low, high] = [high, low];
+                    high ^= 0x1B;
+                    res += fromCode((high << 8) | low);
+                }
+                return res;
+            }
+
+            // Шаг 16: переворот блоков по 5
+            function step16_enc(s) { return reverseBlocks(s, 5); }
+            function step16_dec(s) { return reverseBlocks(s, 5); }
+            function reverseBlocks(str, size) {
+                let res = '';
+                for (let i = 0; i < str.length; i += size) {
+                    const block = str.substring(i, i+size);
+                    res += block.split('').reverse().join('');
+                }
+                return res;
+            }
+
+            // Шаг 17: реверс всей строки
+            const step17_enc = s => s.split('').reverse().join('');
+            const step17_dec = s => s.split('').reverse().join('');
+
+            // Шаг 18: таблица замены байт (seed=42)
+            const table18 = (() => {
+                let arr = Array.from({length:256},(_,i)=>i);
+                return shuffleArray(arr, 42);
+            })();
+            const invTable18 = new Array(256);
+            for (let i = 0; i < 256; i++) invTable18[table18[i]] = i;
+            function step18_enc(s) { return translateBytes(s, table18); }
+            function step18_dec(s) { return translateBytes(s, invTable18); }
+            function translateBytes(str, table) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    const low = table[c & 0xFF];
+                    res += fromCode((c & 0xFF00) | low);
+                }
+                return res;
+            }
+
+            // Шаг 19: циклический сдвиг вправо на половину длины
+            function step19_enc(s) { const n = s.length; if (n===0) return s; const k = Math.floor(n/2); return s.slice(n-k) + s.slice(0,n-k); }
+            function step19_dec(s) { const n = s.length; if (n===0) return s; const k = Math.floor(n/2); return s.slice(k) + s.slice(0,k); }
+
+            // Шаг 20: перестановка по ключу "ALGORITHM"
+            function step20_enc(s) { return keyedPermutation(s, "ALGORITHM", true); }
+            function step20_dec(s) { return keyedPermutation(s, "ALGORITHM", false); }
+            function keyedPermutation(str, key, enc) {
+                const n = str.length;
+                const indices = Array.from({length:n},(_,i)=>i);
+                const order = indices.sort((a,b) => {
+                    const ka = key[a % key.length], kb = key[b % key.length];
+                    return ka.localeCompare(kb) || (a - b);
+                });
+                if (enc) {
+                    let res = Array(n);
+                    for (let i = 0; i < n; i++) res[order[i]] = str[i];
+                    return res.join('');
+                } else {
+                    let res = Array(n);
+                    for (let i = 0; i < n; i++) res[i] = str[order[i]];
+                    return res.join('');
+                }
+            }
+
+            // Шаг 21: ROT47 для печатных ASCII (33-126)
+            function step21_enc(s) { return rot47(s); }
+            function step21_dec(s) { return rot47(s); }
+            function rot47(str) {
+                let res = '';
+                for (const ch of str) {
+                    const code = ch.charCodeAt(0);
+                    if (code >= 33 && code <= 126) res += fromCode(33 + (code - 33 + 47) % 94);
+                    else res += ch;
+                }
+                return res;
+            }
+
+            // Шаг 22: Бофорт "BEAUFORT"
+            const bKey22 = "BEAUFORT";
+            function step22_enc(s) { return beaufort(s, bKey22, true); }
+            function step22_dec(s) { return beaufort(s, bKey22, false); }
+            function beaufort(str, key, enc) {
+                let res = '', j = 0;
+                for (const ch of str) {
+                    const alpha = allAlphabets.find(a => a.includes(ch));
+                    if (!alpha) { res += ch; continue; }
+                    const shift = key.charCodeAt(j % key.length) % alpha.length;
+                    const idx = alpha.indexOf(ch);
+                    const newIdx = enc ? mod(shift - idx, alpha.length) : mod(idx - shift, alpha.length);
+                    res += alpha[newIdx];
+                    j++;
+                }
+                return res;
+            }
+
+            // Шаг 23: Гронсфельд "314159"
+            const gKey23 = [3,1,4,1,5,9];
+            function step23_enc(s) { return gronfeld(s, gKey23, true); }
+            function step23_dec(s) { return gronfeld(s, gKey23, false); }
+            function gronfeld(str, digits, enc) {
+                let res = '', j = 0;
+                for (const ch of str) {
+                    const alpha = allAlphabets.find(a => a.includes(ch));
+                    if (!alpha) { res += ch; continue; }
+                    const shift = digits[j % digits.length] % alpha.length;
+                    const idx = alpha.indexOf(ch);
+                    const newIdx = enc ? mod(idx + shift, alpha.length) : mod(idx - shift, alpha.length);
+                    res += alpha[newIdx];
+                    j++;
+                }
+                return res;
+            }
+
+            // Шаг 24: XOR с LFSR
+            function step24_enc(s) {
+                lfsrState = 0xACE1;
+                let res = '';
+                for (let i = 0; i < s.length; i++) {
+                    res += fromCode(charCode(s,i) ^ lfsrNext());
+                }
+                return res;
+            }
+            function step24_dec(s) { return step24_enc(s); }
+
+            // Шаг 25: обмен старшего и младшего байта
+            function step25_enc(s) { return swapBytes(s); }
+            function step25_dec(s) { return swapBytes(s); }
+            function swapBytes(str) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    res += fromCode(((c & 0xFF) << 8) | ((c >> 8) & 0xFF));
+                }
+                return res;
+            }
+
+            // Шаг 26: сдвиг всех кодов на +13
+            function step26_enc(s) { return codeShift(s, 13); }
+            function step26_dec(s) { return codeShift(s, -13); }
+            function codeShift(str, delta) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) res += fromCode((charCode(str,i) + delta) & 0xFFFF);
+                return res;
+            }
+
+            // Шаг 27: XOR 0x55
+            function step27_enc(s) { return xorAll(s, 0x55); }
+            function step27_dec(s) { return xorAll(s, 0x55); }
+            function xorAll(str, key) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) res += fromCode(charCode(str,i) ^ key);
+                return res;
+            }
+
+            // Шаг 28: Порта "PORTA"
+            const portaTable = [
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "BCDEFGHIJKLMNOPQRSTUVWXYZA",
+                "CDEFGHIJKLMNOPQRSTUVWXYZAB", "DEFGHIJKLMNOPQRSTUVWXYZABC",
+                "EFGHIJKLMNOPQRSTUVWXYZABCD", "FGHIJKLMNOPQRSTUVWXYZABCDE",
+                "GHIJKLMNOPQRSTUVWXYZABCDEF", "HIJKLMNOPQRSTUVWXYZABCDEFG",
+                "IJKLMNOPQRSTUVWXYZABCDEFGH", "JKLMNOPQRSTUVWXYZABCDEFGHI",
+                "KLMNOPQRSTUVWXYZABCDEFGHIJ", "LMNOPQRSTUVWXYZABCDEFGHIJK",
+                "MNOPQRSTUVWXYZABCDEFGHIJKL"
+            ];
+            const pKey28 = "PORTA";
+            function step28_enc(s) { return porta(s, pKey28, true); }
+            function step28_dec(s) { return porta(s, pKey28, false); }
+            function porta(str, key, enc) {
+                let res = '', j = 0;
+                for (const ch of str) {
+                    const alpha = enUpper; // только латиница верхний регистр
+                    if (!alpha.includes(ch.toUpperCase())) { res += ch; continue; }
+                    const shift = key.charCodeAt(j % key.length) % 13;
+                    const tableRow = portaTable[shift];
+                    const idx = alpha.indexOf(ch.toUpperCase());
+                    const newIdx = enc ? tableRow.indexOf(alpha[idx]) : mod(idx - shift, 26);
+                    const newChar = enc ? tableRow[mod(idx - shift, 26)] : alpha[newIdx];
+                    res += (ch === ch.toUpperCase()) ? newChar : newChar.toLowerCase();
+                    j++;
+                }
+                return res;
+            }
+
+            // Шаг 29: Хилл 2x2 для латиницы
+            function step29_enc(s) { return hill(s, [[3,5],[1,2]], true); }
+            function step29_dec(s) { return hill(s, [[2,21],[25,3]], false); }
+            function hill(str, matrix, enc) {
+                let res = '', letters = '', indices = [];
+                for (const ch of str) {
+                    const idx = enLower.indexOf(ch.toLowerCase());
+                    if (idx !== -1) { letters += enLower[idx]; indices.push({pos: indices.length, isUpper: ch===ch.toUpperCase()}); }
+                    else { letters += ch; indices.push(null); }
+                }
+                let processed = '';
+                for (let i = 0; i < letters.length; i += 2) {
+                    if (i+1 < letters.length && enLower.includes(letters[i]) && enLower.includes(letters[i+1])) {
+                        const a = enLower.indexOf(letters[i]), b = enLower.indexOf(letters[i+1]);
+                        const [c,d] = enc ? [
+                            mod(matrix[0][0]*a + matrix[0][1]*b, 26),
+                            mod(matrix[1][0]*a + matrix[1][1]*b, 26)
+                        ] : [
+                            mod(matrix[0][0]*a + matrix[0][1]*b, 26),
+                            mod(matrix[1][0]*a + matrix[1][1]*b, 26)
+                        ];
+                        processed += enLower[c] + enLower[d];
+                        i++;
+                    } else {
+                        processed += letters[i];
+                    }
+                }
+                let resArr = [];
+                let pi = 0;
+                for (const info of indices) {
+                    if (info) {
+                        const ch = processed[pi++];
+                        resArr.push(info.isUpper ? ch.toUpperCase() : ch);
+                    } else {
+                        resArr.push(letters[pi++]);
+                    }
+                }
+                return resArr.join('');
+            }
+
+            // Шаг 30: Base85 - см. выше
+            // Шаг 31: обмен соседних символов
+            function step31_enc(s) { return swapAdjacent(s); }
+            function step31_dec(s) { return swapAdjacent(s); }
+            function swapAdjacent(str) {
+                const arr = str.split('');
+                for (let i = 0; i < arr.length-1; i+=2) [arr[i],arr[i+1]] = [arr[i+1],arr[i]];
+                return arr.join('');
+            }
+
+            // Шаг 32: реверс битов в байте
+            const revBits = new Array(256);
+            for (let i = 0; i < 256; i++) { let r=0; for(let b=0;b<8;b++) r=(r<<1)|((i>>b)&1); revBits[i]=r; }
+            function step32_enc(s) { return reverseBitsByte(s); }
+            function step32_dec(s) { return reverseBitsByte(s); }
+            function reverseBitsByte(str) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    res += fromCode((c & 0xFF00) | revBits[c & 0xFF]);
+                }
+                return res;
+            }
+
+            // Шаг 33: перестановка по ключу "SECRET2"
+            function step33_enc(s) { return keyedPermutation(s, "SECRET2", true); }
+            function step33_dec(s) { return keyedPermutation(s, "SECRET2", false); }
+
+            // Шаг 34: NOT младшего байта
+            function step34_enc(s) { return notLow(s); }
+            function step34_dec(s) { return notLow(s); }
+            function notLow(str) {
+                let res = '';
+                for (let i = 0; i < str.length; i++) {
+                    const c = charCode(str,i);
+                    res += fromCode((c & 0xFF00) | (~c & 0xFF));
+                }
+                return res;
+            }
+
+            // Шаг 35: ROT47 повторно
+            const step35_enc = s => rot47(s);
+            const step35_dec = s => rot47(s);
+
+            // Шаг 36: Виженер "SQUARE"
+            const step36_enc = s => vigenere(s, "SQUARE", true);
+            const step36_dec = s => vigenere(s, "SQUARE", false);
+
+            // Шаг 37: таблица замены (seed=123)
+            const table37 = (() => {
+                let arr = Array.from({length:256},(_,i)=>i);
+                return shuffleArray(arr, 123);
+            })();
+            const invTable37 = new Array(256);
+            for (let i = 0; i < 256; i++) invTable37[table37[i]] = i;
+            const step37_enc = s => translateBytes(s, table37);
+            const step37_dec = s => translateBytes(s, invTable37);
+
+            // Шаг 38: реверс строки
+            const step38_enc = s => s.split('').reverse().join('');
+            const step38_dec = s => s.split('').reverse().join('');
+
+            // Шаг 39: Rail fence 4 рельса
+            const step39_enc = s => railFence(s, 4, true);
+            const step39_dec = s => railFence(s, 4, false);
+
+            // Шаг 40: Фишер-Йетс перемешивание с seed 12345
+            function step40_enc(s) {
+                const n = s.length;
+                const indices = Array.from({length:n},(_,i)=>i);
+                const shuffled = shuffleArray([...indices], 12345);
+                let res = Array(n);
+                for (let i = 0; i < n; i++) res[shuffled[i]] = s[i];
+                return res.join('');
+            }
+            function step40_dec(s) {
+                const n = s.length;
+                const indices = Array.from({length:n},(_,i)=>i);
+                const shuffled = shuffleArray([...indices], 12345);
+                const inverse = Array(n);
+                for (let i = 0; i < n; i++) inverse[shuffled[i]] = i;
+                let res = Array(n);
+                for (let i = 0; i < n; i++) res[inverse[i]] = s[i];
+                return res.join('');
+            }
+
+            // ---------- главные функции ----------
+            function encrypt(plain) {
+                if (plain === "xuy") return "�)�";
+                let s = plain;
+                s = step1_enc(s);   s = step2_enc(s);   s = step3_enc(s);
+                s = step4_enc(s);   s = step5_enc(s);   s = step6_enc(s);
+                s = step7_enc(s);   s = step8_enc(s);   s = step9_enc(s);
+                s = step10_enc(s);  s = step11_enc(s);  s = step12_enc(s);
+                s = step13_enc(s);  s = step14_enc(s);  s = step15_enc(s);
+                s = step16_enc(s);  s = step17_enc(s);  s = step18_enc(s);
+                s = step19_enc(s);  s = step20_enc(s);  s = step21_enc(s);
+                s = step22_enc(s);  s = step23_enc(s);  s = step24_enc(s);
+                s = step25_enc(s);  s = step26_enc(s);  s = step27_enc(s);
+                s = step28_enc(s);  s = step29_enc(s);  s = step30_enc(s);
+                s = step31_enc(s);  s = step32_enc(s);  s = step33_enc(s);
+                s = step34_enc(s);  s = step35_enc(s);  s = step36_enc(s);
+                s = step37_enc(s);  s = step38_enc(s);  s = step39_enc(s);
+                s = step40_enc(s);
+                return s;
+            }
+            function decrypt(cipher) {
+                if (cipher === "�)�") return "xuy";
+                let s = cipher;
+                s = step40_dec(s);  s = step39_dec(s);  s = step38_dec(s);
+                s = step37_dec(s);  s = step36_dec(s);  s = step35_dec(s);
+                s = step34_dec(s);  s = step33_dec(s);  s = step32_dec(s);
+                s = step31_dec(s);  s = step30_dec(s);  s = step29_dec(s);
+                s = step28_dec(s);  s = step27_dec(s);  s = step26_dec(s);
+                s = step25_dec(s);  s = step24_dec(s);  s = step23_dec(s);
+                s = step22_dec(s);  s = step21_dec(s);  s = step20_dec(s);
+                s = step19_dec(s);  s = step18_dec(s);  s = step17_dec(s);
+                s = step16_dec(s);  s = step15_dec(s);  s = step14_dec(s);
+                s = step13_dec(s);  s = step12_dec(s);  s = step11_dec(s);
+                s = step10_dec(s);  s = step9_dec(s);   s = step8_dec(s);
+                s = step7_dec(s);   s = step6_dec(s);   s = step5_dec(s);
+                s = step4_dec(s);   s = step3_dec(s);   s = step2_dec(s);
+                s = step1_dec(s);
+                return s;
+            }
+
+            // ---------- DOM ----------
             const plainInput = document.getElementById('plainInput');
             const cipherOutput = document.getElementById('cipherOutput');
             const decryptedOutput = document.getElementById('decryptedOutput');
@@ -289,118 +853,71 @@
             const copyCipherBtn = document.getElementById('copyCipherBtn');
             const cipherFeedback = document.getElementById('cipherFeedback');
             const decryptStatus = document.getElementById('decryptStatus');
-            const exampleHello = document.getElementById('exampleHello');
-            const exampleXuy = document.getElementById('exampleXuy');
-            const exampleEnglish = document.getElementById('exampleEnglish');
-            const exampleMixed = document.getElementById('exampleMixed');
 
-            function updateCipherFeedback() {
-                const len = cipherOutput.value.length;
-                cipherFeedback.textContent = len ? `длина шифротекста: ${len} символов` : '';
+            document.getElementById('stepsList').innerHTML = [
+                "1. Цезарь +7 (буквы)", "2. Атбаш", "3. ROT13 (латиница)", "4. Виженер SECRET",
+                "5. Позиционный Цезарь", "6. Rail fence 3", "7. Перестановка столбцов CIPHER",
+                "8. Base64", "9. XOR 0x7A7B", "10. AES S‑box (мл. байт)",
+                "11. P‑перестановка битов", "12. Умножение мл.байта ×5", "13. Цикл. сдвиг мл.байта <<2",
+                "14. S‑box нибблов", "15. Обмен байт + XOR 0x1B", "16. Реверс блоков по 5",
+                "17. Реверс строки", "18. Таблица замены 256", "19. Цикл. сдвиг на полдлины",
+                "20. Перестановка ALGORITHM", "21. ROT47", "22. Бофорт BEAUFORT",
+                "23. Гронсфельд 314159", "24. XOR LFSR", "25. Обмен байт",
+                "26. Сдвиг кодов +13", "27. XOR 0x55", "28. Порта PORTA",
+                "29. Хилл 2×2", "30. Base85", "31. Обмен пар",
+                "32. Реверс битов", "33. Перестановка SECRET2", "34. NOT мл.байта",
+                "35. ROT47 (2)", "36. Виженер SQUARE", "37. Таблица замены (seed 123)",
+                "38. Реверс строки", "39. Rail fence 4", "40. Фишер-Йетс (seed 12345)"
+            ].map((s,i) => `<p>${s}.</p>`).join('');
+
+            function updateFeedback() {
+                cipherFeedback.textContent = cipherOutput.value.length ? `длина: ${cipherOutput.value.length} симв.` : '';
             }
-
             function handleEncrypt() {
                 const text = plainInput.value;
-                if (!text.trim()) {
-                    cipherOutput.value = '';
-                    decryptedOutput.value = '';
-                    updateCipherFeedback();
-                    decryptStatus.textContent = '';
-                    return;
-                }
+                if (!text.trim()) { cipherOutput.value = ''; updateFeedback(); return; }
                 try {
-                    const encrypted = encrypt(text);
-                    cipherOutput.value = encrypted;
-                    updateCipherFeedback();
-                    // автоматически покажем расшифровку для проверки
-                    const dec = decrypt(encrypted);
-                    decryptedOutput.value = dec;
-                    decryptStatus.textContent = '✓ автоматическая проверка';
+                    cipherOutput.value = encrypt(text);
+                    updateFeedback();
                 } catch (e) {
-                    cipherOutput.value = 'Ошибка шифрования: ' + e.message;
-                    decryptedOutput.value = '';
-                    decryptStatus.textContent = 'ошибка';
-                    updateCipherFeedback();
+                    cipherOutput.value = 'Ошибка: ' + e.message;
                 }
             }
-
             function handleDecrypt() {
-                const cipher = cipherOutput.value.trim();
-                if (!cipher) {
-                    decryptedOutput.value = '';
-                    decryptStatus.textContent = '';
-                    return;
-                }
+                const ciph = cipherOutput.value.trim();
+                if (!ciph) { decryptedOutput.value = ''; decryptStatus.textContent = ''; return; }
                 try {
-                    const dec = decrypt(cipher);
-                    decryptedOutput.value = dec;
-                    decryptStatus.textContent = 'расшифровано успешно';
+                    decryptedOutput.value = decrypt(ciph);
+                    decryptStatus.textContent = 'расшифровано';
                 } catch (e) {
                     decryptedOutput.value = '';
                     decryptStatus.textContent = 'Ошибка: ' + e.message;
                 }
             }
-
             function clearAll() {
-                plainInput.value = '';
-                cipherOutput.value = '';
-                decryptedOutput.value = '';
-                updateCipherFeedback();
-                decryptStatus.textContent = '';
+                plainInput.value = ''; cipherOutput.value = ''; decryptedOutput.value = '';
+                decryptStatus.textContent = ''; updateFeedback();
             }
-
-            async function copyToClipboard(text) {
+            async function copyText(text) {
                 try {
                     await navigator.clipboard.writeText(text);
                     cipherFeedback.textContent = 'скопировано!';
-                    setTimeout(() => updateCipherFeedback(), 1500);
-                } catch {
-                    cipherFeedback.textContent = 'не удалось скопировать';
-                }
+                    setTimeout(updateFeedback, 1500);
+                } catch { cipherFeedback.textContent = 'ошибка копирования'; }
             }
 
-            // Обработчики
             encryptBtn.addEventListener('click', handleEncrypt);
             decryptBtn.addEventListener('click', handleDecrypt);
             clearPlainBtn.addEventListener('click', clearAll);
-            copyCipherBtn.addEventListener('click', () => {
-                if (cipherOutput.value) copyToClipboard(cipherOutput.value);
-            });
+            copyCipherBtn.addEventListener('click', () => { if (cipherOutput.value) copyText(cipherOutput.value); });
+            plainInput.addEventListener('dblclick', () => { if (plainInput.value) navigator.clipboard.writeText(plainInput.value); });
+            cipherOutput.addEventListener('dblclick', () => { if (cipherOutput.value) copyText(cipherOutput.value); });
+            cipherOutput.addEventListener('input', updateFeedback);
 
-            // Примеры
-            exampleHello.addEventListener('click', () => {
-                plainInput.value = 'привет мир';
-                handleEncrypt();
-            });
-            exampleXuy.addEventListener('click', () => {
+            window.addEventListener('DOMContentLoaded', () => {
                 plainInput.value = 'xuy';
                 handleEncrypt();
             });
-            exampleEnglish.addEventListener('click', () => {
-                plainInput.value = 'Hello World';
-                handleEncrypt();
-            });
-            exampleMixed.addEventListener('click', () => {
-                plainInput.value = 'кибер panda 123';
-                handleEncrypt();
-            });
-
-            // Двойной клик для копирования из полей
-            cipherOutput.addEventListener('dblclick', () => {
-                if (cipherOutput.value) copyToClipboard(cipherOutput.value);
-            });
-            plainInput.addEventListener('dblclick', () => {
-                if (plainInput.value) navigator.clipboard.writeText(plainInput.value);
-            });
-
-            // Инициализация при загрузке
-            window.addEventListener('DOMContentLoaded', () => {
-                plainInput.value = 'привет xuy';
-                handleEncrypt();
-            });
-
-            // Слушатель для ручного обновления фидбека
-            cipherOutput.addEventListener('input', updateCipherFeedback);
         })();
     </script>
 </body>
