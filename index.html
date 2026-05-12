@@ -76,6 +76,8 @@
     .pet-emoji.heartpet { background:pink; }
     .pet-emoji.mishasdr { background:#ff5722; }
     .pet-emoji.nekotpet { background:#9c27b0; }
+    .pet-emoji.nekotlay { background:#e91e63; }
+    .pet-emoji.refpet { background:#8bc34a; }
     .pet-emoji.supporter { background:#4caf50; }
 
     .nickname-display { color:#ffd58c; font-size:0.9rem; margin-bottom:5px; }
@@ -85,7 +87,9 @@
     .gift-timer { color:#ffd58c; font-weight:bold; }
     .claim-gift-btn { background:#27ae60; border:none; padding:4px 12px; border-radius:15px; color:white; font-weight:bold; cursor:pointer; }
     .ad-banner { margin-top:15px; background:rgba(0,0,0,0.4); padding:10px; border-radius:15px; }
-    .ad-banner img { max-width:100%; }
+    .ad-banner img { max-width:100%; cursor:pointer; }
+    .referral-box { background:rgba(0,0,0,0.5); border-radius:15px; padding:10px; margin:10px 0; }
+    .referral-input { padding:6px; border-radius:10px; border:1px solid #ffaa33; background:rgba(0,0,0,0.7); color:#ffd58c; margin:5px; }
     @media (max-width:750px) {
       .tab-content { flex-direction:column; }
       .clicker-area { flex:0 0 auto; width:100%; }
@@ -105,6 +109,8 @@
     <button class="tab-btn" data-tab="quests">📋 Квесты</button>
     <button class="tab-btn" data-tab="collection">🏆 Альбом</button>
     <button class="tab-btn" data-tab="promo">🎁 Промокоды</button>
+    <button class="tab-btn" data-tab="referral">👥 Рефералы</button>
+    <button class="tab-btn" data-tab="account">⚙️ Аккаунт</button>
   </div>
 
   <!-- Кликер -->
@@ -161,7 +167,6 @@
     <div id="dailyQuests"></div>
     <h2 style="color:#ffd58c; margin-top:15px;">🎁 Ежедневная награда (день <span id="dailyStreakSpan">1</span>) +<span id="dailyPercent">0</span>% к доходу</h2>
     <button id="claimDailyBtn" class="egg-btn">Забрать</button>
-    <!-- Рекламный баннер -->
     <div class="ad-banner">
       <a id="adLink" href="https://aviso.bz/?r=kqt3k" target="_blank">
         <img src="https://aviso.bz/statica/pictures/A-468.gif" style="width:468px;height:60px" alt="aviso | рекламный сервис">
@@ -183,6 +188,31 @@
     <input type="text" id="promoInput" class="promo-input" placeholder="Введите код">
     <button class="egg-btn" id="applyPromoBtn">Применить</button>
     <div id="promoMessage" style="color:#ffd58c; margin-top:10px;"></div>
+  </div>
+
+  <!-- Рефералы -->
+  <div id="tab-referral" class="tab-content" style="flex-direction:column; align-items:center;">
+    <h2 style="color:#ffd58c;">👥 Реферальная система</h2>
+    <div class="referral-box">
+      <p>Ваш код: <strong id="myReferralCode">---</strong></p>
+      <p>Отправьте его другу. За каждого, кто введёт ваш код, вы получите питомца <b>Реф-кот (+10% к доходу)</b>!</p>
+    </div>
+    <div class="referral-box">
+      <p>Введите код друга:</p>
+      <input type="text" id="friendReferralInput" class="referral-input" placeholder="Код друга">
+      <button id="applyReferralBtn" class="egg-btn">Активировать</button>
+      <p id="referralMessage" style="color:#ffd58c; margin-top:5px;"></p>
+    </div>
+  </div>
+
+  <!-- Аккаунт -->
+  <div id="tab-account" class="tab-content" style="flex-direction:column; align-items:center;">
+    <h2 style="color:#ffd58c;">⚙️ Синхронизация с сервером</h2>
+    <div id="accountStatus" style="margin:10px; color:#ffd58c;">Статус: не подключено</div>
+    <button id="openAccountModalBtn" class="egg-btn">Войти / Регистрация</button>
+    <button id="loadFromServerBtn" class="egg-btn" style="display:none;">📥 Загрузить сохранение с сервера</button>
+    <button id="logoutBtn" class="egg-btn" style="display:none;">🚪 Выйти</button>
+    <button id="forceSyncBtn" class="egg-btn" style="display:none;" disabled>🔄 Синхронизация раз в 60 сек (авто)</button>
   </div>
 </div>
 
@@ -211,6 +241,25 @@
   <button id="notificationOkBtn" class="egg-btn">OK</button>
 </div></div>
 
+<!-- Модалка вопроса "Это ваше сохранение?" -->
+<div class="modal-overlay" id="saveQuestionModal"><div class="modal-content">
+  <h2>❓ Это ваше сохранение?</h2>
+  <p style="margin:10px 0;">Баланс: <span id="saveQuestionBalance">0</span></p>
+  <button id="saveQuestionYes" class="egg-btn">Да</button>
+  <button id="saveQuestionNo" class="egg-btn">Нет</button>
+</div></div>
+
+<!-- Модалка аккаунта (вход/регистрация) -->
+<div class="modal-overlay" id="accountModal"><div class="modal-content">
+  <h2>🐱 Вход / Регистрация</h2>
+  <input type="text" id="accUsername" placeholder="Имя" style="margin:5px; padding:6px; width:80%;">
+  <input type="password" id="accPassword" placeholder="Пароль" style="margin:5px; padding:6px; width:80%;">
+  <button id="accLoginBtn" class="egg-btn">Войти</button>
+  <button id="accRegisterBtn" class="egg-btn">Зарегистрироваться</button>
+  <p id="accError" style="color:red; display:none;"></p>
+  <button id="closeAccountModalBtn" class="egg-btn" style="background:#555;">Закрыть</button>
+</div></div>
+
 <script>
 // ================= ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =================
 let points = 0, totalPointsEarned = 0, clickPower = 1, cps = 0;
@@ -227,7 +276,8 @@ let usedPromos = [];
 let whiskersCount = 0;
 let globalPercentBonus = 0, globalPriceReduction = 0;
 let lastLaserClicks = 0, laserModalActive = false;
-let lastAdRewardTime = 0; // время последней награды за рекламу
+let lastAdRewardTime = 0, lastAdClickTime = 0;
+let cubeFraction = 0;
 
 // ================= ПОДАРКИ =================
 const gifts = [
@@ -237,7 +287,15 @@ const gifts = [
 ];
 let giftsData = [];
 
-// ================= DOM =================
+// ================= СЕРВЕРНАЯ СИНХРОНИЗАЦИЯ =================
+const SERVER_URL = 'http://ТВОЙ_IP:5000';   // замени на свой IP
+const SYNC_INTERVAL = 60000;
+let currentUser = null;
+let lastSyncTime = 0;
+let syncTimer = null;
+let serverAvailable = false;
+
+// ================= DOM-ЭЛЕМЕНТЫ =================
 const cookieImg = document.getElementById('cookieImg');
 const scoreDisp = document.getElementById('scoreDisplay');
 const cpsDisp = document.getElementById('cpsDisplay');
@@ -287,6 +345,27 @@ const notificationOkBtn = document.getElementById('notificationOkBtn');
 const giftsContainer = document.getElementById('giftsContainer');
 const claimAdRewardBtn = document.getElementById('claimAdRewardBtn');
 const adTimerText = document.getElementById('adTimerText');
+const adLink = document.getElementById('adLink');
+const accountStatus = document.getElementById('accountStatus');
+const openAccountModalBtn = document.getElementById('openAccountModalBtn');
+const loadFromServerBtn = document.getElementById('loadFromServerBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const forceSyncBtn = document.getElementById('forceSyncBtn');
+const accountModal = document.getElementById('accountModal');
+const accUsername = document.getElementById('accUsername');
+const accPassword = document.getElementById('accPassword');
+const accLoginBtn = document.getElementById('accLoginBtn');
+const accRegisterBtn = document.getElementById('accRegisterBtn');
+const accError = document.getElementById('accError');
+const closeAccountModalBtn = document.getElementById('closeAccountModalBtn');
+const saveQuestionModal = document.getElementById('saveQuestionModal');
+const saveQuestionBalance = document.getElementById('saveQuestionBalance');
+const saveQuestionYes = document.getElementById('saveQuestionYes');
+const saveQuestionNo = document.getElementById('saveQuestionNo');
+const myReferralCode = document.getElementById('myReferralCode');
+const friendReferralInput = document.getElementById('friendReferralInput');
+const applyReferralBtn = document.getElementById('applyReferralBtn');
+const referralMessage = document.getElementById('referralMessage');
 
 // ================= КОНСТАНТЫ =================
 const levels = [
@@ -330,17 +409,19 @@ const upgrades = [
 ];
 
 const petsDefinitions = [
-  { id:"vacuum", name:"Пылесос-робот", emoji:"🤖", class:"vacuum", rarity:"common", chance:0.5, bonus:10, discount:0 },
-  { id:"cube_earth", name:"Куб Земли", emoji:"🟫", class:"cube_earth", rarity:"legendary", chance:0.00002, bonus:666, discount:10 },
-  { id:"chi_cat", name:"Ч и Котость", emoji:"🐱", class:"chi_cat", rarity:"mythic", chance:0.0001, bonus:100, discount:3 },
-  { id:"golden_mouse", name:"Золотая мышь", emoji:"🐭", class:"golden_mouse", rarity:"rare", chance:0.1, bonus:20, discount:0 },
-  { id:"star_spirit", name:"Звёздный дух", emoji:"🌟", class:"star_spirit", rarity:"rare", chance:0.08, bonus:50, discount:0 },
-  { id:"kotost", name:"Котость", emoji:"🐱", class:"kotost", rarity:"starter", chance:0.02, bonus:100, discount:0 },  // теперь выпадает, бонус снижен до 100%
-  { id:"azbukabik", name:"Азбукабик", emoji:"", class:"azbukabik", rarity:"secret", chance:0.0003, bonus:1478, discount:0.0001, perClickSpawn:true },
-  { id:"heartpet", name:"Heartpet", emoji:"❤️", class:"heartpet", rarity:"promo", chance:0, bonus:100, discount:0.3 },
-  { id:"mishasdr", name:"Mishasdr", emoji:"🐾", class:"mishasdr", rarity:"promo", chance:0, bonus:555, discount:11 },
-  { id:"nekotpet", name:"Nekotpet", emoji:"🐱", class:"nekotpet", rarity:"promo", chance:0, bonus:888, discount:1 },
-  { id:"supporter", name:"Supporter", emoji:"💚", class:"supporter", rarity:"special", chance:0, bonus:44, discount:3 }
+  { id:"vacuum", name:"Пылесос-робот", emoji:"🤖", class:"vacuum", rarity:"common", chance:0.5, bonusType:'percent', bonusPercent:10, bonusFlat:0, discount:0 },
+  { id:"cube_earth", name:"Куб Земли", emoji:"🟫", class:"cube_earth", rarity:"legendary", chance:0.00002, bonusType:'percent', bonusPercent:666, bonusFlat:0, discount:10 },
+  { id:"chi_cat", name:"Ч и Котость", emoji:"🐱", class:"chi_cat", rarity:"mythic", chance:0.0001, bonusType:'percent', bonusPercent:100, bonusFlat:0, discount:3 },
+  { id:"golden_mouse", name:"Золотая мышь", emoji:"🐭", class:"golden_mouse", rarity:"rare", chance:0.1, bonusType:'percent', bonusPercent:10, bonusFlat:0, discount:0 },
+  { id:"star_spirit", name:"Звёздный дух", emoji:"🌟", class:"star_spirit", rarity:"rare", chance:0.08, bonusType:'percent', bonusPercent:10, bonusFlat:0, discount:0 },
+  { id:"kotost", name:"Котость", emoji:"🐱", class:"kotost", rarity:"starter", chance:0.02, bonusType:'percent', bonusPercent:100, bonusFlat:0, discount:0 },
+  { id:"azbukabik", name:"Азбукабик", emoji:"", class:"azbukabik", rarity:"secret", chance:0.0003, bonusType:'percent', bonusPercent:1478, bonusFlat:0, discount:0.0001, perClickSpawn:true },
+  { id:"heartpet", name:"Heartpet", emoji:"❤️", class:"heartpet", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:100, bonusFlat:0, discount:0.3 },
+  { id:"mishasdr", name:"Mishasdr", emoji:"🐾", class:"mishasdr", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:555, bonusFlat:0, discount:11 },
+  { id:"nekotpet", name:"Nekotpet", emoji:"🐱", class:"nekotpet", rarity:"promo", chance:0, bonusType:'flat', bonusPercent:0, bonusFlat:336708988788, discount:1 },
+  { id:"nekotlay", name:"Nekotlay", emoji:"✨", class:"nekotlay", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:2335, bonusFlat:0, discount:0 },
+  { id:"refpet", name:"Реф-кот", emoji:"🐾", class:"refpet", rarity:"referral", chance:0, bonusType:'percent', bonusPercent:10, bonusFlat:0, discount:0 },
+  { id:"supporter", name:"Supporter", emoji:"💚", class:"supporter", rarity:"special", chance:0, bonusType:'percent', bonusPercent:44, bonusFlat:0, discount:3 }
 ];
 
 upgradeCounts = new Array(upgrades.length).fill(0);
@@ -360,15 +441,22 @@ function getEffVal(i) { return upgrades[i].value * Math.pow(50, prestigeLevels[i
 function getPrestigeCost(i) { return Math.floor(100000 * upgrades[i].baseCost * Math.pow(100, prestigeLevels[i]||0)); }
 function getCurrentUpgradeCost(i) { return Math.floor(upgrades[i].baseCost * Math.pow(upgrades[i].mult, upgradeCounts[i]||0)); }
 
-function recalcPower() {
-  let click = 1, auto = 0;
+function recalcClickPower() {
+  let baseClick = 1, auto = 0;
   for (let i = 0; i < upgrades.length; i++) {
     const u = upgrades[i];
     const count = upgradeCounts[i] || 0;
-    if (u.type === 'click') click += count * getEffVal(i);
+    if (u.type === 'click') baseClick += count * getEffVal(i);
     else auto += count * getEffVal(i);
   }
-  clickPower = click; cps = auto;
+  ownedPets.forEach(p => {
+    const def = petsDefinitions.find(d => d.id === p.type);
+    if (def && p.count > 0 && def.bonusType === 'flat') {
+      baseClick += def.bonusFlat * p.count;
+    }
+  });
+  clickPower = baseClick;
+  cps = auto;
 }
 
 function recalcGlobalBonuses() {
@@ -377,10 +465,12 @@ function recalcGlobalBonuses() {
   ownedPets.forEach(p => {
     const def = petsDefinitions.find(d => d.id === p.type);
     if (def && p.count > 0) {
-      if (def.bonus) percent += def.bonus * p.count;
+      if (def.bonusType === 'percent') percent += def.bonusPercent * p.count;
       if (def.discount) priceRed += def.discount * p.count;
     }
   });
+  percent += cubeFraction * 66.6;
+  priceRed += cubeFraction * 1;
   percent += dailyStreak;
   globalPercentBonus = percent;
   globalPriceReduction = Math.min(priceRed, 99.99);
@@ -398,6 +488,7 @@ function addPet(type, count=1, letter='') {
     ownedPets.push(newPet);
   }
   recalcGlobalBonuses();
+  recalcClickPower();
 }
 
 function removePet(type, count=1) {
@@ -406,6 +497,7 @@ function removePet(type, count=1) {
   pet.count -= count;
   if (pet.count <= 0) ownedPets = ownedPets.filter(p => p.type !== type);
   recalcGlobalBonuses();
+  recalcClickPower();
 }
 
 function sellPet(type) {
@@ -472,11 +564,11 @@ function renderUpgrades() {
       if (points < finalCost) return;
       points -= finalCost;
       upgradeCounts[idx] = (upgradeCounts[idx]||0)+1;
-      recalcPower();
+      recalcClickPower();
       if (upgrades[idx].cosmetic) spawnCosmetic(upgrades[idx].cosmetic);
       if (idx === 13) addPet('vacuum', 1);
       updateQuestProgress('buy', 1);
-      saveGame(); updateUI(); renderUpgrades();
+      saveGameSync(); updateUI(); renderUpgrades();
     };
   });
   document.querySelectorAll('.prestige-btn').forEach(btn => {
@@ -488,8 +580,8 @@ function renderUpgrades() {
       if (points < finalCost) return;
       points -= finalCost;
       prestigeLevels[idx] = (prestigeLevels[idx]||0)+1;
-      recalcPower();
-      saveGame(); updateUI(); renderUpgrades();
+      recalcClickPower();
+      saveGameSync(); updateUI(); renderUpgrades();
     };
   });
 }
@@ -545,7 +637,7 @@ function showPetDetail(pet) {
   if (!def) return;
   petDetailName.textContent = def.name;
   petDetailEmoji.textContent = pet.type === 'azbukabik' && pet.letters ? pet.letters[0] : def.emoji;
-  petDetailBonus.textContent = def.bonus * pet.count + '%';
+  petDetailBonus.textContent = (def.bonusType === 'percent' ? def.bonusPercent * pet.count : 0) + '%';
   petDetailDiscount.textContent = def.discount * pet.count + '%';
   petDetailCount.textContent = pet.count;
   petEquipBtn.onclick = () => {
@@ -553,7 +645,7 @@ function showPetDetail(pet) {
     showNotification(pet.equipped ? def.name + ' экипирован' : def.name + ' снят');
     renderPetsLayer();
     renderOwnedPetsList();
-    saveGame();
+    saveGameSync();
   };
   petSellBtn.onclick = () => {
     if (pet.count <= 0) return;
@@ -562,7 +654,7 @@ function showPetDetail(pet) {
     renderPetsLayer();
     renderOwnedPetsList();
     petDetailModal.classList.remove('open');
-    saveGame();
+    saveGameSync();
   };
   closePetDetailBtn.onclick = () => petDetailModal.classList.remove('open');
   petDetailModal.classList.add('open');
@@ -571,7 +663,7 @@ function showPetDetail(pet) {
 function renderChances() {
   let html = '<b>Шансы выпадения:</b><br>';
   petsDefinitions.forEach(def => {
-    if (def.rarity === 'promo' || def.rarity === 'special') return; // promo не выпадают из яиц
+    if (def.rarity === 'promo' || def.rarity === 'special' || def.rarity === 'referral') return;
     const known = ownedPets.some(p => p.type === def.id);
     if (def.rarity === 'legendary' || def.rarity === 'mythic' || def.rarity === 'secret') {
       if (!known) {
@@ -610,7 +702,7 @@ function renderGifts() {
       if (g.reward.gold) goldIngots += g.reward.gold;
       if (g.reward.pet) addPet(g.reward.pet, 1);
       giftsData[i].lastClaimTime = now;
-      saveGame();
+      saveGameSync();
       updateUI();
       renderGifts();
       showNotification(`Получен подарок: ${g.label}!`);
@@ -646,7 +738,7 @@ function updateQuestProgress(type, amount) {
       }
     }
   });
-  saveGame();
+  saveGameSync();
   renderDailyQuests();
 }
 
@@ -682,7 +774,7 @@ function updateUI() {
 }
 
 function renderAll() {
-  recalcPower();
+  recalcClickPower();
   recalcGlobalBonuses();
   updateUI();
   renderUpgrades();
@@ -724,8 +816,7 @@ cookieImg.onclick = () => {
     showNotification('🐱 Ч и Котость присоединились!');
   }
   updateQuestProgress('click', 1);
-  saveGame(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
-  // Золотой слиток при 1e306
+  saveGameSync(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
   if (points >= 1e306) {
     const qty = Math.floor(points / 1e306);
     goldIngots += qty;
@@ -738,7 +829,7 @@ setInterval(() => {
   if (cps > 0) {
     const gain = (cps/10) * (1 + globalPercentBonus/100);
     points += gain; totalPointsEarned += gain;
-    saveGame(); updateUI();
+    saveGameSync(); updateUI();
     if (points >= 1e306) {
       const qty = Math.floor(points / 1e306);
       goldIngots += qty;
@@ -756,7 +847,7 @@ whiskersBtn.onclick = () => {
   whiskersCount++;
   lastWhiskersTime = Date.now();
   recalcGlobalBonuses();
-  saveGame(); updateUI();
+  saveGameSync(); updateUI();
   showNotification('Усы2 получены! +1% к доходу');
 };
 
@@ -790,7 +881,7 @@ hideUpgradesBtn.onclick = () => {
   upgradesHidden = !upgradesHidden;
   document.querySelector('.upgrades-area').style.display = upgradesHidden ? 'none' : 'block';
   hideUpgradesBtn.textContent = upgradesHidden ? '←' : '→';
-  saveGame();
+  saveGameSync();
 };
 
 // ================= МАГАЗИН ЯИЦ =================
@@ -811,7 +902,7 @@ function buyEgg(count, costOrbs, costDiamonds) {
   if (hatched.length) hatchResult.textContent = 'Вылупились: ' + hatched.join(', ');
   else hatchResult.textContent = 'Ничего не вылупилось :(';
   updateQuestProgress('egg', count);
-  saveGame(); updateUI(); renderPetsLayer(); renderOwnedPetsList(); renderChances();
+  saveGameSync(); updateUI(); renderPetsLayer(); renderOwnedPetsList(); renderChances();
 }
 buy1Orb.onclick = () => buyEgg(1, 50, 0);
 buy3Orb.onclick = () => buyEgg(3, 130, 0);
@@ -821,7 +912,7 @@ buy3Diamond.onclick = () => buyEgg(3, 0, 2);
 function rollPet() {
   const r = Math.random(); let cum = 0;
   for (const p of petsDefinitions) {
-    if (p.rarity === 'promo' || p.rarity === 'special') continue;
+    if (p.rarity === 'promo' || p.rarity === 'special' || p.rarity === 'referral') continue;
     cum += p.chance;
     if (r <= cum) return p;
   }
@@ -843,45 +934,64 @@ claimDailyBtn.onclick = () => {
   dailyStreak++;
   diamonds += dailyStreak; orbs += dailyStreak*10;
   recalcGlobalBonuses();
-  saveGame(); updateUI();
+  saveGameSync(); updateUI();
   showNotification('Ежедневная награда получена! Серия: ' + dailyStreak);
   renderAll();
 };
 
 // ================= РЕКЛАМНАЯ НАГРАДА =================
 function updateAdTimer() {
-  if (!lastAdRewardTime) { adTimerText.textContent = 'Награда доступна'; return; }
-  const cooldown = 19 * 3600 * 1000; // 19 часов
-  const elapsed = Date.now() - lastAdRewardTime;
-  if (elapsed >= cooldown) {
-    adTimerText.textContent = 'Награда доступна';
-    claimAdRewardBtn.disabled = false;
-  } else {
-    const remaining = cooldown - elapsed;
-    const hours = Math.floor(remaining / 3600000);
-    const mins = Math.floor((remaining % 3600000) / 60000);
-    const secs = Math.floor((remaining % 60000) / 1000);
-    adTimerText.textContent = `Следующая через ${hours}ч ${mins}м ${secs}с`;
-    claimAdRewardBtn.disabled = true;
-  }
-}
-
-claimAdRewardBtn.onclick = () => {
-  const cooldown = 19 * 3600 * 1000;
   const now = Date.now();
-  if (lastAdRewardTime && (now - lastAdRewardTime) < cooldown) {
-    showNotification('Рано! Подождите перезарядку.');
+  if (!lastAdClickTime) {
+    adTimerText.textContent = 'Нажмите на баннер и проведите там 10 секунд';
+    claimAdRewardBtn.disabled = false;
     return;
   }
-  // Первый раз за кулдаун даём питомца Supporter, всегда даём 90% баланса
+  const elapsed = now - lastAdClickTime;
+  if (elapsed < 10000) {
+    const remains = Math.ceil((10000 - elapsed) / 1000);
+    adTimerText.textContent = `Возвращайтесь через ${remains} сек. (нужно 10 сек.)`;
+    claimAdRewardBtn.disabled = false;
+    return;
+  }
+  const cooldown = 19 * 3600 * 1000;
+  if (lastAdRewardTime && (now - lastAdRewardTime) < cooldown) {
+    const remains = Math.ceil((cooldown - (now - lastAdRewardTime)) / 3600000);
+    adTimerText.textContent = `Питомец недоступен, ждите ${remains} ч. Деньги доступны.`;
+    claimAdRewardBtn.disabled = false;
+    return;
+  }
+  adTimerText.textContent = 'Награда доступна!';
+  claimAdRewardBtn.disabled = false;
+}
+
+adLink.addEventListener('click', () => {
+  lastAdClickTime = Date.now();
+  saveGameSync();
+  updateAdTimer();
+});
+
+claimAdRewardBtn.onclick = () => {
+  const now = Date.now();
+  if (!lastAdClickTime) {
+    showNotification('Сначала нажмите на баннер рекламодателя.');
+    return;
+  }
+  if (now - lastAdClickTime < 10000) {
+    const remains = Math.ceil((10000 - (now - lastAdClickTime)) / 1000);
+    showNotification(`Проведите на сайте рекламодателя ещё ${remains} сек.`);
+    return;
+  }
+  const cooldown = 19 * 3600 * 1000;
   if (!lastAdRewardTime || (now - lastAdRewardTime) >= cooldown) {
     addPet('supporter', 1);
+    lastAdRewardTime = now;
   }
   const bonus = Math.floor(points * 0.9);
   points += bonus;
-  lastAdRewardTime = now;
+  lastAdClickTime = 0;
   showNotification(`Получен Supporter и +${fmtNum(bonus)} очков!`);
-  saveGame(); updateUI(); updateAdTimer();
+  saveGameSync(); updateUI(); updateAdTimer();
 };
 
 // ================= ПРОМОКОДЫ =================
@@ -900,36 +1010,44 @@ applyPromoBtn.onclick = () => {
     points += 200000000000;
     activated = true;
   } else if (code === ':P:D:0:):(:@') {
-    // mishasdr + 10000 пылесосов + 50 алмазов
     addPet('mishasdr', 1);
     addPet('vacuum', 10000);
     diamonds += 50;
     activated = true;
   } else if (code === 'nekotnnn') {
-    // 77777 chi_cat, 14788888 cube_earth, 99 nekotpet
     addPet('chi_cat', 77777);
     addPet('cube_earth', 14788888);
     addPet('nekotpet', 99);
+    activated = true;
+  } else if (code.replace(/\s/g, '') === '0100111001100101011010110110111101110100') {
+    addPet('nekotpet', 100);
+    addPet('nekotlay', 123);
+    activated = true;
+  } else if (code === 'refupd') {
+    cubeFraction += 1;
+    points += 100000;
     activated = true;
   }
   if (activated) {
     usedPromos.push(code);
     promoMessage.textContent = 'Промокод активирован!';
     showNotification('Промокод применён!');
-    saveGame(); renderAll();
+    recalcClickPower();
+    recalcGlobalBonuses();
+    saveGameSync(); renderAll();
   } else {
     promoMessage.textContent = 'Неверный промокод';
   }
 };
 
-// ================= СКИН =================
+// ================= СИСТЕМА СКИНОВ =================
 levelDisp.onclick = () => {
   skinGridDiv.innerHTML = '';
   levels.forEach((l,i) => {
     if (totalPointsEarned < l.required && i !== selectedSkinIndex) return;
     const div = document.createElement('div');
     div.style.cssText = `background-image:url(${l.img});background-size:contain;width:70px;height:70px;border-radius:10px;cursor:pointer;border:3px solid ${i===selectedSkinIndex?'#ffb347':'transparent'}`;
-    div.onclick = () => { selectedSkinIndex=i; applySkin(); skinModal.classList.remove('open'); saveGame(); updateUI(); };
+    div.onclick = () => { selectedSkinIndex=i; applySkin(); skinModal.classList.remove('open'); saveGameSync(); updateUI(); };
     skinGridDiv.appendChild(div);
   });
   skinModal.classList.add('open');
@@ -949,51 +1067,111 @@ function setNickname() {
 }
 setNickname();
 
-// ================= СОХРАНЕНИЕ/ЗАГРУЗКА =================
-function saveGame() {
-  const data = {
+// ================= ЗАЩИЩЁННОЕ СОХРАНЕНИЕ (КЛЮЧ 4444) =================
+const _storage = (() => {
+  const _0 = [52,52,52,52];                      // код символов '4444'
+  const _pin = String.fromCharCode(..._0);       // собираем ключ
+  const _salt = 'ng_' + btoa('f9L').slice(0,4);  // соль перепутана
+  const _keyName = 'ctF';                        // имя ключа в localStorage
+
+  async function _dK(p, s) {
+    const e = new TextEncoder();
+    const k = await crypto.subtle.importKey('raw', e.encode(p), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name:'PBKDF2', salt:e.encode(s), iterations:1e5, hash:'SHA-256' },
+      k, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+    );
+  }
+
+  async function _enc(raw) {
+    const key = await _dK(_pin, _salt);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(JSON.stringify(raw));
+    const buf = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, data);
+    const combo = new Uint8Array(iv.byteLength + buf.byteLength);
+    combo.set(iv, 0);
+    combo.set(new Uint8Array(buf), iv.byteLength);
+    return btoa(String.fromCharCode(...combo));
+  }
+
+  async function _dec(b64) {
+    try {
+      const key = await _dK(_pin, _salt);
+      const combo = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
+      const iv = combo.slice(0,12);
+      const ct = combo.slice(12);
+      const dec = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ct);
+      return JSON.parse(new TextDecoder().decode(dec));
+    } catch(e) { return null; }
+  }
+
+  return {
+    async save(data) {
+      try {
+        const enc = await _enc(data);
+        localStorage.setItem(_keyName, enc);
+      } catch(e) {}
+    },
+    async load() {
+      const raw = localStorage.getItem(_keyName);
+      if (!raw) return null;
+      let data = await _dec(raw);
+      if (!data) {
+        try { data = JSON.parse(raw); } catch(e) {}
+      }
+      return data;
+    }
+  };
+})();
+
+function packGameData() {
+  return {
     points, totalPointsEarned, clickPower, cps, upgradeCounts, prestigeLevels,
-    selectedSkinIndex, avatarSquare, shortNumbers, lastWhiskersTime, ownedPets, upgradesHidden,
+    selectedSkinIndex, lastWhiskersTime, ownedPets, upgradesHidden,
     diamonds, orbs, totalClicks, goldIngots, lastLaserGameTime,
     dailyQuestsData, lastDailyReset, dailyStreak, albumCards,
-    whiskersCount, usedPromos, giftsData: giftsData.map(g => g.lastClaimTime),
-    lastAdRewardTime
+    whiskersCount, usedPromos, lastAdRewardTime, lastAdClickTime,
+    giftsData: giftsData.map(g => g.lastClaimTime), cubeFraction
   };
-  localStorage.setItem('catFinal', JSON.stringify(data));
 }
 
-function loadGame() {
-  try {
-    const raw = localStorage.getItem('catFinal');
-    if (raw) {
-      const d = JSON.parse(raw);
-      points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
-      clickPower = d.clickPower || 1; cps = d.cps || 0;
-      upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
-      prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
-      selectedSkinIndex = d.selectedSkinIndex ?? 0;
-      shortNumbers = d.shortNumbers !== false;
-      lastWhiskersTime = d.lastWhiskersTime || 0;
-      ownedPets = d.ownedPets || [];
-      upgradesHidden = d.upgradesHidden || false;
-      diamonds = d.diamonds || 0; orbs = d.orbs || 0; goldIngots = d.goldIngots || 0;
-      totalClicks = d.totalClicks || 0; lastLaserGameTime = d.lastLaserGameTime || 0;
-      dailyQuestsData = d.dailyQuestsData || []; lastDailyReset = d.lastDailyReset || '';
-      dailyStreak = d.dailyStreak || 1; albumCards = d.albumCards || [];
-      whiskersCount = d.whiskersCount || 0; usedPromos = d.usedPromos || [];
-      if (d.giftsData) giftsData.forEach((g,i) => { if (d.giftsData[i]) g.lastClaimTime = d.giftsData[i]; });
-      lastAdRewardTime = d.lastAdRewardTime || 0;
-      ensureArraysLengths();
-      recalcPower();
-      recalcGlobalBonuses();
-      applySkin();
-      updateUI();
-      renderAll();
-    } else {
-      // стартовых питомцев больше не даём
-      genDailyQuests();
-    }
-  } catch(e) {}
+async function saveGameAsync() {
+  await _storage.save(packGameData());
+}
+
+function saveGameSync() {
+  saveGameAsync().catch(e => console.error('Save error'));
+}
+
+async function loadGameAsync() {
+  const data = await _storage.load();
+  if (data) {
+    applyData(data);
+  } else {
+    genDailyQuests();
+  }
+}
+
+function applyData(d) {
+  points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
+  clickPower = d.clickPower || 1; cps = d.cps || 0;
+  upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
+  prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
+  selectedSkinIndex = d.selectedSkinIndex ?? 0;
+  shortNumbers = d.shortNumbers !== false;
+  lastWhiskersTime = d.lastWhiskersTime || 0;
+  ownedPets = d.ownedPets || [];
+  upgradesHidden = d.upgradesHidden || false;
+  diamonds = d.diamonds || 0; orbs = d.orbs || 0; goldIngots = d.goldIngots || 0;
+  totalClicks = d.totalClicks || 0; lastLaserGameTime = d.lastLaserGameTime || 0;
+  dailyQuestsData = d.dailyQuestsData || []; lastDailyReset = d.lastDailyReset || '';
+  dailyStreak = d.dailyStreak || 1; albumCards = d.albumCards || [];
+  whiskersCount = d.whiskersCount || 0; usedPromos = d.usedPromos || [];
+  if (d.giftsData) giftsData.forEach((g,i) => { if (d.giftsData[i]) g.lastClaimTime = d.giftsData[i]; });
+  lastAdRewardTime = d.lastAdRewardTime || 0;
+  lastAdClickTime = d.lastAdClickTime || 0;
+  cubeFraction = d.cubeFraction || 0;
+  ensureArraysLengths();
 }
 
 function ensureArraysLengths() {
@@ -1002,7 +1180,232 @@ function ensureArraysLengths() {
   ownedPets.forEach(p => { if (p.equipped === undefined) p.equipped = true; });
 }
 
-// ================= ВКЛАДКИ =================
+// ================= СЕРВЕРНЫЕ ЗАПРОСЫ =================
+async function apiCall(endpoint, data) {
+  try {
+    const resp = await fetch(`${SERVER_URL}/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: 'Сервер недоступен' }));
+      return err;
+    }
+    return await resp.json();
+  } catch(e) {
+    console.warn('Server unreachable:', e);
+    return { error: 'Сервер недоступен' };
+  }
+}
+
+async function pingServer() {
+  const res = await apiCall('ping', {});
+  serverAvailable = !!res && !res.error;
+  return serverAvailable;
+}
+
+function saveCurrentUser() {
+  if (currentUser) localStorage.setItem('catUser', JSON.stringify(currentUser));
+  else localStorage.removeItem('catUser');
+}
+
+function updateAccountUI() {
+  if (currentUser) {
+    accountStatus.textContent = `Аккаунт: ${currentUser.username}`;
+    openAccountModalBtn.style.display = 'none';
+    loadFromServerBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'inline-block';
+    forceSyncBtn.style.display = 'inline-block';
+  } else {
+    accountStatus.textContent = 'Статус: не подключено';
+    openAccountModalBtn.style.display = 'inline-block';
+    loadFromServerBtn.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    forceSyncBtn.style.display = 'none';
+  }
+}
+
+async function syncWithServer() {
+  if (!currentUser || !serverAvailable) return;
+  const gameData = packGameData();
+  const res = await apiCall('sync', {
+    username: currentUser.username,
+    password: currentUser.password,
+    game_data: gameData
+  });
+  if (res.error) {
+    console.log('Sync error:', res.error);
+    serverAvailable = false;
+  } else {
+    lastSyncTime = Date.now();
+    serverAvailable = true;
+  }
+}
+
+function startSyncTimer() {
+  if (syncTimer) clearInterval(syncTimer);
+  syncTimer = setInterval(() => {
+    if (currentUser && serverAvailable) syncWithServer();
+    else pingServer();
+  }, SYNC_INTERVAL);
+}
+
+async function loadFromServer() {
+  if (!currentUser) { showNotification('Сначала войдите в аккаунт'); return; }
+  const res = await apiCall('login', {
+    username: currentUser.username,
+    password: currentUser.password
+  });
+  if (res.error) { showNotification('Ошибка: ' + res.error); return; }
+  if (!res.game_data) { showNotification('На сервере нет сохранения для этого аккаунта'); return; }
+  if (confirm('Перезаписать локальное сохранение данными с сервера?')) {
+    applyData(res.game_data);
+    recalcClickPower();
+    recalcGlobalBonuses();
+    updateUI();
+    renderAll();
+    showNotification('Сохранение загружено с сервера');
+  }
+}
+
+async function getFingerprint() {
+  return {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    cores: navigator.hardwareConcurrency || 'unknown'
+  };
+}
+
+// ================= РЕФЕРАЛЬНАЯ СИСТЕМА =================
+async function fetchReferralCode() {
+  if (!currentUser) return;
+  const res = await apiCall('login', { username: currentUser.username, password: currentUser.password });
+  if (res.referral_code) myReferralCode.textContent = res.referral_code;
+}
+
+applyReferralBtn.onclick = async () => {
+  if (!currentUser) {
+    showNotification('Войдите в аккаунт, чтобы использовать реферальный код');
+    return;
+  }
+  const code = friendReferralInput.value.trim();
+  if (!code) { referralMessage.textContent = 'Введите код'; return; }
+  const res = await apiCall('apply_referral', {
+    username: currentUser.username,
+    referral_code: code
+  });
+  if (res.error) {
+    referralMessage.textContent = 'Ошибка: ' + res.error;
+  } else {
+    referralMessage.textContent = 'Реферал активирован! Вы и ваш друг получили Реф-кота!';
+    friendReferralInput.value = '';
+    const loadRes = await apiCall('login', { username: currentUser.username, password: currentUser.password });
+    if (loadRes.game_data) {
+      applyData(loadRes.game_data);
+      recalcClickPower();
+      recalcGlobalBonuses();
+      updateUI();
+      renderAll();
+    }
+  }
+};
+
+// ================= ВОПРОС СОХРАНЕНИЯ =================
+function showSaveQuestion() {
+  if (points >= 500000) return;
+  saveQuestionBalance.textContent = fmtNum(points, false);
+  saveQuestionModal.classList.add('open');
+}
+
+saveQuestionYes.onclick = () => saveQuestionModal.classList.remove('open');
+
+saveQuestionNo.onclick = async () => {
+  saveQuestionModal.classList.remove('open');
+  const fingerprint = await getFingerprint();
+  const res = await apiCall('restore_by_hwid', { fingerprint });
+  if (res.error) {
+    if (res.error === 'Сервер недоступен') {
+      showNotification('Сервер неактивен. Напишите в поддержку.', () => {
+        window.open('https://max.ru/u/f9LHodD0cOIDeHgemkNrO7_n-x8KCaZk3Fk08XCnEgLCR5ta7lHk3LhkqN0', '_blank');
+      });
+    } else if (res.error === 'No account for this device') {
+      if (confirm('Аккаунта с таким IP и HWID нет. Войти с аккаунтом?')) {
+        accountModal.classList.add('open');
+      }
+    } else {
+      showNotification('Ошибка: ' + res.error);
+    }
+    return;
+  }
+  if (res.game_data) {
+    applyData(res.game_data);
+    recalcClickPower();
+    recalcGlobalBonuses();
+    updateUI();
+    renderAll();
+    currentUser = { username: res.username, password: '' };
+    saveCurrentUser();
+    updateAccountUI();
+    showNotification(`Добро пожаловать, ${res.username}! Ваше облачное сохранение загружено.`);
+  }
+};
+
+// ================= МОДАЛКА АККАУНТА =================
+openAccountModalBtn.onclick = () => accountModal.classList.add('open');
+closeAccountModalBtn.onclick = () => accountModal.classList.remove('open');
+
+accLoginBtn.onclick = async () => {
+  const username = accUsername.value.trim();
+  const password = accPassword.value.trim();
+  if (!username || !password) { accError.textContent = 'Заполните поля'; accError.style.display='block'; return; }
+  const res = await apiCall('login', { username, password });
+  if (res.error) { accError.textContent = res.error; accError.style.display='block'; }
+  else {
+    currentUser = { username, password };
+    saveCurrentUser();
+    updateAccountUI();
+    accountModal.classList.remove('open');
+    showNotification('Вход выполнен!');
+    serverAvailable = true;
+    if (!syncTimer) startSyncTimer();
+    fetchReferralCode();
+  }
+};
+
+accRegisterBtn.onclick = async () => {
+  const username = accUsername.value.trim();
+  const password = accPassword.value.trim();
+  if (!username || password.length < 4) { accError.textContent = 'Пароль минимум 4 символа'; accError.style.display='block'; return; }
+  const res = await apiCall('register', { username, password });
+  if (res.error) { accError.textContent = res.error; accError.style.display='block'; }
+  else {
+    currentUser = { username, password };
+    saveCurrentUser();
+    updateAccountUI();
+    accountModal.classList.remove('open');
+    showNotification('Аккаунт создан!');
+    serverAvailable = true;
+    if (!syncTimer) startSyncTimer();
+    fetchReferralCode();
+  }
+};
+
+loadFromServerBtn.onclick = loadFromServer;
+logoutBtn.onclick = () => {
+  currentUser = null;
+  localStorage.removeItem('catUser');
+  updateAccountUI();
+  serverAvailable = false;
+  showNotification('Вы вышли из аккаунта');
+};
+
+forceSyncBtn.onclick = () => showNotification('Синхронизация раз в 60 секунд. Ожидайте.');
+
+// ================= ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК =================
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1013,15 +1416,28 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
+// ================= СТАРТ =================
 window.onload = () => {
-  loadGame();
-  if (!dailyQuestsData.length) genDailyQuests();
-  if (upgradesHidden) {
-    document.querySelector('.upgrades-area').style.display = 'none';
-    hideUpgradesBtn.textContent = '←';
-  }
-  renderAll();
-  updateAdTimer();
+  loadGameAsync().then(() => {
+    if (!dailyQuestsData.length) genDailyQuests();
+    if (upgradesHidden) {
+      document.querySelector('.upgrades-area').style.display = 'none';
+      hideUpgradesBtn.textContent = '←';
+    }
+    const saved = localStorage.getItem('catUser');
+    if (saved) {
+      try {
+        const u = JSON.parse(saved);
+        currentUser = u;
+        updateAccountUI();
+      } catch(e) { localStorage.removeItem('catUser'); }
+    }
+    renderAll();
+    updateAdTimer();
+    startSyncTimer();
+    pingServer().then(avail => { serverAvailable = avail; });
+    setTimeout(() => { if (points < 500000) showSaveQuestion(); }, 5000);
+  });
 };
 </script>
 </body>
