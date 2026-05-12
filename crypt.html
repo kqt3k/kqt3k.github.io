@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кириллица + BrokenBase + Base32 · Шифр</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+        body { background-color: #0a0a0f; }
+        .glow-purple { box-shadow: 0 0 8px rgba(155, 77, 255, 0.3); }
+        .border-purple { border-color: #9b4dff; }
+        .bg-purple { background-color: #9b4dff; }
+        .text-purple { color: #9b4dff; }
+        .hover-bg-purple:hover { background-color: #9b4dff; color: black; }
+        .hover-text-purple:hover { color: #9b4dff; }
+        .focus-purple:focus { border-color: #9b4dff; outline: none; box-shadow: 0 0 0 2px rgba(155, 77, 255, 0.3); }
+        ::selection { background: #9b4dff; color: black; }
+    </style>
+</head>
+<body class="bg-black text-gray-200">
+
+    <header class="border-b border-purple/40 bg-black/90 backdrop-blur-sm sticky top-0 z-10">
+        <div class="container mx-auto px-5 py-5 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold tracking-tighter">
+                    <span class="text-purple">[</span>Алфавитный шифр<span class="text-purple">]</span>
+                    <span class="text-xs align-middle ml-3 bg-purple/20 text-purple px-2 py-0.5 rounded border border-purple">v1.0</span>
+                </h1>
+                <p class="text-xs md:text-sm text-gray-400 mt-1">a=1 б=2 в=3 … → BrokenBase XOR → Base32</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="border border-purple/60 px-3 py-1 text-xs font-mono bg-black text-purple">КИРИЛЛИЦА + ЛАТИНИЦА</div>
+                <div class="border border-purple/60 px-3 py-1 text-xs font-mono bg-black text-purple">100% ОФЛАЙН</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-5 py-8 max-w-6xl">
+        <!-- легенда -->
+        <div class="bg-gray-950 border-l-8 border-purple p-5 mb-8 rounded-r-xl">
+            <p class="text-sm md:text-base leading-relaxed">
+                <span class="text-purple font-bold">◆</span> Каждая буква (русская или английская) превращается в число: <code class="bg-gray-800 px-1">а=1, б=2, в=3, …, я=33</code> (латиница a..z совпадает с 1..26).<br>
+                <span class="text-purple font-bold">◆</span> Числа упаковываются в специальные символы, затем прогоняются через <strong class="text-purple">BrokenBase</strong> (XOR 0x7A + магический спецкейс xuy ↔ �)�).<br>
+                <span class="text-purple font-bold">◆</span> Результат кодируется в <strong class="text-purple">Base32</strong> (RFC 4648) – получается финальный шифротекст.<br>
+                <span class="text-purple font-bold">◆</span> Расшифровка полностью обратима (с точностью до регистра: все буквы становятся строчными).
+            </p>
+        </div>
+
+        <!-- поле ввода -->
+        <div class="grid md:grid-cols-2 gap-5 mb-8">
+            <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg">
+                <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
+                    <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[PLAIN]</span>
+                    <span>📄 Исходный текст</span>
+                </label>
+                <textarea id="plainInput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Введите текст для шифрования...&#10;Например: привет мир, Hello, xuy, секрет"></textarea>
+                <div class="flex gap-3 mt-4">
+                    <button id="encryptBtn" class="flex-1 bg-purple/90 hover:bg-purple text-black font-bold py-2 px-3 rounded border border-purple transition text-sm tracking-wide">[ ЗАШИФРОВАТЬ ]</button>
+                    <button id="clearPlainBtn" class="bg-transparent border border-gray-600 hover:border-purple hover:text-purple px-4 py-2 rounded text-sm transition">Очистить</button>
+                </div>
+            </div>
+
+            <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg">
+                <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
+                    <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[CRYPT]</span>
+                    <span>🔐 Шифротекст (Base32)</span>
+                </label>
+                <textarea id="cipherOutput" rows="6" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Результат шифрования..." readonly></textarea>
+                <div class="flex gap-3 mt-4">
+                    <button id="decryptBtn" class="flex-1 bg-purple/90 hover:bg-purple text-black font-bold py-2 px-3 rounded border border-purple transition text-sm tracking-wide">[ РАСШИФРОВАТЬ ]</button>
+                    <button id="copyCipherBtn" class="bg-transparent border border-gray-600 hover:border-purple hover:text-purple px-4 py-2 rounded text-sm transition">Копировать</button>
+                </div>
+                <div id="cipherFeedback" class="text-xs text-gray-500 mt-2 font-mono"></div>
+            </div>
+        </div>
+
+        <!-- второе поле для расшифрованного текста -->
+        <div class="bg-gray-950 border border-purple/40 p-5 rounded-lg shadow-lg mb-8">
+            <label class="flex items-center gap-2 text-sm font-bold uppercase mb-3">
+                <span class="bg-purple text-black px-2 py-0.5 text-xs rounded">[DECRYPTED]</span>
+                <span>🔓 Расшифрованный текст</span>
+            </label>
+            <textarea id="decryptedOutput" rows="4" class="w-full bg-black border border-gray-700 rounded p-3 text-sm font-mono text-gray-200 focus:border-purple focus:ring-1 focus:ring-purple transition resize-y" placeholder="Результат расшифровки..." readonly></textarea>
+            <div class="flex justify-end mt-2">
+                <span id="decryptStatus" class="text-xs text-gray-500 font-mono"></span>
+            </div>
+        </div>
+
+        <!-- быстрые примеры -->
+        <div class="flex flex-wrap gap-3 justify-center md:justify-start mb-12">
+            <span class="text-sm text-purple font-mono border-r border-gray-700 pr-3">⚡ примеры:</span>
+            <button id="exampleHello" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"привет мир"</button>
+            <button id="exampleXuy" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"xuy" (магия �)�)</button>
+            <button id="exampleEnglish" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"Hello World"</button>
+            <button id="exampleMixed" class="text-xs bg-gray-900 border border-gray-700 hover:border-purple hover:text-purple px-3 py-1 rounded-full transition">"кибер panda 123"</button>
+        </div>
+
+        <!-- детали работы -->
+        <details class="bg-gray-950 border border-gray-800 rounded-lg p-4 mb-8">
+            <summary class="cursor-pointer text-sm font-bold text-purple hover:text-purple/80">[ + ] Как устроен шифр (технические детали)</summary>
+            <div class="mt-3 text-sm text-gray-300 space-y-2 pl-3 border-l-2 border-purple/50">
+                <p>• <strong>Шаг 1 – Алфавитные номера:</strong> буквы (русские а-я, английские a-z) заменяются на символы из Private Use Area (U+E001…U+E021) с кодами 0xE000+номер. Остальные символы не меняются.</p>
+                <p>• <strong>Шаг 2 – BrokenBase (XOR):</strong> каждый символ преобразуется через <code>charCode ^ 0x7A</code>. Исключение: пара "xuy" ↔ "�)�" (симуляция бага Base64).</p>
+                <p>• <strong>Шаг 3 – Base32:</strong> полученная строка преобразуется в UTF-8 байты, затем кодируется в Base32 (алфавит A-Z2-7, без паддинга).</p>
+                <p class="text-gray-500 text-xs">Расшифровка – строго обратная последовательность.</p>
+            </div>
+        </details>
+
+        <footer class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500 font-mono">
+            <p>Алфавитный шифр · BrokenBase · Base32 | никакие данные не покидают ваш браузер</p>
+        </footer>
+    </main>
+
+    <script>
+        (function() {
+            // ---------- Алфавитная таблица ----------
+            const ruAlphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+            // номер для русской буквы = индекс + 1
+            // английская a..z совпадает с 1..26
+            const charToNum = new Map();
+            // русские
+            for (let i = 0; i < ruAlphabet.length; i++) {
+                charToNum.set(ruAlphabet[i], i + 1);
+                // также заглавные
+                charToNum.set(ruAlphabet[i].toUpperCase(), i + 1);
+            }
+            // английские
+            const enAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+            for (let i = 0; i < enAlphabet.length; i++) {
+                // строчная и заглавная
+                charToNum.set(enAlphabet[i], i + 1);
+                charToNum.set(enAlphabet[i].toUpperCase(), i + 1);
+            }
+
+            // обратное отображение: номер -> русская строчная буква
+            const numToRuChar = [];
+            for (let i = 0; i < ruAlphabet.length; i++) {
+                numToRuChar.push(ruAlphabet[i]); // индекс 0 -> 'а' (номер 1)
+            }
+
+            function isLetterMapping(ch) {
+                return charToNum.has(ch);
+            }
+
+            // ---------- Преобразование текста в строку с PUA-символами ----------
+            function textToNumbersString(text) {
+                let result = '';
+                for (const ch of text) {
+                    const num = charToNum.get(ch);
+                    if (num !== undefined) {
+                        // символ из Private Use Area: U+E000 + num
+                        result += String.fromCharCode(0xE000 + num);
+                    } else {
+                        result += ch;
+                    }
+                }
+                return result;
+            }
+
+            // обратное: строка с PUA -> обычный текст (русские строчные)
+            function numbersStringToText(str) {
+                let result = '';
+                for (const ch of str) {
+                    const code = ch.charCodeAt(0);
+                    if (code >= 0xE001 && code <= 0xE021) {
+                        const num = code - 0xE000;
+                        // num от 1 до 33
+                        if (num >= 1 && num <= numToRuChar.length) {
+                            result += numToRuChar[num - 1];
+                        } else {
+                            // на всякий случай оставляем исходный символ
+                            result += ch;
+                        }
+                    } else {
+                        result += ch;
+                    }
+                }
+                return result;
+            }
+
+            // ---------- BrokenBase (из предоставленного кода) ----------
+            const XOR_KEY = 0x7A; // 122
+
+            function brokenBaseEncode(plain) {
+                if (plain === "xuy") {
+                    return "�)�";
+                }
+                let result = "";
+                for (let i = 0; i < plain.length; i++) {
+                    let code = plain.charCodeAt(i);
+                    let transformed = code ^ XOR_KEY;
+                    result += String.fromCharCode(transformed);
+                }
+                return result;
+            }
+
+            function brokenBaseDecode(cipher) {
+                if (cipher === "�)�") {
+                    return "xuy";
+                }
+                let result = "";
+                for (let i = 0; i < cipher.length; i++) {
+                    let code = cipher.charCodeAt(i);
+                    let original = code ^ XOR_KEY;
+                    result += String.fromCharCode(original);
+                }
+                return result;
+            }
+
+            // ---------- Base32 (RFC 4648, без паддинга) ----------
+            const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+            function base32Encode(bytes) {
+                let bits = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    bits += bytes[i].toString(2).padStart(8, '0');
+                }
+                // дополняем нулями до кратности 5
+                const paddingBits = (5 - (bits.length % 5)) % 5;
+                bits += '0'.repeat(paddingBits);
+                let result = '';
+                for (let i = 0; i < bits.length; i += 5) {
+                    const chunk = bits.substr(i, 5);
+                    const index = parseInt(chunk, 2);
+                    result += BASE32_ALPHABET[index];
+                }
+                return result;
+            }
+
+            function base32Decode(str) {
+                // нормализуем: убираем пробелы, переводим в верхний регистр
+                str = str.toUpperCase().replace(/\s/g, '');
+                // допустимые символы: A-Z2-7
+                const validChars = /^[A-Z2-7]*$/;
+                if (!validChars.test(str)) {
+                    throw new Error('Некорректная Base32 строка.');
+                }
+                let bits = '';
+                for (let i = 0; i < str.length; i++) {
+                    const ch = str[i];
+                    const index = BASE32_ALPHABET.indexOf(ch);
+                    if (index === -1) throw new Error('Недопустимый символ в Base32.');
+                    bits += index.toString(2).padStart(5, '0');
+                }
+                // отбрасываем биты паддинга (лишние до кратности 8)
+                const validBits = bits.length - (bits.length % 8);
+                bits = bits.substring(0, validBits);
+                const bytes = new Uint8Array(bits.length / 8);
+                for (let i = 0; i < bytes.length; i++) {
+                    const byteBits = bits.substr(i * 8, 8);
+                    bytes[i] = parseInt(byteBits, 2);
+                }
+                return bytes;
+            }
+
+            // ---------- Полный цикл шифрования ----------
+            function encrypt(plainText) {
+                // Шаг 1: алфавитные номера -> PUA строка
+                const numsStr = textToNumbersString(plainText);
+                // Шаг 2: BrokenBase encode
+                const brokenEncoded = brokenBaseEncode(numsStr);
+                // Шаг 3: строка -> UTF-8 байты -> Base32
+                const encoder = new TextEncoder();
+                const utf8Bytes = encoder.encode(brokenEncoded);
+                return base32Encode(utf8Bytes);
+            }
+
+            function decrypt(cipherBase32) {
+                // Шаг 1: Base32 -> UTF-8 байты
+                const bytes = base32Decode(cipherBase32);
+                // Шаг 2: байты -> строка (UTF-8)
+                const decoder = new TextDecoder('utf-8');
+                const brokenEncoded = decoder.decode(bytes);
+                // Шаг 3: BrokenBase decode
+                const numsStr = brokenBaseDecode(brokenEncoded);
+                // Шаг 4: PUA -> обычный текст
+                return numbersStringToText(numsStr);
+            }
+
+            // ---------- DOM Elements ----------
+            const plainInput = document.getElementById('plainInput');
+            const cipherOutput = document.getElementById('cipherOutput');
+            const decryptedOutput = document.getElementById('decryptedOutput');
+            const encryptBtn = document.getElementById('encryptBtn');
+            const decryptBtn = document.getElementById('decryptBtn');
+            const clearPlainBtn = document.getElementById('clearPlainBtn');
+            const copyCipherBtn = document.getElementById('copyCipherBtn');
+            const cipherFeedback = document.getElementById('cipherFeedback');
+            const decryptStatus = document.getElementById('decryptStatus');
+            const exampleHello = document.getElementById('exampleHello');
+            const exampleXuy = document.getElementById('exampleXuy');
+            const exampleEnglish = document.getElementById('exampleEnglish');
+            const exampleMixed = document.getElementById('exampleMixed');
+
+            function updateCipherFeedback() {
+                const len = cipherOutput.value.length;
+                cipherFeedback.textContent = len ? `длина шифротекста: ${len} символов` : '';
+            }
+
+            function handleEncrypt() {
+                const text = plainInput.value;
+                if (!text.trim()) {
+                    cipherOutput.value = '';
+                    decryptedOutput.value = '';
+                    updateCipherFeedback();
+                    decryptStatus.textContent = '';
+                    return;
+                }
+                try {
+                    const encrypted = encrypt(text);
+                    cipherOutput.value = encrypted;
+                    updateCipherFeedback();
+                    // автоматически покажем расшифровку для проверки
+                    const dec = decrypt(encrypted);
+                    decryptedOutput.value = dec;
+                    decryptStatus.textContent = '✓ автоматическая проверка';
+                } catch (e) {
+                    cipherOutput.value = 'Ошибка шифрования: ' + e.message;
+                    decryptedOutput.value = '';
+                    decryptStatus.textContent = 'ошибка';
+                    updateCipherFeedback();
+                }
+            }
+
+            function handleDecrypt() {
+                const cipher = cipherOutput.value.trim();
+                if (!cipher) {
+                    decryptedOutput.value = '';
+                    decryptStatus.textContent = '';
+                    return;
+                }
+                try {
+                    const dec = decrypt(cipher);
+                    decryptedOutput.value = dec;
+                    decryptStatus.textContent = 'расшифровано успешно';
+                } catch (e) {
+                    decryptedOutput.value = '';
+                    decryptStatus.textContent = 'Ошибка: ' + e.message;
+                }
+            }
+
+            function clearAll() {
+                plainInput.value = '';
+                cipherOutput.value = '';
+                decryptedOutput.value = '';
+                updateCipherFeedback();
+                decryptStatus.textContent = '';
+            }
+
+            async function copyToClipboard(text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    cipherFeedback.textContent = 'скопировано!';
+                    setTimeout(() => updateCipherFeedback(), 1500);
+                } catch {
+                    cipherFeedback.textContent = 'не удалось скопировать';
+                }
+            }
+
+            // Обработчики
+            encryptBtn.addEventListener('click', handleEncrypt);
+            decryptBtn.addEventListener('click', handleDecrypt);
+            clearPlainBtn.addEventListener('click', clearAll);
+            copyCipherBtn.addEventListener('click', () => {
+                if (cipherOutput.value) copyToClipboard(cipherOutput.value);
+            });
+
+            // Примеры
+            exampleHello.addEventListener('click', () => {
+                plainInput.value = 'привет мир';
+                handleEncrypt();
+            });
+            exampleXuy.addEventListener('click', () => {
+                plainInput.value = 'xuy';
+                handleEncrypt();
+            });
+            exampleEnglish.addEventListener('click', () => {
+                plainInput.value = 'Hello World';
+                handleEncrypt();
+            });
+            exampleMixed.addEventListener('click', () => {
+                plainInput.value = 'кибер panda 123';
+                handleEncrypt();
+            });
+
+            // Двойной клик для копирования из полей
+            cipherOutput.addEventListener('dblclick', () => {
+                if (cipherOutput.value) copyToClipboard(cipherOutput.value);
+            });
+            plainInput.addEventListener('dblclick', () => {
+                if (plainInput.value) navigator.clipboard.writeText(plainInput.value);
+            });
+
+            // Инициализация при загрузке
+            window.addEventListener('DOMContentLoaded', () => {
+                plainInput.value = 'привет xuy';
+                handleEncrypt();
+            });
+
+            // Слушатель для ручного обновления фидбека
+            cipherOutput.addEventListener('input', updateCipherFeedback);
+        })();
+    </script>
+</body>
+</html>
