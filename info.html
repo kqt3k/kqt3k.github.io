@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>🐱 КОТОСТЬ КЛИКЕР — стань повелителем кошачьей вселенной!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0f0c1f;
+      background-image: radial-gradient(circle at 10% 20%, rgba(255, 180, 70, 0.08) 0%, rgba(0, 0, 0, 0.6) 90%);
+      font-family: 'Inter', sans-serif;
+      color: #f5ede0;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+
+    /* плавающие элементы (котятки) */
+    .floating-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .floating-bg span {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.1;
+      animation: floatBg 18s infinite linear;
+      user-select: none;
+    }
+    @keyframes floatBg {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.2; }
+      90% { opacity: 0.15; }
+      100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 4rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* шапка */
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-top: 2rem;
+    }
+    .badge {
+      background: rgba(255, 200, 100, 0.2);
+      backdrop-filter: blur(8px);
+      display: inline-block;
+      border-radius: 100px;
+      padding: 0.35rem 1rem;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      border: 1px solid rgba(255, 180, 70, 0.5);
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #FFE6B0, #FFB347, #FF8C42);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      margin-bottom: 1rem;
+    }
+    .subhead {
+      font-size: 1.3rem;
+      max-width: 650px;
+      margin: 0 auto;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      padding: 0.6rem 1.5rem;
+      border-radius: 80px;
+      border: 1px solid #ffb34755;
+      font-weight: 600;
+    }
+    .stat-card span {
+      color: #ffcd7e;
+      font-size: 1.3rem;
+      margin-right: 0.4rem;
+    }
+
+    /* основная сетка */
+    .grid-2col {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+    .demo-area {
+      flex: 1.2;
+      background: rgba(20, 15, 30, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 2rem;
+      padding: 1.8rem;
+      border: 1px solid rgba(255, 180, 70, 0.3);
+      box-shadow: 0 20px 35px -15px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+    .features-area {
+      flex: 1;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 1.8rem;
+    }
+
+    /* демо-кликер */
+    .demo-clicker {
+      text-align: center;
+    }
+    .cat-demo {
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, #ffd48a, #b97f2e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      margin: 0 auto 1rem;
+      cursor: pointer;
+      transition: 0.08s linear;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.4), inset 0 0 10px rgba(255,255,180,0.8);
+      user-select: none;
+    }
+    .cat-demo:active {
+      transform: scale(0.92);
+    }
+    .demo-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFDFA0, #E5A23B);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+    .demo-actions {
+      display: flex;
+      gap: 0.7rem;
+      justify-content: center;
+      margin: 1.2rem 0;
+      flex-wrap: wrap;
+    }
+    .demo-btn {
+      background: #2a241a;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      color: #ffd58c;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: 0.1s;
+      font-size: 0.9rem;
+    }
+    .demo-btn:hover {
+      background: #b87a2e;
+      color: white;
+      transform: translateY(-2px);
+    }
+    .demo-note {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 1rem;
+    }
+
+    /* фичи */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255,200,120,0.05);
+      padding: 0.8rem;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+    }
+    .feature-icon {
+      font-size: 2rem;
+      min-width: 48px;
+      text-align: center;
+    }
+    .feature-text strong {
+      color: #ffcf7a;
+      font-size: 1.1rem;
+    }
+
+    .pet-showcase {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      justify-content: center;
+    }
+    .pet-chip {
+      background: rgba(0,0,0,0.5);
+      border-radius: 60px;
+      padding: 0.3rem 1rem;
+      font-size: 0.9rem;
+      border: 1px solid #ffb34766;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(95deg, #F6A83D, #E37A1A);
+      padding: 1rem 2.8rem;
+      border-radius: 60px;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #221c0f;
+      text-decoration: none;
+      box-shadow: 0 12px 20px -6px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+      margin: 1rem 0;
+      border: none;
+      cursor: pointer;
+    }
+    .cta-button:hover {
+      transform: scale(1.02);
+      background: linear-gradient(95deg, #ffb451, #ff8c24);
+      box-shadow: 0 16px 28px -6px black;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem;
+      text-align: center;
+      background: linear-gradient(120deg, #ffdaa0, #fcb045);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .grid-cols-3 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .card {
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(12px);
+      border-radius: 1.6rem;
+      padding: 1.2rem;
+      flex: 1;
+      min-width: 180px;
+      text-align: center;
+      border: 1px solid rgba(255,180,80,0.3);
+    }
+    .card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      border-top: 1px dashed rgba(255,180,70,0.3);
+      padding-top: 2rem;
+    }
+    @media (max-width: 780px) {
+      h1 { font-size: 2.2rem; }
+      .subhead { font-size: 1rem; }
+      .container { padding: 1rem 1rem 2rem; }
+      .cta-button { font-size: 1.2rem; padding: 0.8rem 1.8rem; }
+    }
+    .star-glow {
+      text-shadow: 0 0 8px #ffb347;
+    }
+    .referral-badge {
+      background: #2e241b;
+      border-radius: 40px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.75rem;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+<div class="floating-bg" id="floatingBg"></div>
+<div class="container">
+  <div class="hero">
+    <div class="badge">✨ ОФИЦИАЛЬНЫЙ КЛИКЕР ✨</div>
+    <h1>🐾 КОТОСТЬ КЛИКЕР 🐾<br>Гладь кота, правь вселенной</h1>
+    <div class="subhead">Сотни улучшений, таинственные питомцы, яйца с легендарками и настоящая экономика!</div>
+    <div class="hero-stats">
+      <div class="stat-card"><span>🐱</span> 150+ уникальных питомцев</div>
+      <div class="stat-card"><span>💎</span> Алмазы, орбы, золотые слитки</div>
+      <div class="stat-card"><span>🏆</span> Система престижа и альбом</div>
+    </div>
+  </div>
+
+  <!-- Демо + Фичи -->
+  <div class="grid-2col">
+    <div class="demo-area">
+      <div class="demo-clicker">
+        <h3 style="margin-bottom: 0.8rem;">✨ Погладь демо-кота ✨</h3>
+        <div class="cat-demo" id="demoCat">🐱</div>
+        <div class="demo-score" id="demoScore">0</div>
+        <div class="demo-actions">
+          <button class="demo-btn" id="demoClickBtn">🐾 Коготок +1</button>
+          <button class="demo-btn" id="demoAutoBtn">🤖 Взять автокликер (демо)</button>
+        </div>
+        <div class="demo-note">💡 Это лишь малая часть возможностей! В полной версии: 20+ улучшений, престиж, космические бонусы и живые питомцы на экране.</div>
+      </div>
+    </div>
+
+    <div class="features-area">
+      <div class="feature-list">
+        <div class="feature-item"><div class="feature-icon">🥚</div><div class="feature-text"><strong>Магия яиц</strong><br>Вылупляй редчайших существ: Куб Земли, Чи Котость, Азбукабик и тайных легенд!</div></div>
+        <div class="feature-item"><div class="feature-icon">🐕‍🦺</div><div class="feature-text"><strong>Питомцы-компаньоны</strong><br>Каждый даёт уникальный бонус: +% дохода, скидки в магазине, особые эффекты.</div></div>
+        <div class="feature-item"><div class="feature-icon">⚡</div><div class="feature-text"><strong>Лапки размять</strong><br>Мини-игра «Лазер», ежечасные подарки, задания и ежедневные серии с множителем!</div></div>
+        <div class="feature-item"><div class="feature-icon">👥</div><div class="feature-text"><strong>Реферальная система</strong><br>Приведи друга и получи особого «Реф-кота» +10% к доходу навсегда!</div></div>
+        <div class="feature-item"><div class="feature-icon">☁️</div><div class="feature-text"><strong>Облачное сохранение</strong><br>Вход по паролю — продолжай играть с любого устройства. Синхронизация раз в минуту.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Карточки питомцев + промо -->
+  <div class="section-title">🌟 ТОП легендарные питомцы 🌟</div>
+  <div class="pet-showcase">
+    <span class="pet-chip">🤖 Пылесос-робот (+10% дохода)</span>
+    <span class="pet-chip">🟫 Куб Земли (+666% дохода, -10% цен)</span>
+    <span class="pet-chip">🐱 Чи Котость (+100% дохода)</span>
+    <span class="pet-chip">🌟 Звёздный дух (+10% дохода)</span>
+    <span class="pet-chip">✨ Азбукабик (+1478% дохода)</span>
+    <span class="pet-chip">💚 Supporter (эксклюзивный)</span>
+  </div>
+
+  <div class="grid-cols-3">
+    <div class="card"><h3>🐾 50+ улучшений</h3><div>От мягкой лапки до космического лотка. Каждое улучшение повышает клик или пассивный доход!</div></div>
+    <div class="card"><h3>🥇 Престиж звёзд</h3><div>Перерождай улучшения за особую валюту, получай множители и статус «Кото-легенда».</div></div>
+    <div class="card"><h3>🎁 Промокоды</h3><div>Активируй секретные коды: <span class="referral-badge">:P:D:0:):(:@</span> дарит 10000 пылесосов + алмазы!</div></div>
+  </div>
+
+  <!-- Ежедневные квесты + подарки -->
+  <div style="background: rgba(0,0,0,0.4); border-radius: 2rem; padding: 1.5rem; margin: 2rem 0;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+      <div><span style="font-size: 2rem;">📋</span> <strong style="font-size: 1.3rem;">Ежедневные квесты</strong><br>Кликни 500 раз, купи 10 улучшений — получи алмазы и орбы!</div>
+      <div><span style="font-size: 2rem;">🎁</span> <strong>Подарки за ожидание</strong><br>Каждые 5, 15, 30 минут — забирай бонусы, слитки и питомцев</div>
+      <div><span style="font-size: 2rem;">📅</span> <strong>Серия наград</strong><br>Заходи каждый день — увеличивай % дохода до небес!</div>
+    </div>
+  </div>
+
+  <!-- Центральный CTA -->
+  <div style="text-align: center; margin: 2rem 0 1rem;">
+    <a href="https://kqt3k.github.io" target="_blank" rel="noopener noreferrer" class="cta-button">🐈 ИГРАТЬ В ПОЛНУЮ ВЕРСИЮ →</a>
+    <p style="margin-top: 0.8rem; font-size: 0.9rem;">🔗 <strong>kqt3k.github.io</strong> — кликай, собирай коллекцию, открывай секреты</p>
+    <div style="margin-top: 0.5rem;">
+      <span class="referral-badge">🎮 Уже более 15 активных котоигроков</span>
+    </div>
+  </div>
+
+  <!-- Свидетельства / отзывы -->
+  <div class="section-title">❤️ Игроки мурчат ❤️</div>
+  <div class="grid-cols-3" style="margin-bottom: 1rem;">
+    <div class="card"><span>⭐️⭐️⭐️⭐️⭐️</span><br>«Вылупил Куба Земли за 3 дня! Система яиц бомбическая, игра не отпускает.»<br>— <strong>Nekot_lord</strong></div>
+    <div class="card"><span>⭐️⭐️⭐️⭐️⭐️</span><br>«Огромное количество питомцев и космический престиж. Всё честно, без доната.»<br>— <strong>Mishasdr</strong></div>
+    <div class="card"><span>⭐️⭐️⭐️⭐️⭐️</span><br>«Реферальный код принёс реф-кота, а промокоды реально работают. Лучший кликер года!»<br>— <strong>CubeCat</strong></div>
+  </div>
+
+  <!-- технический блок с ссылкой на GitHub и особенностями -->
+  <div style="text-align: center; background: #00000030; border-radius: 30px; padding: 1rem; margin-top: 1rem;">
+    <p>✨ <strong>Что вас ждёт в полной игре:</strong> Автосохранение, графика уровней кота (14 уникальных образов), магазин яиц, коллекционирование, синхронизация с сервером, система друзей, бонусы за рекламу (без навязчивости) и многое другое ✨</p>
+  </div>
+
+  <footer>
+    ⚡ Котость Кликер — неофициальная, но очень душевная игра. Разработано для всех любителей котиков и чисел. <br>
+    🐾 Переходи по ссылке <a href="https://kqt3k.github.io" target="_blank" style="color:#ffbe6e;">kqt3k.github.io</a> и начни своё кошачье приключение сегодня!
+  </footer>
+</div>
+
+<script>
+  // Анимированный фон с плавающими иконками котиков
+  function createFloatingItems() {
+    const container = document.getElementById('floatingBg');
+    const icons = ['🐱', '🐾', '🐈', '🌟', '💎', '🥚', '🐭', '⭐', '🎁'];
+    for (let i = 0; i < 35; i++) {
+      const span = document.createElement('span');
+      span.textContent = icons[Math.floor(Math.random() * icons.length)];
+      const size = Math.random() * 2 + 1.2;
+      span.style.fontSize = `${size}rem`;
+      span.style.left = `${Math.random() * 100}%`;
+      span.style.animationDelay = `${Math.random() * 15}s`;
+      span.style.animationDuration = `${12 + Math.random() * 20}s`;
+      span.style.opacity = Math.random() * 0.2 + 0.05;
+      container.appendChild(span);
+    }
+  }
+  createFloatingItems();
+
+  // ---------- ДЕМО-КЛИКЕР (простой виджет для привлечения) ----------
+  let demoPoints = 0;
+  let autoInterval = null;
+  let autoActive = false;
+
+  const demoCat = document.getElementById('demoCat');
+  const demoScoreSpan = document.getElementById('demoScore');
+  const demoClickBtn = document.getElementById('demoClickBtn');
+  const demoAutoBtn = document.getElementById('demoAutoBtn');
+
+  function updateDemoUI() {
+    demoScoreSpan.innerText = Math.floor(demoPoints);
+  }
+
+  function addDemoPoints(amount) {
+    demoPoints += amount;
+    updateDemoUI();
+    // Визуальный фидбэк
+    const oldCat = demoCat.innerHTML;
+    demoCat.style.transform = 'scale(0.95)';
+    setTimeout(() => { demoCat.style.transform = ''; }, 100);
+  }
+
+  // клик по картинке
+  demoCat.addEventListener('click', (e) => {
+    e.stopPropagation();
+    addDemoPoints(1);
+  });
+  demoClickBtn.addEventListener('click', () => addDemoPoints(1));
+
+  demoAutoBtn.addEventListener('click', () => {
+    if (autoActive) {
+      clearInterval(autoInterval);
+      autoActive = false;
+      demoAutoBtn.innerHTML = '🤖 Взять автокликер (демо)';
+      demoAutoBtn.style.background = '#2a241a';
+      // показать уведомление
+      const note = document.createElement('div');
+      note.innerText = '🔴 Автокликер выключен. В игре — десятки пассивных генераторов!';
+      note.style.position = 'fixed'; note.style.bottom = '20px'; note.style.left = '20px'; note.style.background = '#000000aa'; note.style.padding = '8px 15px'; note.style.borderRadius = '30px'; note.style.fontSize = '0.8rem'; note.style.zIndex = '999';
+      document.body.appendChild(note);
+      setTimeout(() => note.remove(), 2500);
+    } else {
+      autoActive = true;
+      autoInterval = setInterval(() => {
+        addDemoPoints(2);
+      }, 1800);
+      demoAutoBtn.innerHTML = '⏸️ Отключить автокликер';
+      demoAutoBtn.style.background = '#b87a2e';
+      const msg = document.createElement('div');
+      msg.innerText = '✨ +2 очка каждые 1.8 сек! В настоящей игре — 20+ пассивных улучшений и питомцы с авто-доходом! ✨';
+      msg.style.position = 'fixed'; msg.style.bottom = '20px'; msg.style.right = '20px'; msg.style.background = '#3a2a1aee'; msg.style.padding = '8px 18px'; msg.style.borderRadius = '30px'; msg.style.fontSize = '0.8rem'; msg.style.zIndex = '999';
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 3000);
+    }
+  });
+
+  // добавляем небольшую анимацию "мурлыканья"
+  setInterval(() => {
+    if (Math.random() > 0.7) {
+      demoCat.style.filter = 'drop-shadow(0 0 6px #ffb347)';
+      setTimeout(() => { demoCat.style.filter = ''; }, 200);
+    }
+  }, 3000);
+
+  // Убедимся, что демо не мешает основной рекламе
+  // показываем приятный popup при наведении на CTA? нет, не нужно, всё лаконично
+
+  // Дополнительный эффект: красивый градиент для ссылки
+  const ctaBtn = document.querySelector('.cta-button');
+  if(ctaBtn) {
+    ctaBtn.addEventListener('mouseenter', () => {
+      ctaBtn.style.textShadow = '0 0 4px gold';
+    });
+    ctaBtn.addEventListener('mouseleave', () => {
+      ctaBtn.style.textShadow = '';
+    });
+  }
+
+  // Маленькое предупреждение о том, что это демо (не путать с полной игрой)
+  console.log('Рекламный лендинг игры Котость Кликер | ссылка: kqt3k.github.io');
+</script>
+</body>
+</html>
