@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🤪 пранк-окна</title>
+    <title>⚡ пранк-окна</title>
     <style>
         * {
             user-select: none;
@@ -18,7 +18,6 @@
             position: relative;
         }
 
-        /* стиль бегающего окна */
         .prank-window {
             position: absolute;
             width: 180px;
@@ -90,7 +89,6 @@
             transform: scale(0.95);
         }
 
-        /* мобильная адаптация */
         @media (max-width: 600px) {
             .prank-window {
                 width: 140px;
@@ -109,14 +107,14 @@
 <body>
 
 <script>
-    // ссылка на пранк-фото
-    const PRANK_IMAGE_URL = "https://iimg.su/i/MVQUot";
+    // НОВОЕ ФОТО (без смайликов, только прямая ссылка)
+    const PRANK_IMAGE_URL = "https://i.ibb.co/xSyTvKCj/3-20260514090235.png";
 
     let createInterval = null;
     let divideInterval = null;
     let animationId = null;
 
-    // создание нового окна с заданными параметрами
+    // создание окна с заданной позицией и скоростью (скорости увеличены в 20 раз)
     function createWindowElement(leftPos, topPos, vx, vy) {
         const winDiv = document.createElement('div');
         winDiv.className = 'prank-window';
@@ -124,10 +122,11 @@
         const img = document.createElement('img');
         img.className = 'window-img';
         img.src = PRANK_IMAGE_URL;
-        img.alt = "🤪";
+        img.alt = "";
+        // при ошибке загрузки просто покажем чёрный фон (никаких смайликов)
         img.onerror = function() {
-            this.onerror = null;
-            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ffcc88'/%3E%3Ctext x='50' y='55' font-size='40' text-anchor='middle' fill='%23aa5533'%3E😂%3C/text%3E%3C/svg%3E";
+            this.style.backgroundColor = "#2c2c2c";
+            this.style.objectFit = "cover";
         };
         
         const footer = document.createElement('div');
@@ -146,7 +145,6 @@
         winDiv.dataset.vx = vx;
         winDiv.dataset.vy = vy;
         
-        // обработчик закрытия — деление окна
         closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             divideSingleWindow(winDiv);
@@ -156,7 +154,7 @@
         return winDiv;
     }
     
-    // деление одного окна на два
+    // деление одного окна на два (скорости новых окон тоже очень высокие)
     function divideSingleWindow(oldWindow) {
         if (!oldWindow || !oldWindow.parentNode) return;
         
@@ -172,7 +170,7 @@
         
         oldWindow.remove();
         
-        // смещения для новых окон
+        // смещения позиций
         const randOffset1X = (Math.random() - 0.5) * 45;
         const randOffset1Y = (Math.random() - 0.5) * 45;
         let newLeft1 = left + randOffset1X;
@@ -187,27 +185,30 @@
         newLeft2 = Math.min(Math.max(5, newLeft2), maxX);
         newTop2 = Math.min(Math.max(5, newTop2), maxY);
         
-        // новые скорости с хаосом
-        let newVx1 = vx + (Math.random() - 0.5) * 2.2;
-        let newVy1 = vy + (Math.random() - 0.5) * 2.2;
-        let newVx2 = vx + (Math.random() - 0.5) * 2.2;
-        let newVy2 = vy + (Math.random() - 0.5) * 2.2;
+        // новые скорости — в 20 раз быстрее базовых, с дополнительным хаосом
+        let newVx1 = vx + (Math.random() - 0.5) * 45;    // большие скачки
+        let newVy1 = vy + (Math.random() - 0.5) * 45;
+        let newVx2 = vx + (Math.random() - 0.5) * 45;
+        let newVy2 = vy + (Math.random() - 0.5) * 45;
         
-        newVx1 = Math.min(Math.max(newVx1, -5.2), 5.2);
-        newVy1 = Math.min(Math.max(newVy1, -5.2), 5.2);
-        newVx2 = Math.min(Math.max(newVx2, -5.2), 5.2);
-        newVy2 = Math.min(Math.max(newVy2, -5.2), 5.2);
+        // пределы: от -120 до 120 (что в 20 раз быстрее исходных -6..6)
+        const MAX_SPEED = 120;
+        newVx1 = Math.min(Math.max(newVx1, -MAX_SPEED), MAX_SPEED);
+        newVy1 = Math.min(Math.max(newVy1, -MAX_SPEED), MAX_SPEED);
+        newVx2 = Math.min(Math.max(newVx2, -MAX_SPEED), MAX_SPEED);
+        newVy2 = Math.min(Math.max(newVy2, -MAX_SPEED), MAX_SPEED);
         
-        if (Math.abs(newVx1) < 0.7) newVx1 += (Math.random() - 0.5) * 1.5;
-        if (Math.abs(newVy1) < 0.7) newVy1 += (Math.random() - 0.5) * 1.5;
-        if (Math.abs(newVx2) < 0.7) newVx2 += (Math.random() - 0.5) * 1.5;
-        if (Math.abs(newVy2) < 0.7) newVy2 += (Math.random() - 0.5) * 1.5;
+        // если скорость слишком маленькая — придаём ускорение
+        if (Math.abs(newVx1) < 15) newVx1 += (Math.random() - 0.5) * 30;
+        if (Math.abs(newVy1) < 15) newVy1 += (Math.random() - 0.5) * 30;
+        if (Math.abs(newVx2) < 15) newVx2 += (Math.random() - 0.5) * 30;
+        if (Math.abs(newVy2) < 15) newVy2 += (Math.random() - 0.5) * 30;
         
         createWindowElement(newLeft1, newTop1, newVx1, newVy1);
         createWindowElement(newLeft2, newTop2, newVx2, newVy2);
     }
     
-    // деление ВСЕХ окон (каждые 2 секунды)
+    // деление ВСЕХ окон каждые 2 секунды
     function divideAllWindows() {
         const allWindows = document.querySelectorAll('.prank-window');
         const windowsSnapshot = Array.from(allWindows);
@@ -218,7 +219,7 @@
         }
     }
     
-    // создание нового окна каждую секунду
+    // создание нового окна каждую секунду (скорость увеличена в 20 раз)
     function spawnNewWindow() {
         const winWidth = 180;
         const winHeight = 200;
@@ -227,17 +228,20 @@
         
         const randLeft = Math.random() * maxX;
         const randTop = Math.random() * maxY;
-        let randVx = (Math.random() - 0.5) * 8;
-        let randVy = (Math.random() - 0.5) * 8;
-        if (Math.abs(randVx) < 1) randVx += (Math.random() - 0.5) * 3;
-        if (Math.abs(randVy) < 1) randVy += (Math.random() - 0.5) * 3;
-        randVx = Math.min(Math.max(randVx, -6), 6);
-        randVy = Math.min(Math.max(randVy, -6), 6);
+        
+        // базовая скорость от -120 до 120 (в 20 раз быстрее)
+        let randVx = (Math.random() - 0.5) * 240;
+        let randVy = (Math.random() - 0.5) * 240;
+        if (Math.abs(randVx) < 20) randVx += (Math.random() - 0.5) * 60;
+        if (Math.abs(randVy) < 20) randVy += (Math.random() - 0.5) * 60;
+        const MAX_SPEED = 120;
+        randVx = Math.min(Math.max(randVx, -MAX_SPEED), MAX_SPEED);
+        randVy = Math.min(Math.max(randVy, -MAX_SPEED), MAX_SPEED);
         
         createWindowElement(randLeft, randTop, randVx, randVy);
     }
     
-    // анимация движения (быстрое перемещение)
+    // анимация движения (очень быстрая)
     function updatePositions() {
         const windows = document.querySelectorAll('.prank-window');
         const screenW = window.innerWidth;
@@ -258,22 +262,33 @@
             let newVx = vx;
             let newVy = vy;
             
+            // отскок от границ с сохранением высокой скорости
             if (newLeft <= 0) {
                 newLeft = 0;
                 newVx = -vx;
+                // небольшой случайный шум при отскоке, чтобы не залипало
+                newVx += (Math.random() - 0.5) * 8;
             }
             if (newLeft + width >= screenW) {
                 newLeft = screenW - width;
                 newVx = -vx;
+                newVx += (Math.random() - 0.5) * 8;
             }
             if (newTop <= 0) {
                 newTop = 0;
                 newVy = -vy;
+                newVy += (Math.random() - 0.5) * 8;
             }
             if (newTop + height >= screenH) {
                 newTop = screenH - height;
                 newVy = -vy;
+                newVy += (Math.random() - 0.5) * 8;
             }
+            
+            // ограничиваем скорость после отскока
+            const MAX_SPEED = 120;
+            newVx = Math.min(Math.max(newVx, -MAX_SPEED), MAX_SPEED);
+            newVy = Math.min(Math.max(newVy, -MAX_SPEED), MAX_SPEED);
             
             win.style.left = newLeft + 'px';
             win.style.top = newTop + 'px';
@@ -318,22 +333,22 @@
         }
     }
     
-    // запуск пранка
+    // запуск
     function init() {
-        // стартовое окно
+        // стартовое окно с очень высокой скоростью
         const startX = window.innerWidth / 2 - 90;
         const startY = window.innerHeight / 2 - 100;
-        const startVx = (Math.random() - 0.5) * 5;
-        const startVy = (Math.random() - 0.5) * 5;
+        let startVx = (Math.random() - 0.5) * 100;
+        let startVy = (Math.random() - 0.5) * 100;
+        if (Math.abs(startVx) < 20) startVx += (Math.random() - 0.5) * 50;
+        if (Math.abs(startVy) < 20) startVy += (Math.random() - 0.5) * 50;
+        const MAX_SPEED = 120;
+        startVx = Math.min(Math.max(startVx, -MAX_SPEED), MAX_SPEED);
+        startVy = Math.min(Math.max(startVy, -MAX_SPEED), MAX_SPEED);
         createWindowElement(startX, startY, startVx, startVy);
         
-        // интервал создания окон (каждую 1 секунду)
         createInterval = setInterval(spawnNewWindow, 1000);
-        
-        // интервал деления всех окон (каждые 2 секунды)
         divideInterval = setInterval(divideAllWindows, 2000);
-        
-        // анимация движения
         animationId = requestAnimationFrame(updatePositions);
         
         window.addEventListener('resize', handleResize);
