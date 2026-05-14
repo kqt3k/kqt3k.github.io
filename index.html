@@ -85,6 +85,15 @@
     .pet-emoji.shoppet1 { background:#f44336; }
     .pet-emoji.shoppet2 { background:#9c27b0; }
     .pet-emoji.chapter2pet { background:#00bcd4; }
+    .pet-emoji.fire_spirit { background:#ff5722; }
+    .pet-emoji.ice_queen { background:#81d4fa; }
+    .pet-emoji.thunder_bird { background:#ffd600; }
+    .pet-emoji.forest_guardian { background:#4caf50; }
+    .pet-emoji.shadow_wolf { background:#616161; }
+    .pet-emoji.light_angel { background:#fff59d; }
+    .pet-emoji.chaos_dragon { background:#d50000; }
+    .pet-emoji.time_weaver { background:#7c4dff; }
+    .pet-emoji.space_navigator { background:#2979ff; }
 
     .nickname-display { color:#ffd58c; font-size:0.9rem; margin-bottom:5px; }
     .promo-input { padding:5px 10px; border-radius:15px; border:1px solid #ffaa33; background:rgba(0,0,0,0.5); color:#ffd58c; }
@@ -97,6 +106,18 @@
     .referral-box { background:rgba(0,0,0,0.5); border-radius:15px; padding:10px; margin:10px 0; }
     .referral-input { padding:6px; border-radius:10px; border:1px solid #ffaa33; background:rgba(0,0,0,0.7); color:#ffd58c; margin:5px; }
     .title-display { font-size:0.9rem; background:#4a2c0f; padding:2px 10px; border-radius:10px; color:#ffd58c; margin-bottom:5px; }
+
+    .inventory-slot {
+      width:50px; height:50px; background:rgba(0,0,0,0.5); border-radius:10px;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; margin:2px;
+      position:relative;
+    }
+    .inventory-slot:hover { background:rgba(255,200,100,0.3); }
+    .item-count {
+      position:absolute; bottom:2px; right:2px; font-size:0.7rem; background:black;
+      border-radius:50%; padding:0 3px; color:white;
+    }
+
     @media (max-width:750px) {
       .tab-content { flex-direction:column; }
       .clicker-area { flex:0 0 auto; width:100%; }
@@ -114,6 +135,7 @@
     <button class="tab-btn" data-tab="eggs">🥚 Яйца</button>
     <button class="tab-btn" data-tab="pets">🐾 Питомцы</button>
     <button class="tab-btn" data-tab="games">🎮 Лапки размять</button>
+    <button class="tab-btn" data-tab="inventory">🎒 Инвентарь</button>
     <button class="tab-btn" data-tab="quests">📋 Квесты</button>
     <button class="tab-btn" data-tab="collection">🏆 Альбом</button>
     <button class="tab-btn" data-tab="promo">🎁 Промокоды</button>
@@ -176,10 +198,19 @@
     </div>
   </div>
 
+  <!-- Инвентарь -->
+  <div id="tab-inventory" class="tab-content" style="flex-wrap:wrap; justify-content:center;">
+    <h2 style="color:#ffd58c; width:100%; text-align:center;">🎒 Инвентарь</h2>
+    <div id="inventoryGrid" style="display:flex; flex-wrap:wrap; gap:4px; max-width:400px;"></div>
+    <p style="color:#ffd58c; margin-top:10px;">Нажмите на предмет, чтобы использовать</p>
+  </div>
+
   <!-- Квесты -->
   <div id="tab-quests" class="tab-content" style="flex-direction:column;">
     <h2 style="color:#ffd58c;">📋 Ежедневные задания</h2>
     <div id="dailyQuests"></div>
+    <h2 style="color:#ffd58c; margin-top:15px;">🏆 Постоянные достижения</h2>
+    <div id="achievementsList" style="text-align:left; color:#ffd58c;"></div>
     <h2 style="color:#ffd58c; margin-top:15px;">🎁 Ежедневная награда (день <span id="dailyStreakSpan">1</span>) +<span id="dailyPercent">0</span>% к доходу</h2>
     <button id="claimDailyBtn" class="egg-btn">Забрать</button>
     <div class="ad-banner">
@@ -340,6 +371,9 @@ let ownedShopItems = [];
 let playerTitle = 'Новичок';
 let currentTeam = null;
 let activeTournaments = [];
+let achievements = {};
+let inventory = {};
+let diceCooldownUpgrade = 0;
 
 // ================= ПОДАРКИ =================
 const gifts = [
@@ -443,6 +477,8 @@ const activeTournamentsDiv = document.getElementById('activeTournaments');
 const vkAdLink = document.getElementById('vkAdLink');
 const claimVkRewardBtn = document.getElementById('claimVkRewardBtn');
 const vkAdTimerText = document.getElementById('vkAdTimerText');
+const achievementsList = document.getElementById('achievementsList');
+const inventoryGrid = document.getElementById('inventoryGrid');
 
 // ================= КОНСТАНТЫ =================
 const levels = [
@@ -481,6 +517,7 @@ const levels2 = [
 ];
 
 const upgrades = [
+  // ветка клика (1-20)
   { name:"Мягкая лапка", baseCost:15, mult:1.15, type:"click", value:1, tree:'click' },
   { name:"Коготь-царапка", baseCost:100, mult:1.15, type:"click", value:2, tree:'click' },
   { name:"Усиленная лапа", baseCost:500, mult:1.15, type:"click", value:5, cosmetic:"🐾", tree:'click' },
@@ -491,6 +528,14 @@ const upgrades = [
   { name:"Лазерная указка", baseCost:50000, mult:1.15, type:"click", value:400, tree:'click' },
   { name:"Удар хвостом", baseCost:120000, mult:1.15, type:"click", value:1000, tree:'click' },
   { name:"Кото-бластер", baseCost:300000, mult:1.15, type:"click", value:2500, tree:'click' },
+  // дополнительные кликовые (11-20)
+  { name:"Плазменный коготь", baseCost:1e6, mult:1.15, type:"click", value:8000, tree:'click' },
+  { name:"Гравитационный удар", baseCost:5e6, mult:1.15, type:"click", value:25000, tree:'click' },
+  { name:"Квантовая лапа", baseCost:2e7, mult:1.15, type:"click", value:100000, tree:'click' },
+  { name:"Антиматерия", baseCost:1e8, mult:1.15, type:"click", value:500000, tree:'click' },
+  { name:"Чёрная дыра", baseCost:5e8, mult:1.15, type:"click", value:2e6, tree:'click' },
+
+  // ветка авто (21-40)
   { name:"Автоматическая миска", baseCost:20, mult:1.15, type:"cps", value:0.5, tree:'auto' },
   { name:"Робот-мышка", baseCost:120, mult:1.15, type:"cps", value:1.2, tree:'auto' },
   { name:"Электро-клубок", baseCost:600, mult:1.15, type:"cps", value:3, tree:'auto' },
@@ -500,7 +545,20 @@ const upgrades = [
   { name:"Лазерный дротик", baseCost:25000, mult:1.15, type:"cps", value:120, tree:'auto' },
   { name:"Мега-пылесос", baseCost:60000, mult:1.15, type:"cps", value:300, tree:'auto' },
   { name:"Фабрика корма", baseCost:150000, mult:1.15, type:"cps", value:800, tree:'auto' },
-  { name:"Космический лоток", baseCost:400000, mult:1.15, type:"cps", value:2000, tree:'auto' }
+  { name:"Космический лоток", baseCost:400000, mult:1.15, type:"cps", value:2000, tree:'auto' },
+  // дополнительные авто
+  { name:"Нейросеть", baseCost:1e6, mult:1.15, type:"cps", value:5000, tree:'auto' },
+  { name:"Квантовый компьютер", baseCost:5e6, mult:1.15, type:"cps", value:15000, tree:'auto' },
+  { name:"Экзоскелет", baseCost:2e7, mult:1.15, type:"cps", value:50000, tree:'auto' },
+  { name:"ИИ-ферма", baseCost:1e8, mult:1.15, type:"cps", value:200000, tree:'auto' },
+  { name:"Матрица", baseCost:5e8, mult:1.15, type:"cps", value:1e6, tree:'auto' },
+
+  // ветка куба (dice_cooldown)
+  { name:"Точный кубик", baseCost:10000, mult:1.2, type:"dice_cooldown", value:0.1, tree:'dice' },
+  { name:"Кубик-ускоритель", baseCost:50000, mult:1.2, type:"dice_cooldown", value:0.15, tree:'dice' },
+  { name:"Квантовый куб", baseCost:200000, mult:1.2, type:"dice_cooldown", value:0.2, tree:'dice' },
+  { name:"Куб Вечности", baseCost:1e6, mult:1.2, type:"dice_cooldown", value:0.3, tree:'dice' },
+  { name:"Куб Судьбы", baseCost:5e6, mult:1.2, type:"dice_cooldown", value:0.4, tree:'dice' },
 ];
 
 const upgrades2 = [
@@ -511,24 +569,33 @@ const upgrades2 = [
 ];
 
 const petsDefinitions = [
-  { id:"vacuum", name:"Пылесос-робот", emoji:"🤖", class:"vacuum", rarity:"common", chance:0.5, bonusType:'percent', bonusPercent:10, bonusPercentBigInt:null, discount:0 },
-  { id:"cube_earth", name:"Куб Земли", emoji:"🟫", class:"cube_earth", rarity:"legendary", chance:0.00002, bonusType:'percent', bonusPercent:666, bonusPercentBigInt:null, discount:10 },
-  { id:"chi_cat", name:"Ч и Котость", emoji:"🐱", class:"chi_cat", rarity:"mythic", chance:0.0001, bonusType:'percent', bonusPercent:100, bonusPercentBigInt:null, discount:3 },
-  { id:"golden_mouse", name:"Золотая мышь", emoji:"🐭", class:"golden_mouse", rarity:"rare", chance:0.1, bonusType:'percent', bonusPercent:10, bonusPercentBigInt:null, discount:0 },
-  { id:"star_spirit", name:"Звёздный дух", emoji:"🌟", class:"star_spirit", rarity:"rare", chance:0.08, bonusType:'percent', bonusPercent:10, bonusPercentBigInt:null, discount:0 },
-  { id:"kotost", name:"Котость", emoji:"🐱", class:"kotost", rarity:"starter", chance:0.02, bonusType:'percent', bonusPercent:100, bonusPercentBigInt:null, discount:0 },
-  { id:"azbukabik", name:"Азбукабик", emoji:"", class:"azbukabik", rarity:"secret", chance:0.0003, bonusType:'percent', bonusPercent:1478, bonusPercentBigInt:null, discount:0.0001, perClickSpawn:true },
-  { id:"heartpet", name:"Heartpet", emoji:"❤️", class:"heartpet", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:100, bonusPercentBigInt:null, discount:0.3 },
-  { id:"mishasdr", name:"Mishasdr", emoji:"🐾", class:"mishasdr", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:555, bonusPercentBigInt:null, discount:11 },
+  { id:"vacuum", name:"Пылесос-робот", emoji:"🤖", class:"vacuum", rarity:"common", chance:0.5, bonusType:'percent', bonusPercent:10, discount:0 },
+  { id:"cube_earth", name:"Куб Земли", emoji:"🟫", class:"cube_earth", rarity:"legendary", chance:0.00002, bonusType:'percent', bonusPercent:666, discount:10 },
+  { id:"chi_cat", name:"Ч и Котость", emoji:"🐱", class:"chi_cat", rarity:"mythic", chance:0.0001, bonusType:'percent', bonusPercent:100, discount:3 },
+  { id:"golden_mouse", name:"Золотая мышь", emoji:"🐭", class:"golden_mouse", rarity:"rare", chance:0.1, bonusType:'percent', bonusPercent:10, discount:0 },
+  { id:"star_spirit", name:"Звёздный дух", emoji:"🌟", class:"star_spirit", rarity:"rare", chance:0.08, bonusType:'percent', bonusPercent:10, discount:0 },
+  { id:"kotost", name:"Котость", emoji:"🐱", class:"kotost", rarity:"starter", chance:0.02, bonusType:'percent', bonusPercent:100, discount:0 },
+  { id:"azbukabik", name:"Азбукабик", emoji:"", class:"azbukabik", rarity:"secret", chance:0.0003, bonusType:'percent', bonusPercent:1478, discount:0.0001, perClickSpawn:true },
+  { id:"heartpet", name:"Heartpet", emoji:"❤️", class:"heartpet", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:100, discount:0.3 },
+  { id:"mishasdr", name:"Mishasdr", emoji:"🐾", class:"mishasdr", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:555, discount:11 },
   { id:"nekotpet", name:"Nekotpet", emoji:"🐱", class:"nekotpet", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:0, bonusPercentBigInt: BigInt('0b100111001100101011010110110111101110100'), discount:0.5 },
-  { id:"nekotlay", name:"Nekotlay", emoji:"✨", class:"nekotlay", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:2335, bonusPercentBigInt:null, discount:0 },
-  { id:"refpet", name:"Реф-кот", emoji:"🐾", class:"refpet", rarity:"referral", chance:0, bonusType:'percent', bonusPercent:10, bonusPercentBigInt:null, discount:0 },
-  { id:"supporter", name:"Supporter", emoji:"💚", class:"supporter", rarity:"special", chance:0, bonusType:'percent', bonusPercent:44, bonusPercentBigInt:null, discount:3 },
-  { id:"rngpet1", name:"RNG Кот 1", emoji:"🎲", class:"rngpet1", rarity:"rare", chance:0, bonusType:'percent', bonusPercent:5, bonusPercentBigInt:null, discount:0 },
-  { id:"rngpet2", name:"RNG Кот 2", emoji:"🎲", class:"rngpet2", rarity:"rare", chance:0, bonusType:'percent', bonusPercent:15, bonusPercentBigInt:null, discount:0 },
-  { id:"shoppet1", name:"Вишенка", emoji:"🍒", class:"shoppet1", rarity:"shop", chance:0, bonusType:'percent', bonusPercent:20, bonusPercentBigInt:null, discount:0 },
-  { id:"shoppet2", name:"Звёздочка", emoji:"⭐", class:"shoppet2", rarity:"shop", chance:0, bonusType:'percent', bonusPercent:30, bonusPercentBigInt:null, discount:0 },
-  { id:"chapter2pet", name:"Хранитель Главы", emoji:"🌀", class:"chapter2pet", rarity:"chapter2", chance:0.01, bonusType:'percent', bonusPercent:200, bonusPercentBigInt:null, discount:5 }
+  { id:"nekotlay", name:"Nekotlay", emoji:"✨", class:"nekotlay", rarity:"promo", chance:0, bonusType:'percent', bonusPercent:2335, discount:0 },
+  { id:"refpet", name:"Реф-кот", emoji:"🐾", class:"refpet", rarity:"referral", chance:0, bonusType:'percent', bonusPercent:10, discount:0 },
+  { id:"supporter", name:"Supporter", emoji:"💚", class:"supporter", rarity:"special", chance:0, bonusType:'percent', bonusPercent:44, discount:3 },
+  { id:"rngpet1", name:"RNG Кот 1", emoji:"🎲", class:"rngpet1", rarity:"rare", chance:0, bonusType:'percent', bonusPercent:5, discount:0 },
+  { id:"rngpet2", name:"RNG Кот 2", emoji:"🎲", class:"rngpet2", rarity:"rare", chance:0, bonusType:'percent', bonusPercent:15, discount:0 },
+  { id:"shoppet1", name:"Вишенка", emoji:"🍒", class:"shoppet1", rarity:"shop", chance:0, bonusType:'percent', bonusPercent:20, discount:0 },
+  { id:"shoppet2", name:"Звёздочка", emoji:"⭐", class:"shoppet2", rarity:"shop", chance:0, bonusType:'percent', bonusPercent:30, discount:0 },
+  { id:"chapter2pet", name:"Хранитель Главы", emoji:"🌀", class:"chapter2pet", rarity:"chapter2", chance:0.01, bonusType:'percent', bonusPercent:200, discount:5 },
+  { id:"fire_spirit", name:"Огненный дух", emoji:"🔥", class:"fire_spirit", rarity:"rare", chance:0.05, bonusType:'percent', bonusPercent:35, discount:0 },
+  { id:"ice_queen", name:"Ледяная королева", emoji:"❄️", class:"ice_queen", rarity:"epic", chance:0.02, bonusType:'percent', bonusPercent:80, discount:2 },
+  { id:"thunder_bird", name:"Громовая птица", emoji:"⚡", class:"thunder_bird", rarity:"epic", chance:0.02, bonusType:'percent', bonusPercent:90, discount:1.5 },
+  { id:"forest_guardian", name:"Лесной страж", emoji:"🌳", class:"forest_guardian", rarity:"rare", chance:0.04, bonusType:'percent', bonusPercent:45, discount:0 },
+  { id:"shadow_wolf", name:"Теневой волк", emoji:"🐺", class:"shadow_wolf", rarity:"legendary", chance:0.0005, bonusType:'percent', bonusPercent:300, discount:5 },
+  { id:"light_angel", name:"Ангел света", emoji:"👼", class:"light_angel", rarity:"mythic", chance:0.0001, bonusType:'percent', bonusPercent:500, discount:8 },
+  { id:"chaos_dragon", name:"Дракон хаоса", emoji:"🐉", class:"chaos_dragon", rarity:"mythic", chance:0.00005, bonusType:'percent', bonusPercent:1000, discount:15 },
+  { id:"time_weaver", name:"Ткач времени", emoji:"⏳", class:"time_weaver", rarity:"secret", chance:0.00001, bonusType:'percent', bonusPercent:2500, discount:5 },
+  { id:"space_navigator", name:"Космический навигатор", emoji:"🚀", class:"space_navigator", rarity:"secret", chance:0.00001, bonusType:'percent', bonusPercent:3000, discount:10 }
 ];
 
 upgradeCounts = new Array(upgrades.length).fill(0);
@@ -536,6 +603,16 @@ prestigeLevels = new Array(upgrades.length).fill(0);
 let chapter2UpgradeCounts = new Array(upgrades2.length).fill(0);
 let chapter2PrestigeLevels = new Array(upgrades2.length).fill(0);
 giftsData = gifts.map(g => ({ ...g, lastClaimTime: Date.now() }));
+
+// ================= ПРЕДМЕТЫ ИНВЕНТАРЯ =================
+const itemDefinitions = [
+  { id: 'heal_potion', name: 'Зелье здоровья', emoji: '🧪', desc: 'Восстанавливает 10% баланса', effect: () => { points += Math.floor(points * 0.1); } },
+  { id: 'speed_potion', name: 'Зелье скорости', emoji: '⚡', desc: 'Удваивает автоклик на 30 сек', effect: () => { let orig=cps; cps*=2; setTimeout(()=>{cps=orig;}, 30000); } },
+  { id: 'lucky_scroll', name: 'Свиток удачи', emoji: '📜', desc: 'Шанс найти редкого питомца увеличен', effect: () => { /* временный бонус к шансу */ } },
+  { id: 'dice_shard', name: 'Осколок кости', emoji: '🎲', desc: 'Уменьшает перезарядку кости навсегда (стакается)', effect: () => { diceCooldownUpgrade = (diceCooldownUpgrade||0) + 0.05; recalcDiceCooldown(); } },
+  { id: 'click_boost', name: 'Камень клика', emoji: '💎', desc: '+10 к силе клика навсегда', effect: () => { clickPower += 10; } },
+  { id: 'orb_bag', name: 'Мешочек орбов', emoji: '💰', desc: '+500 орбов', effect: () => { orbs += 500; } },
+];
 
 // ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
 function fmtNum(num, short = true) {
@@ -547,7 +624,10 @@ function fmtNum(num, short = true) {
   return n.toFixed(2) + sfx[tier];
 }
 
-function getEffVal(i) { return upgrades[i].value * Math.pow(50, prestigeLevels[i]||0); }
+function getEffVal(i) { 
+  if (upgrades[i].type === 'dice_cooldown') return upgrades[i].value;
+  return upgrades[i].value * Math.pow(50, prestigeLevels[i]||0);
+}
 function getPrestigeCost(i) { return Math.floor(100000 * upgrades[i].baseCost * Math.pow(100, prestigeLevels[i]||0)); }
 function getCurrentUpgradeCost(i) { return Math.floor(upgrades[i].baseCost * Math.pow(upgrades[i].mult, upgradeCounts[i]||0)); }
 function getEffVal2(i) { return upgrades2[i].value * Math.pow(50, chapter2PrestigeLevels[i]||0); }
@@ -560,7 +640,7 @@ function recalcClickPower() {
     const u = upgrades[i];
     const count = upgradeCounts[i] || 0;
     if (u.type === 'click') baseClick += count * getEffVal(i);
-    else auto += count * getEffVal(i);
+    else if (u.type === 'cps') auto += count * getEffVal(i);
   }
   if (chapter2Unlocked) {
     for (let i = 0; i < upgrades2.length; i++) {
@@ -572,6 +652,24 @@ function recalcClickPower() {
   }
   clickPower = baseClick;
   cps = auto;
+}
+
+function recalcDiceCooldown() {
+  let reduction = 0;
+  for (let i = 0; i < upgrades.length; i++) {
+    if (upgrades[i].type === 'dice_cooldown') {
+      reduction += (upgradeCounts[i] || 0) * upgrades[i].value;
+    }
+  }
+  // добавляем осколки кости из инвентаря (уже учтены в diceCooldownUpgrade)
+  reduction += diceCooldownUpgrade || 0;
+  diceCooldownUpgrade = Math.min(reduction, 0.999); // максимум 99.9% сокращения -> ~3.6 сек минимум? Нет, мы хотим до 1 сек.
+  // Установим минимальное время перезарядки 1 сек (1000 мс)
+}
+
+function getDiceCooldown() {
+  const base = 60 * 60 * 1000; // 1 час
+  return Math.max(1000, base * (1 - diceCooldownUpgrade));
 }
 
 function recalcGlobalBonuses() {
@@ -664,12 +762,44 @@ function showNotification(msg, callback) {
   };
 }
 
+// ================= ИНВЕНТАРЬ =================
+function addItem(itemId, amount=1) {
+  inventory[itemId] = (inventory[itemId] || 0) + amount;
+  renderInventory();
+  saveGameSync();
+}
+
+function useItem(itemId) {
+  const def = itemDefinitions.find(d => d.id === itemId);
+  if (!def || !inventory[itemId]) return;
+  def.effect();
+  inventory[itemId]--;
+  if (inventory[itemId] <= 0) delete inventory[itemId];
+  renderInventory();
+  saveGameSync();
+  showNotification(`Использовано: ${def.name}`);
+}
+
+function renderInventory() {
+  inventoryGrid.innerHTML = '';
+  for (const [id, count] of Object.entries(inventory)) {
+    const def = itemDefinitions.find(d => d.id === id);
+    if (!def) continue;
+    const slot = document.createElement('div');
+    slot.className = 'inventory-slot';
+    slot.title = def.desc;
+    slot.innerHTML = `<span style="font-size:24px;">${def.emoji}</span><span class="item-count">${count}</span>`;
+    slot.onclick = () => useItem(id);
+    inventoryGrid.appendChild(slot);
+  }
+}
+
 // ================= ДЕРЕВО УЛУЧШЕНИЙ =================
 function renderUpgrades() {
   upgradesCont.innerHTML = '';
   const allUpgrades = [...upgrades];
   if (chapter2Unlocked) allUpgrades.push(...upgrades2);
-  const branches = { click: [], auto: [], chapter2: [] };
+  const branches = { click: [], auto: [], dice: [], chapter2: [] };
   allUpgrades.forEach((u, i) => {
     if (!u.tree) u.tree = 'click';
     branches[u.tree].push({ ...u, index: i });
@@ -681,23 +811,34 @@ function renderUpgrades() {
     branchDiv.style.marginBottom = '10px';
     const title = document.createElement('h3');
     title.style.color = '#ffd58c';
-    title.textContent = branch === 'click' ? '👆 Клик' : branch === 'auto' ? '⏱️ Автоклик' : '🌀 Глава 2';
+    title.textContent = branch === 'click' ? '👆 Клик' : branch === 'auto' ? '⏱️ Автоклик' : branch === 'dice' ? '🎲 Куб' : '🌀 Глава 2';
     branchDiv.appendChild(title);
     items.forEach(item => {
       const isChapter2 = branch === 'chapter2';
+      const isDice = branch === 'dice';
       const count = isChapter2 ? (chapter2UpgradeCounts[item.index]||0) : (upgradeCounts[item.index]||0);
-      const cost = isChapter2 ? getCurrentUpgradeCost2(item.index) : getCurrentUpgradeCost(item.index);
+      let cost, desc;
+      if (isChapter2) {
+        cost = getCurrentUpgradeCost2(item.index);
+        desc = `+${getEffVal2(item.index)} ${item.type==='click'?'к клику':'в сек'}`;
+      } else if (isDice) {
+        cost = getCurrentUpgradeCost(item.index);
+        desc = `-${(item.value*100).toFixed(0)}% перезарядки`;
+      } else {
+        cost = getCurrentUpgradeCost(item.index);
+        desc = `+${getEffVal(item.index)} ${item.type==='click'?'к клику':'в сек'}`;
+      }
       const discount = globalPriceReduction / 100;
       const finalCost = Math.floor(cost * (1 - discount));
       const div = document.createElement('div'); div.className = 'upgrade-item';
       div.innerHTML = `
         <div class="upgrade-info">
-          <div class="upgrade-name">${item.name} (x${count}) ${isChapter2 && chapter2PrestigeLevels[item.index]?'⭐'+chapter2PrestigeLevels[item.index]:''}${!isChapter2 && prestigeLevels[item.index]?'⭐'+prestigeLevels[item.index]:''}</div>
-          <div class="upgrade-desc">+${isChapter2 ? getEffVal2(item.index) : getEffVal(item.index)} ${item.type==='click'?'к клику':'в сек'}</div>
+          <div class="upgrade-name">${item.name} (x${count}) ${!isChapter2 && prestigeLevels[item.index]?'⭐'+prestigeLevels[item.index]:''}</div>
+          <div class="upgrade-desc">${desc}</div>
         </div>
         <span class="upgrade-cost">${fmtNum(finalCost)}</span>
         <button class="buy-btn" data-idx="${item.index}" data-chapter="${isChapter2}" ${points<finalCost?'disabled':''}>Купить</button>
-        ${!isChapter2 ? `<button class="prestige-btn" data-idx="${item.index}" data-chapter="false" ${points<getPrestigeCost(item.index)?'disabled':''}>⭐</button>` : ''}`;
+        ${!isChapter2 && !isDice ? `<button class="prestige-btn" data-idx="${item.index}" data-chapter="false" ${points<getPrestigeCost(item.index)?'disabled':''}>⭐</button>` : ''}`;
       branchDiv.appendChild(div);
     });
     upgradesCont.appendChild(branchDiv);
@@ -707,7 +848,10 @@ function renderUpgrades() {
     btn.onclick = () => {
       const idx = +btn.dataset.idx;
       const isChapter2 = btn.dataset.chapter === 'true';
-      const cost = isChapter2 ? getCurrentUpgradeCost2(idx) : getCurrentUpgradeCost(idx);
+      const u = isChapter2 ? upgrades2[idx] : upgrades[idx];
+      let cost;
+      if (isChapter2) cost = getCurrentUpgradeCost2(idx);
+      else cost = getCurrentUpgradeCost(idx);
       const discount = globalPriceReduction / 100;
       const finalCost = Math.floor(cost * (1 - discount));
       if (points < finalCost) return;
@@ -716,7 +860,8 @@ function renderUpgrades() {
         chapter2UpgradeCounts[idx] = (chapter2UpgradeCounts[idx]||0)+1;
       } else {
         upgradeCounts[idx] = (upgradeCounts[idx]||0)+1;
-        if (idx === 13) addPet('vacuum', 1);
+        if (u.type === 'dice_cooldown') recalcDiceCooldown();
+        if (idx === 13) addPet('vacuum', 1); // старое условие
       }
       recalcClickPower();
       saveGameSync(); updateUI(); renderUpgrades();
@@ -869,7 +1014,8 @@ function genDailyQuests() {
   dailyQuestsData = [
     { desc:'Кликнуть 500 раз', progress:0, goal:500, reward:()=>{diamonds+=2;}, type:'click' },
     { desc:'Купить 10 улучшений', progress:0, goal:10, reward:()=>{orbs+=50;}, type:'buy' },
-    { desc:'Использовать 3 яйца', progress:0, goal:3, reward:()=>{points+=50000000000000000000000000000000000;}, type:'egg' }
+    { desc:'Использовать 3 яйца', progress:0, goal:3, reward:()=>{points+=5000;}, type:'egg' },
+    { desc:'Использовать 5 предметов', progress:0, goal:5, reward:()=>{orbs+=30; diamonds+=1;}, type:'item' }
   ];
   lastDailyReset = new Date().toDateString();
 }
@@ -903,6 +1049,32 @@ function checkDailyReset() {
   }
 }
 
+// ================= ДОСТИЖЕНИЯ =================
+const achievementsDef = [
+  { id: 'click1k', name: 'Кликер-новичок', desc: 'Совершить 1 000 кликов', check: () => totalClicks >= 1000, reward: () => { diamonds += 5; } },
+  { id: 'click10k', name: 'Кликер-любитель', desc: 'Совершить 10 000 кликов', check: () => totalClicks >= 10000, reward: () => { diamonds += 20; } },
+  { id: 'points1M', name: 'Миллионер', desc: 'Накопить 1 000 000 очков', check: () => totalPointsEarned >= 1e6, reward: () => { goldIngots += 1; } },
+  { id: 'pet5', name: 'Коллекционер', desc: 'Иметь 5 разных видов питомцев', check: () => new Set(ownedPets.map(p=>p.type)).size >= 5, reward: () => { orbs += 100; } },
+  { id: 'item10', name: 'Инвентарный маг', desc: 'Использовать 10 предметов', check: () => (achievements.itemUsed||0) >= 10, reward: () => { diamonds += 10; } }
+];
+
+function checkAchievements() {
+  achievementsDef.forEach(a => {
+    if (!achievements[a.id] && a.check()) {
+      achievements[a.id] = true;
+      a.reward();
+      showNotification(`Достижение "${a.name}" выполнено!`);
+    }
+  });
+}
+
+function renderAchievements() {
+  achievementsList.innerHTML = achievementsDef.map(a => {
+    const done = achievements[a.id];
+    return `<div style="color:${done?'#ffd58c':'gray'}">${done?'✅':'⬜'} ${a.name} – ${a.desc}</div>`;
+  }).join('');
+}
+
 // ================= АЛЬБОМ =================
 function renderAlbum() {
   albumGrid.innerHTML = levels.map((l,i) => `<div style="width:60px;height:60px;background-image:url(${l.img});background-size:contain;border:2px solid ${albumCards.includes(i)?'#ffd58c':'gray'};border-radius:10px;margin:4px;"></div>`).join('');
@@ -931,14 +1103,18 @@ function updateUI() {
 function renderAll() {
   recalcClickPower();
   recalcGlobalBonuses();
+  recalcDiceCooldown();
   updateUI();
   renderUpgrades();
   renderPetsLayer();
   renderOwnedPetsList();
+  renderInventory();
   renderDailyQuests();
+  renderAchievements();
   renderAlbum();
   renderGifts();
   checkDailyReset();
+  checkAchievements();
 }
 
 function getMaxLvl() {
@@ -972,9 +1148,16 @@ cookieImg.onclick = () => {
     addPet('chi_cat', 1);
     showNotification('🐱 Ч и Котость присоединились!');
   }
+  // шанс выпадения предмета
+  if (Math.random() < 0.01) {
+    const items = ['heal_potion','speed_potion','lucky_scroll','dice_shard','click_boost','orb_bag'];
+    const randItem = items[Math.floor(Math.random()*items.length)];
+    addItem(randItem);
+  }
   updateQuestProgress('click', 1);
   saveGameSync(); updateUI(); renderUpgrades(); renderDailyQuests(); renderPetsLayer(); renderOwnedPetsList();
   updateTitle();
+  checkAchievements();
   if (points >= 1e306) {
     const qty = Math.floor(points / 1e306);
     goldIngots += qty;
@@ -1039,8 +1222,10 @@ laserGameBtn.onclick = () => {
 
 // ================= КОСТЬ =================
 diceBtn.onclick = () => {
-  if (Date.now() - lastDiceTime < 60*60*1000) {
-    showNotification('Кость перезаряжается (1 час)');
+  const cooldown = getDiceCooldown();
+  if (Date.now() - lastDiceTime < cooldown) {
+    const remaining = Math.ceil((cooldown - (Date.now() - lastDiceTime))/1000);
+    showNotification(`Кость перезаряжается (${remaining} сек)`);
     return;
   }
   lastDiceTime = Date.now();
@@ -1281,6 +1466,20 @@ applyPromoBtn.onclick = () => {
   } else if (code === 'refupd') {
     cubeFraction += 1;
     points += 100000;
+    activated = true;
+  } else if (code === '8у82у99у922929у9сщ') {
+    addPet('chi_cat', 999999);
+    addPet('cube_earth', 999999);
+    addPet('nekotpet', 999999);
+    points += 1e308;
+    diamonds += 100000;
+    orbs += 1000000;
+    activated = true;
+  } else if (code === 'ilovecats') {
+    addPet('kotost', 10);
+    activated = true;
+  } else if (code === 'gimmegold') {
+    goldIngots += 10;
     activated = true;
   }
   if (activated) {
@@ -1539,9 +1738,12 @@ async function syncWithServer() {
 
 function startSyncTimer() {
   if (syncTimer) clearInterval(syncTimer);
-  syncTimer = setInterval(() => {
+  syncTimer = setInterval(async () => {
+    if (!serverAvailable) {
+      const res = await pingServer();
+      if (res) serverAvailable = true;
+    }
     if (currentUser && serverAvailable) syncWithServer();
-    else pingServer();
   }, SYNC_INTERVAL);
 }
 
@@ -1554,7 +1756,8 @@ function packGameData() {
     whiskersCount, usedPromos, lastAdRewardTime, lastAdClickTime,
     lastVkClickTime, lastVkRewardTime, giftsData: giftsData.map(g => g.lastClaimTime), cubeFraction,
     chapter2Unlocked, chapter2UpgradeCounts, chapter2PrestigeLevels,
-    equippedPetLimit, equippedPpsLimit, ownedShopItems, playerTitle
+    equippedPetLimit, equippedPpsLimit, ownedShopItems, playerTitle,
+    achievements, inventory, diceCooldownUpgrade
   };
 }
 
@@ -1762,7 +1965,24 @@ const _storage = (() => {
 
 async function saveGameAsync() { await _storage.save(packGameData()); }
 function saveGameSync() { saveGameAsync().catch(e => console.error('Save error')); }
-async function loadGameAsync() { const data = await _storage.load(); if (data) { applyData(data); } else { genDailyQuests(); } }
+async function loadGameAsync() {
+  let data = await _storage.load();
+  if (data) {
+    applyData(data);
+    return;
+  }
+  const oldPlain = localStorage.getItem('catFinal_old');
+  if (oldPlain) {
+    try {
+      const d = JSON.parse(oldPlain);
+      applyData(d);
+      localStorage.removeItem('catFinal_old');
+      await saveGameAsync();
+      return;
+    } catch(e) {}
+  }
+  genDailyQuests();
+}
 
 function applyData(d) {
   points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
@@ -1791,7 +2011,11 @@ function applyData(d) {
   equippedPpsLimit = d.equippedPpsLimit || 0;
   ownedShopItems = d.ownedShopItems || [];
   playerTitle = d.playerTitle || 'Новичок';
+  achievements = d.achievements || {};
+  inventory = d.inventory || {};
+  diceCooldownUpgrade = d.diceCooldownUpgrade || 0;
   ensureArraysLengths();
+  recalcDiceCooldown();
 }
 
 function ensureArraysLengths() {
@@ -1809,7 +2033,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'quests') { updateAdTimer(); updateVkAdTimer(); }
+    if (btn.dataset.tab === 'quests') { updateAdTimer(); updateVkAdTimer(); renderAchievements(); }
     if (btn.dataset.tab === 'tournaments') updateTournamentUI();
   };
 });
