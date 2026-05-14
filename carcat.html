@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Кликер · Котость на автостраде</title>
+    <link rel="icon" href="lvl1cat.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 9 / 16;
+            background: #2d2d44;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #scoreDisplay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffd58c;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+        #balanceDisplay {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            color: #ccffcc;
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+        #bonusDisplay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #88ccff;
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(0,0,0,0.7);
+            z-index: 10;
+            text-align: right;
+        }
+        #message {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px black;
+            z-index: 20;
+            text-align: center;
+            pointer-events: none;
+            width: 90%;
+        }
+        .btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 30px;
+            background: #ffaa33;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 30;
+            box-shadow: 0 4px 0 #7a4b1d;
+            transition: 0.1s;
+        }
+        .btn:active {
+            transform: translateX(-50%) translateY(2px);
+            box-shadow: 0 2px 0 #7a4b1d;
+        }
+        .btn-small {
+            padding: 8px 20px;
+            font-size: 1rem;
+        }
+        .skin-controls, .accessory-controls {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 30;
+        }
+        .skin-controls { bottom: 100px; }
+        .accessory-controls { bottom: 140px; }
+        .skin-btn, .accessory-btn {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #ffd58c;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: #ffd58c;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .color-btn {
+            position: absolute;
+            top: 60px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            z-index: 30;
+        }
+        .mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 15;
+        }
+        .ctrl-btn {
+            pointer-events: all;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 20px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ctrl-btn:active { background: rgba(255,255,255,0.5); }
+
+        /* Модальное окно магазина */
+        .modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background: #2d2d44;
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 350px;
+            color: #ffd58c;
+            text-align: center;
+        }
+        .modal h3 { margin-bottom: 10px; }
+        .item-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; }
+        .item-btn { background: #ffaa33; border: none; border-radius: 15px; padding: 4px 12px; color: white; font-weight: bold; cursor: pointer; }
+        .item-btn:disabled { opacity: 0.5; cursor: default; }
+        .close-btn { background: #555; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreDisplay">0</div>
+    <div id="balanceDisplay">💰 0</div>
+    <div id="bonusDisplay"></div>
+    <div id="message"></div>
+
+    <!-- Кнопки управления скином и аксессуарами -->
+    <div class="accessory-controls">
+        <button class="accessory-btn" id="prevAccessoryBtn">◀</button>
+        <span style="color:#ffd58c; line-height:36px;">Акс.</span>
+        <button class="accessory-btn" id="nextAccessoryBtn">▶</button>
+    </div>
+    <div class="skin-controls">
+        <button class="skin-btn" id="prevSkinBtn">◀</button>
+        <span id="skinLabel" style="color:#ffd58c; line-height:36px;">Ур.1</span>
+        <button class="skin-btn" id="nextSkinBtn">▶</button>
+    </div>
+
+    <button class="btn" id="restartBtn" style="display: none;">Играть</button>
+    <button class="btn btn-small" id="shopBtn" style="bottom: 80px;">🛒 Магазин</button>
+    <button class="btn btn-small" id="vkResurrectBtn" style="bottom: 130px; display: none;">❤️ Воскреснуть (ВК)</button>
+
+    <!-- Цвета машины -->
+    <div class="color-btn" id="colorOrange" style="background: #ffaa33; top: 60px;"></div>
+    <div class="color-btn" id="colorBlue" style="background: #3399ff; top: 105px;"></div>
+    <div class="color-btn" id="colorGreen" style="background: #33cc55; top: 150px;"></div>
+    <div class="color-btn" id="colorPurple" style="background: #aa44ff; top: 195px;"></div>
+
+    <!-- Мобильное управление -->
+    <div class="mobile-controls">
+        <div class="ctrl-btn" id="leftBtn">◀</div>
+        <div class="ctrl-btn" id="rightBtn">▶</div>
+    </div>
+
+    <!-- Модальное окно магазина аксессуаров -->
+    <div class="modal" id="shopModal">
+        <div class="modal-content">
+            <h3>🛒 Аксессуары</h3>
+            <div class="item-list" id="shopItemList"></div>
+            <button class="btn close-btn" id="closeShopBtn">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- НАСТРОЙКИ ----------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const bonusDisplay = document.getElementById('bonusDisplay');
+    const messageDiv = document.getElementById('message');
+    const restartBtn = document.getElementById('restartBtn');
+    const shopBtn = document.getElementById('shopBtn');
+    const vkResurrectBtn = document.getElementById('vkResurrectBtn');
+    const leftBtn = document.getElementById('leftBtn');
+    const rightBtn = document.getElementById('rightBtn');
+    const prevSkinBtn = document.getElementById('prevSkinBtn');
+    const nextSkinBtn = document.getElementById('nextSkinBtn');
+    const skinLabel = document.getElementById('skinLabel');
+    const prevAccessoryBtn = document.getElementById('prevAccessoryBtn');
+    const nextAccessoryBtn = document.getElementById('nextAccessoryBtn');
+    const shopModal = document.getElementById('shopModal');
+    const shopItemList = document.getElementById('shopItemList');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+
+    const W = 400, H = 700;
+    canvas.width = W; canvas.height = H;
+
+    // ---------- СКИНЫ КОТОСТИ ----------
+    const skinImages = [];
+    const skinSrcs = ['lvl1cat.png','lvl2cat.png','lvl3cat.png','lvl4cat.png','lvl5cat.png','lvl6cat.png','lvl7cat.png','lvl8cat.png','lvl9cat.png','lvl10cat.png','lvl11cat.png','lvl12cat.png','lvl13cat.png','lvl14cat.png'];
+    skinSrcs.forEach(src => { const img = new Image(); img.src = src; skinImages.push(img); });
+    let currentSkinIndex = 0;
+    try {
+        const shared = parseInt(localStorage.getItem('shared_skin_index'));
+        if (!isNaN(shared) && shared >= 0 && shared < skinImages.length) currentSkinIndex = shared;
+    } catch(e) {}
+    function setSkin(idx) {
+        if (idx < 0 || idx >= skinImages.length) return;
+        currentSkinIndex = idx;
+        localStorage.setItem('shared_skin_index', idx);
+        skinLabel.textContent = 'Ур.' + (idx+1);
+    }
+    prevSkinBtn.onclick = () => setSkin(currentSkinIndex - 1);
+    nextSkinBtn.onclick = () => setSkin(currentSkinIndex + 1);
+    skinLabel.textContent = 'Ур.' + (currentSkinIndex+1);
+
+    // ---------- ЦВЕТ МАШИНЫ ----------
+    let carColor = localStorage.getItem('carColor') || '#ffaa33';
+    function setCarColor(c) { carColor = c; localStorage.setItem('carColor', c); }
+    document.getElementById('colorOrange').onclick = () => setCarColor('#ffaa33');
+    document.getElementById('colorBlue').onclick = () => setCarColor('#3399ff');
+    document.getElementById('colorGreen').onclick = () => setCarColor('#33cc55');
+    document.getElementById('colorPurple').onclick = () => setCarColor('#aa44ff');
+
+    // ---------- АКСЕССУАРЫ ----------
+    const accessoryDefs = [
+        { id: 'none', name: 'Без аксессуара', emoji: '', cost: 0 },
+        { id: 'spoiler', name: 'Спойлер', emoji: '🏎️', cost: 500 },
+        { id: 'roof_box', name: 'Бокс на крыше', emoji: '📦', cost: 800 },
+        { id: 'flame', name: 'Огненные полосы', emoji: '🔥', cost: 1200 },
+        { id: 'neon', name: 'Неоновая подсветка', emoji: '💡', cost: 1500 },
+        { id: 'wings', name: 'Крылья', emoji: '🪽', cost: 2000 }
+    ];
+    let ownedAccessories = JSON.parse(localStorage.getItem('ownedAccessories') || '["none"]');
+    let currentAccessory = localStorage.getItem('currentAccessory') || 'none';
+    function setAccessory(id) {
+        if (!ownedAccessories.includes(id)) return;
+        currentAccessory = id;
+        localStorage.setItem('currentAccessory', id);
+    }
+    function getAccessoryIndex() { return accessoryDefs.findIndex(a => a.id === currentAccessory); }
+    prevAccessoryBtn.onclick = () => {
+        const owned = accessoryDefs.filter(a => ownedAccessories.includes(a.id));
+        let idx = owned.findIndex(a => a.id === currentAccessory);
+        idx = (idx - 1 + owned.length) % owned.length;
+        setAccessory(owned[idx].id);
+    };
+    nextAccessoryBtn.onclick = () => {
+        const owned = accessoryDefs.filter(a => ownedAccessories.includes(a.id));
+        let idx = owned.findIndex(a => a.id === currentAccessory);
+        idx = (idx + 1) % owned.length;
+        setAccessory(owned[idx].id);
+    };
+
+    // ---------- ОБЩИЙ БАЛАНС ----------
+    const SHARED_KEY = 'shared_cat_points';
+    function getBalance() { return parseInt(localStorage.getItem(SHARED_KEY) || '0'); }
+    function spendPoints(amount) {
+        let bal = getBalance();
+        if (bal < amount) return false;
+        bal -= amount;
+        localStorage.setItem(SHARED_KEY, bal.toString());
+        updateBalanceDisplay();
+        return true;
+    }
+    function updateBalanceDisplay() { balanceDisplay.textContent = '💰 ' + getBalance(); }
+
+    // ---------- МАГАЗИН АКСЕССУАРОВ ----------
+    function renderShop() {
+        shopItemList.innerHTML = '';
+        accessoryDefs.forEach(acc => {
+            const owned = ownedAccessories.includes(acc.id);
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <span>${acc.emoji} ${acc.name}</span>
+                <span>${acc.cost > 0 ? acc.cost + ' очков' : 'Бесплатно'}</span>
+                <button class="item-btn" ${owned || getBalance() < acc.cost ? 'disabled' : ''}>${owned ? 'Куплено' : 'Купить'}</button>
+            `;
+            const btn = row.querySelector('button');
+            btn.onclick = () => {
+                if (spendPoints(acc.cost)) {
+                    ownedAccessories.push(acc.id);
+                    localStorage.setItem('ownedAccessories', JSON.stringify(ownedAccessories));
+                    renderShop();
+                }
+            };
+            shopItemList.appendChild(row);
+        });
+    }
+    shopBtn.onclick = () => { shopModal.style.display = 'flex'; renderShop(); };
+    closeShopBtn.onclick = () => { shopModal.style.display = 'none'; };
+
+    // ---------- ВОСКРЕШЕНИЕ ВК ----------
+    const VK_RESURRECT_KEY = 'vk_resurrect_time';
+    function canVkResurrect() {
+        const last = parseInt(localStorage.getItem(VK_RESURRECT_KEY) || '0');
+        return Date.now() - last > 24 * 60 * 60 * 1000;
+    }
+    function vkResurrect() {
+        if (!canVkResurrect()) {
+            alert('Воскрешение доступно раз в 24 часа.');
+            return;
+        }
+        // Имитация: открываем группу ВК в новой вкладке
+        window.open('https://vk.com/club238691099', '_blank');
+        // После возврата (через 5 секунд) даём воскрешение
+        setTimeout(() => {
+            if (confirm('Вы подписались на ВК?')) {
+                localStorage.setItem(VK_RESURRECT_KEY, Date.now().toString());
+                reset();
+                messageDiv.textContent = '';
+                restartBtn.style.display = 'none';
+                vkResurrectBtn.style.display = 'none';
+            }
+        }, 5000);
+    }
+    vkResurrectBtn.onclick = vkResurrect;
+
+    // ---------- ИГРОВЫЕ ПЕРЕМЕННЫЕ ----------
+    let gameActive = false;
+    let score = 0;
+    let frames = 0;
+    let shieldActive = false, shieldTimer = 0;
+    let doublePoints = false, doubleTimer = 0;
+    let magnetActive = false, magnetTimer = 0;
+
+    const player = { x: W/2-25, y: H-120, w: 50, h: 70, speed: 5 };
+    const road = { x: 50, w: W-100, laneCount: 3, get laneWidth() { return this.w / this.laneCount; } };
+    let obstacles = [];
+    const OBSTACLE_SPAWN_RATE = 40;
+    let spawnCounter = 0;
+    let OBSTACLE_SPEED = 5;
+
+    // ---------- БУСТЫ ИЗ КЛИКЕРА ----------
+    function getClickerBonus() {
+        const bonus = parseFloat(localStorage.getItem('shared_bonus_percent') || '0');
+        return Math.max(0.3, 1 - bonus / 100);
+    }
+
+    // ---------- ПАССАЖИРЫ (расширенный список) ----------
+    const passengerTypes = [
+        { emoji: '🐱', name: 'Котость', effect: 'shield', color: '#c4870a' },
+        { emoji: '🤖', name: 'Пылесос', effect: 'slow', color: '#888' },
+        { emoji: '🟫', name: 'Куб Земли', effect: 'double', color: '#8B4513' },
+        { emoji: '🌟', name: 'Звезда', effect: 'score', color: 'lightblue' },
+        { emoji: '🧲', name: 'Магнит', effect: 'magnet', color: '#ff5555' },
+        { emoji: '⚡', name: 'Молния', effect: 'speed_boost', color: '#ffff00' },
+        { emoji: '💎', name: 'Алмаз', effect: 'bonus_points', color: '#00ffff' }
+    ];
+    let passengers = [];
+    const PASSENGER_SPAWN_RATE = 200;
+    let passengerSpawnCounter = 0;
+
+    class Obstacle {
+        constructor() {
+            this.w = road.laneWidth - 10; this.h = 40;
+            this.x = road.x + Math.floor(Math.random()*road.laneCount)*road.laneWidth + 5;
+            this.y = -this.h;
+            this.speed = OBSTACLE_SPEED + Math.floor(score/500)*0.5;
+            this.color = `hsl(${Math.random()*360},80%,50%)`;
+        }
+        update() { this.y += this.speed; }
+        draw(ctx) {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(this.x+this.w*0.3, this.y+this.h*0.3, 5, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(this.x+this.w*0.7, this.y+this.h*0.3, 5, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath(); ctx.arc(this.x+this.w*0.3, this.y+this.h*0.3, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(this.x+this.w*0.7, this.y+this.h*0.3, 2, 0, Math.PI*2); ctx.fill();
+        }
+    }
+
+    class Passenger {
+        constructor() {
+            const type = passengerTypes[Math.floor(Math.random()*passengerTypes.length)];
+            Object.assign(this, type);
+            this.x = road.x + Math.floor(Math.random()*road.laneCount)*road.laneWidth + 5;
+            this.y = -30;
+            this.w = 30; this.h = 30;
+            this.speed = 3;
+        }
+        update() { this.y += this.speed; }
+        draw(ctx) { ctx.font = '30px serif'; ctx.fillText(this.emoji, this.x, this.y+30); }
+    }
+
+    function applyPassengerEffect(effect) {
+        switch(effect) {
+            case 'shield': shieldActive = true; shieldTimer = 300; break;
+            case 'slow': OBSTACLE_SPEED = Math.max(2, OBSTACLE_SPEED-2); setTimeout(()=>{OBSTACLE_SPEED=5*getClickerBonus();},5000); break;
+            case 'double': doublePoints = true; doubleTimer = 300; break;
+            case 'score': syncPoints(50); break;
+            case 'magnet': magnetActive = true; magnetTimer = 200; break;
+            case 'speed_boost': player.speed *= 1.5; setTimeout(()=>{player.speed=5;},5000); break;
+            case 'bonus_points': syncPoints(200); break;
+        }
+    }
+
+    // ---------- ОЧКИ ----------
+    function syncPoints(addAmount) {
+        let amt = addAmount;
+        if (doublePoints) amt *= 2;
+        score += amt;
+        let total = getBalance() + amt;
+        localStorage.setItem(SHARED_KEY, total.toString());
+        updateBalanceDisplay();
+        scoreDisplay.textContent = score;
+    }
+
+    function rectCollide(r1, r2) {
+        return r1.x < r2.x+r2.w && r1.x+r1.w > r2.x && r1.y < r2.y+r2.h && r1.y+r1.h > r2.y;
+    }
+
+    function reset() {
+        gameActive = true;
+        score = 0; frames = 0;
+        obstacles = []; spawnCounter = 0;
+        passengers = []; passengerSpawnCounter = 0;
+        shieldActive = false; doublePoints = false; magnetActive = false;
+        OBSTACLE_SPEED = 5 * getClickerBonus();
+        player.x = W/2-25; player.speed = 5;
+        scoreDisplay.textContent = '0';
+        messageDiv.textContent = '';
+        restartBtn.style.display = 'none';
+        vkResurrectBtn.style.display = 'none';
+        updateBalanceDisplay();
+        updateBonusDisplay();
+    }
+
+    function gameOver() {
+        gameActive = false;
+        messageDiv.innerHTML = `Игра окончена!<br>Очки: ${score}`;
+        restartBtn.style.display = 'block';
+        restartBtn.textContent = 'Играть снова';
+        if (canVkResurrect()) vkResurrectBtn.style.display = 'block';
+    }
+
+    function updateBonusDisplay() {
+        const pct = Math.round((1 - getClickerBonus())*100);
+        bonusDisplay.innerHTML = `Буст кликера: ${pct}%<br>Замедление препятствий`;
+    }
+
+    // ---------- ИГРОВОЙ ЦИКЛ ----------
+    function update() {
+        if (!gameActive) return;
+        if (shieldActive && --shieldTimer <= 0) shieldActive = false;
+        if (doublePoints && --doubleTimer <= 0) doublePoints = false;
+        if (magnetActive && --magnetTimer <= 0) magnetActive = false;
+
+        spawnCounter++;
+        if (spawnCounter >= OBSTACLE_SPAWN_RATE) { spawnCounter = 0; obstacles.push(new Obstacle()); }
+        passengerSpawnCounter++;
+        if (passengerSpawnCounter >= PASSENGER_SPAWN_RATE) { passengerSpawnCounter = 0; passengers.push(new Passenger()); }
+
+        for (let i = obstacles.length-1; i >= 0; i--) {
+            obstacles[i].update();
+            if (magnetActive) {
+                // магнит притягивает препятствия к центру? Нет, лучше сделаем, что пассажиры притягиваются к игроку
+            }
+            if (rectCollide(player, obstacles[i])) {
+                if (shieldActive) { obstacles.splice(i,1); shieldActive = false; }
+                else { gameOver(); return; }
+            }
+            if (obstacles[i].y > H+50) { obstacles.splice(i,1); syncPoints(doublePoints?20:10); }
+        }
+
+        for (let i = passengers.length-1; i >= 0; i--) {
+            passengers[i].update();
+            if (magnetActive) {
+                const dx = (player.x + player.w/2) - (passengers[i].x + 15);
+                if (Math.abs(dx) < 100) passengers[i].x += dx * 0.1;
+            }
+            if (rectCollide(player, passengers[i])) {
+                applyPassengerEffect(passengers[i].effect);
+                passengers.splice(i,1);
+            } else if (passengers[i].y > H+50) {
+                passengers.splice(i,1);
+            }
+        }
+
+        if (frames % 60 === 0) syncPoints(1);
+        frames++;
+    }
+
+    function draw() {
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle = '#333355'; ctx.fillRect(0,0,W,H);
+        ctx.fillStyle = '#555577'; ctx.fillRect(road.x,0,road.w,H);
+        ctx.strokeStyle = '#ffd58c'; ctx.lineWidth = 2; ctx.setLineDash([20,30]);
+        for (let i=1; i<road.laneCount; i++) {
+            const x = road.x + i*road.laneWidth;
+            ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        obstacles.forEach(o => o.draw(ctx));
+        passengers.forEach(p => p.draw(ctx));
+
+        // машина
+        ctx.fillStyle = carColor;
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(player.x+5, player.y+10, 15, 15);
+        ctx.fillRect(player.x+30, player.y+10, 15, 15);
+        ctx.fillStyle = '#222';
+        ctx.fillRect(player.x-5, player.y+15, 10, 20);
+        ctx.fillRect(player.x+player.w-5, player.y+15, 10, 20);
+        ctx.fillRect(player.x-5, player.y+player.h-25, 10, 20);
+        ctx.fillRect(player.x+player.w-5, player.y+player.h-25, 10, 20);
+
+        // аксессуары
+        const acc = accessoryDefs.find(a => a.id === currentAccessory);
+        if (acc && acc.id !== 'none') {
+            if (acc.id === 'spoiler') { ctx.fillStyle = '#555'; ctx.fillRect(player.x-10, player.y-15, player.w+20, 8); }
+            else if (acc.id === 'roof_box') { ctx.fillStyle = '#888'; ctx.fillRect(player.x+15, player.y-25, 20, 15); }
+            else if (acc.id === 'flame') { ctx.fillStyle = 'orange'; ctx.beginPath(); ctx.moveTo(player.x, player.y+player.h); ctx.lineTo(player.x-10, player.y+player.h+20); ctx.lineTo(player.x+10, player.y+player.h+15); ctx.fill(); }
+            else if (acc.id === 'neon') { ctx.strokeStyle = 'cyan'; ctx.lineWidth = 2; ctx.strokeRect(player.x-2, player.y-2, player.w+4, player.h+4); }
+            else if (acc.id === 'wings') { ctx.fillStyle = 'white'; ctx.fillRect(player.x-15, player.y+20, 10, 20); ctx.fillRect(player.x+player.w+5, player.y+20, 10, 20); }
+        }
+
+        // котость
+        const skinImg = skinImages[currentSkinIndex];
+        if (skinImg && skinImg.complete) {
+            ctx.drawImage(skinImg, player.x+player.w/2-20, player.y-45, 40, 40);
+        } else {
+            ctx.fillStyle = '#c4870a'; ctx.beginPath(); ctx.arc(player.x+player.w/2, player.y-10, 15, 0, Math.PI*2); ctx.fill();
+        }
+        if (shieldActive) { ctx.strokeStyle = 'cyan'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(player.x+player.w/2, player.y+player.h/2, 45, 0, Math.PI*2); ctx.stroke(); }
+    }
+
+    // ---------- УПРАВЛЕНИЕ ----------
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.key] = true; if (!gameActive && e.key === ' ') reset(); });
+    window.addEventListener('keyup', e => { keys[e.key] = false; });
+    leftBtn.addEventListener('pointerdown', () => { keys['ArrowLeft'] = true; });
+    leftBtn.addEventListener('pointerup', () => { keys['ArrowLeft'] = false; });
+    leftBtn.addEventListener('pointerleave', () => { keys['ArrowLeft'] = false; });
+    rightBtn.addEventListener('pointerdown', () => { keys['ArrowRight'] = true; });
+    rightBtn.addEventListener('pointerup', () => { keys['ArrowRight'] = false; });
+    rightBtn.addEventListener('pointerleave', () => { keys['ArrowRight'] = false; });
+    canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const relX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        keys['ArrowLeft'] = relX < canvas.clientWidth/2;
+        keys['ArrowRight'] = relX >= canvas.clientWidth/2;
+    });
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        const relX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        keys['ArrowLeft'] = relX < canvas.clientWidth/2;
+        keys['ArrowRight'] = relX >= canvas.clientWidth/2;
+    });
+    canvas.addEventListener('touchend', e => { e.preventDefault(); keys['ArrowLeft'] = false; keys['ArrowRight'] = false; });
+    restartBtn.addEventListener('click', reset);
+
+    function handleInput() {
+        if (!gameActive) return;
+        if (keys['ArrowLeft'] || keys['a'] || keys['A'] || keys['ф'] || keys['Ф']) player.x -= player.speed;
+        if (keys['ArrowRight'] || keys['d'] || keys['D'] || keys['в'] || keys['В']) player.x += player.speed;
+        player.x = Math.max(road.x, Math.min(player.x, road.x+road.w-player.w));
+    }
+
+    function gameLoop() { handleInput(); update(); draw(); requestAnimationFrame(gameLoop); }
+
+    // ---------- СТАРТ ----------
+    reset();
+    updateBalanceDisplay();
+    gameLoop();
+</script>
+</body>
+</html>
