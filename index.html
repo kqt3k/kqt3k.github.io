@@ -29,7 +29,7 @@
       padding:8px 16px; color:#ffd58c; font-weight:bold; cursor:pointer; transition:0.2s; font-size:0.9rem;
     }
     .tab-btn.active { background:rgba(80,40,0,0.9); border-color:#ffaa33; }
-    .tab-content { display:none; flex-direction:row; gap:15px; flex:1; overflow-y:auto; max-height:80vh; }
+    .tab-content { display:none; flex-direction:row; gap:15px; flex:1; overflow-y:auto; max-height:80vh; -webkit-overflow-scrolling:touch; }
     .tab-content.active { display:flex; }
     .clicker-area {
       background:rgba(30,15,0,0.8); backdrop-filter:blur(15px); border-radius:40px;
@@ -107,16 +107,9 @@
     .referral-input { padding:6px; border-radius:10px; border:1px solid #ffaa33; background:rgba(0,0,0,0.7); color:#ffd58c; margin:5px; }
     .title-display { font-size:0.9rem; background:#4a2c0f; padding:2px 10px; border-radius:10px; color:#ffd58c; margin-bottom:5px; }
 
-    .inventory-slot {
-      width:50px; height:50px; background:rgba(0,0,0,0.5); border-radius:10px;
-      display:flex; align-items:center; justify-content:center; cursor:pointer; margin:2px;
-      position:relative;
-    }
+    .inventory-slot { width:50px; height:50px; background:rgba(0,0,0,0.5); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; margin:2px; position:relative; }
     .inventory-slot:hover { background:rgba(255,200,100,0.3); }
-    .item-count {
-      position:absolute; bottom:2px; right:2px; font-size:0.7rem; background:black;
-      border-radius:50%; padding:0 3px; color:white;
-    }
+    .item-count { position:absolute; bottom:2px; right:2px; font-size:0.7rem; background:black; border-radius:50%; padding:0 3px; color:white; }
 
     @media (max-width:750px) {
       .tab-content { flex-direction:column; }
@@ -517,7 +510,6 @@ const levels2 = [
 ];
 
 const upgrades = [
-  // ветка клика (1-20)
   { name:"Мягкая лапка", baseCost:15, mult:1.15, type:"click", value:1, tree:'click' },
   { name:"Коготь-царапка", baseCost:100, mult:1.15, type:"click", value:2, tree:'click' },
   { name:"Усиленная лапа", baseCost:500, mult:1.15, type:"click", value:5, cosmetic:"🐾", tree:'click' },
@@ -528,14 +520,11 @@ const upgrades = [
   { name:"Лазерная указка", baseCost:50000, mult:1.15, type:"click", value:400, tree:'click' },
   { name:"Удар хвостом", baseCost:120000, mult:1.15, type:"click", value:1000, tree:'click' },
   { name:"Кото-бластер", baseCost:300000, mult:1.15, type:"click", value:2500, tree:'click' },
-  // дополнительные кликовые (11-20)
   { name:"Плазменный коготь", baseCost:1e6, mult:1.15, type:"click", value:8000, tree:'click' },
   { name:"Гравитационный удар", baseCost:5e6, mult:1.15, type:"click", value:25000, tree:'click' },
   { name:"Квантовая лапа", baseCost:2e7, mult:1.15, type:"click", value:100000, tree:'click' },
   { name:"Антиматерия", baseCost:1e8, mult:1.15, type:"click", value:500000, tree:'click' },
   { name:"Чёрная дыра", baseCost:5e8, mult:1.15, type:"click", value:2e6, tree:'click' },
-
-  // ветка авто (21-40)
   { name:"Автоматическая миска", baseCost:20, mult:1.15, type:"cps", value:0.5, tree:'auto' },
   { name:"Робот-мышка", baseCost:120, mult:1.15, type:"cps", value:1.2, tree:'auto' },
   { name:"Электро-клубок", baseCost:600, mult:1.15, type:"cps", value:3, tree:'auto' },
@@ -546,14 +535,11 @@ const upgrades = [
   { name:"Мега-пылесос", baseCost:60000, mult:1.15, type:"cps", value:300, tree:'auto' },
   { name:"Фабрика корма", baseCost:150000, mult:1.15, type:"cps", value:800, tree:'auto' },
   { name:"Космический лоток", baseCost:400000, mult:1.15, type:"cps", value:2000, tree:'auto' },
-  // дополнительные авто
   { name:"Нейросеть", baseCost:1e6, mult:1.15, type:"cps", value:5000, tree:'auto' },
   { name:"Квантовый компьютер", baseCost:5e6, mult:1.15, type:"cps", value:15000, tree:'auto' },
   { name:"Экзоскелет", baseCost:2e7, mult:1.15, type:"cps", value:50000, tree:'auto' },
   { name:"ИИ-ферма", baseCost:1e8, mult:1.15, type:"cps", value:200000, tree:'auto' },
   { name:"Матрица", baseCost:5e8, mult:1.15, type:"cps", value:1e6, tree:'auto' },
-
-  // ветка куба (dice_cooldown)
   { name:"Точный кубик", baseCost:10000, mult:1.2, type:"dice_cooldown", value:0.1, tree:'dice' },
   { name:"Кубик-ускоритель", baseCost:50000, mult:1.2, type:"dice_cooldown", value:0.15, tree:'dice' },
   { name:"Квантовый куб", baseCost:200000, mult:1.2, type:"dice_cooldown", value:0.2, tree:'dice' },
@@ -661,14 +647,12 @@ function recalcDiceCooldown() {
       reduction += (upgradeCounts[i] || 0) * upgrades[i].value;
     }
   }
-  // добавляем осколки кости из инвентаря (уже учтены в diceCooldownUpgrade)
   reduction += diceCooldownUpgrade || 0;
-  diceCooldownUpgrade = Math.min(reduction, 0.999); // максимум 99.9% сокращения -> ~3.6 сек минимум? Нет, мы хотим до 1 сек.
-  // Установим минимальное время перезарядки 1 сек (1000 мс)
+  diceCooldownUpgrade = Math.min(reduction, 0.999);
 }
 
 function getDiceCooldown() {
-  const base = 60 * 60 * 1000; // 1 час
+  const base = 60 * 60 * 1000;
   return Math.max(1000, base * (1 - diceCooldownUpgrade));
 }
 
@@ -843,7 +827,6 @@ function renderUpgrades() {
     });
     upgradesCont.appendChild(branchDiv);
   }
-  // обработчики
   document.querySelectorAll('.buy-btn').forEach(btn => {
     btn.onclick = () => {
       const idx = +btn.dataset.idx;
@@ -861,7 +844,7 @@ function renderUpgrades() {
       } else {
         upgradeCounts[idx] = (upgradeCounts[idx]||0)+1;
         if (u.type === 'dice_cooldown') recalcDiceCooldown();
-        if (idx === 13) addPet('vacuum', 1); // старое условие
+        if (idx === 13) addPet('vacuum', 1);
       }
       recalcClickPower();
       saveGameSync(); updateUI(); renderUpgrades();
@@ -1148,7 +1131,6 @@ cookieImg.onclick = () => {
     addPet('chi_cat', 1);
     showNotification('🐱 Ч и Котость присоединились!');
   }
-  // шанс выпадения предмета
   if (Math.random() < 0.01) {
     const items = ['heal_potion','speed_potion','lucky_scroll','dice_shard','click_boost','orb_bag'];
     const randItem = items[Math.floor(Math.random()*items.length)];
@@ -1923,59 +1905,107 @@ logoutBtn.onclick = () => {
 
 forceSyncBtn.onclick = () => showNotification('Синхронизация раз в 60 секунд. Ожидайте.');
 
-// ================= ШИФРОВАНИЕ СОХРАНЕНИЯ =================
-const _storage = (() => {
-  const _0 = [52,52,52,52];
-  const _pin = String.fromCharCode(..._0);
-  const _salt = 'ng_' + btoa('f9L').slice(0,4);
-  const _keyName = 'ctF';
-  async function _dK(p, s) {
-    const e = new TextEncoder();
-    const k = await crypto.subtle.importKey('raw', e.encode(p), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey(
-      { name:'PBKDF2', salt:e.encode(s), iterations:1e5, hash:'SHA-256' },
-      k, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
-    );
+// ================= НАДЁЖНОЕ СОХРАНЕНИЕ =================
+const STORAGE_KEY = 'ctF';
+const STORAGE_VERSION = 2;
+
+function simpleEncrypt(text, key) {
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
   }
-  async function _enc(raw) {
-    const key = await _dK(_pin, _salt);
+  return btoa(result);
+}
+function simpleDecrypt(encBase64, key) {
+  const enc = atob(encBase64);
+  let result = '';
+  for (let i = 0; i < enc.length; i++) {
+    result += String.fromCharCode(enc.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return result;
+}
+
+const secureStorage = {
+  async getKey() {
+    if (window.crypto && window.crypto.subtle) {
+      const pin = '4444';
+      const salt = 'catgame_salt_v1';
+      const enc = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey(
+        { name:'PBKDF2', salt:enc.encode(salt), iterations:100000, hash:'SHA-256' },
+        keyMaterial, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+      );
+    } else {
+      return 'fallback_key';
+    }
+  },
+  async encrypt(data) {
+    const key = await this.getKey();
+    const json = JSON.stringify(data);
+    if (key === 'fallback_key') {
+      return simpleEncrypt(json, '4444');
+    }
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const data = new TextEncoder().encode(JSON.stringify(raw));
-    const buf = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, data);
-    const combo = new Uint8Array(iv.byteLength + buf.byteLength);
-    combo.set(iv, 0);
-    combo.set(new Uint8Array(buf), iv.byteLength);
-    return btoa(String.fromCharCode(...combo));
-  }
-  async function _dec(b64) {
+    const encoded = new TextEncoder().encode(json);
+    const encrypted = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, encoded);
+    const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(encrypted), iv.byteLength);
+    return btoa(String.fromCharCode(...combined));
+  },
+  async decrypt(cipherBase64) {
+    const key = await this.getKey();
+    if (key === 'fallback_key') {
+      try {
+        const dec = simpleDecrypt(cipherBase64, '4444');
+        return JSON.parse(dec);
+      } catch(e) { return null; }
+    }
     try {
-      const key = await _dK(_pin, _salt);
-      const combo = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-      const iv = combo.slice(0,12);
-      const ct = combo.slice(12);
-      const dec = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ct);
-      return JSON.parse(new TextDecoder().decode(dec));
+      const combined = Uint8Array.from(atob(cipherBase64), c => c.charCodeAt(0));
+      const iv = combined.slice(0, 12);
+      const encrypted = combined.slice(12);
+      const decrypted = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, encrypted);
+      return JSON.parse(new TextDecoder().decode(decrypted));
     } catch(e) { return null; }
   }
-  return {
-    async save(data) { try { const enc = await _enc(data); localStorage.setItem(_keyName, enc); } catch(e) {} },
-    async load() { const raw = localStorage.getItem(_keyName); if (!raw) return null; let data = await _dec(raw); if (!data) { try { data = JSON.parse(raw); } catch(e) {} } return data; }
-  };
-})();
+};
 
-async function saveGameAsync() { await _storage.save(packGameData()); }
-function saveGameSync() { saveGameAsync().catch(e => console.error('Save error')); }
-async function loadGameAsync() {
-  let data = await _storage.load();
-  if (data) {
-    applyData(data);
-    return;
+async function saveGameAsync() {
+  const data = packGameData();
+  data._version = STORAGE_VERSION;
+  try {
+    const encrypted = await secureStorage.encrypt(data);
+    localStorage.setItem(STORAGE_KEY, encrypted);
+  } catch(e) {
+    localStorage.setItem(STORAGE_KEY + '_backup', JSON.stringify(data));
   }
-  const oldPlain = localStorage.getItem('catFinal_old');
-  if (oldPlain) {
+}
+function saveGameSync() { saveGameAsync().catch(e => console.error('Save error')); }
+
+async function loadGameAsync() {
+  const encrypted = localStorage.getItem(STORAGE_KEY);
+  if (encrypted) {
+    const data = await secureStorage.decrypt(encrypted);
+    if (data) {
+      applyData(data);
+      return;
+    }
+  }
+  const backup = localStorage.getItem(STORAGE_KEY + '_backup');
+  if (backup) {
     try {
-      const d = JSON.parse(oldPlain);
-      applyData(d);
+      const data = JSON.parse(backup);
+      applyData(data);
+      return;
+    } catch(e) {}
+  }
+  const old = localStorage.getItem('catFinal_old');
+  if (old) {
+    try {
+      const data = JSON.parse(old);
+      applyData(data);
       localStorage.removeItem('catFinal_old');
       await saveGameAsync();
       return;
@@ -1987,10 +2017,10 @@ async function loadGameAsync() {
 function applyData(d) {
   points = d.points || 0; totalPointsEarned = d.totalPointsEarned || 0;
   clickPower = d.clickPower || 1; cps = d.cps || 0;
-  upgradeCounts = d.upgradeCounts || new Array(upgrades.length).fill(0);
-  prestigeLevels = d.prestigeLevels || new Array(upgrades.length).fill(0);
-  selectedSkinIndex = d.selectedSkinIndex ?? 0;
-  shortNumbers = d.shortNumbers !== false;
+  upgradeCounts = d.upgradeCounts || [];
+  prestigeLevels = d.prestigeLevels || [];
+  selectedSkinIndex = d.selectedSkinIndex || 0;
+  shortNumbers = d.shortNumbers !== undefined ? d.shortNumbers : true;
   lastWhiskersTime = d.lastWhiskersTime || 0;
   ownedPets = d.ownedPets || [];
   upgradesHidden = d.upgradesHidden || false;
@@ -2002,11 +2032,15 @@ function applyData(d) {
   whiskersCount = d.whiskersCount || 0; usedPromos = d.usedPromos || [];
   lastAdRewardTime = d.lastAdRewardTime || 0; lastAdClickTime = d.lastAdClickTime || 0;
   lastVkClickTime = d.lastVkClickTime || 0; lastVkRewardTime = d.lastVkRewardTime || 0;
-  if (d.giftsData) giftsData.forEach((g,i) => { if (d.giftsData[i]) g.lastClaimTime = d.giftsData[i]; });
+  if (d.giftsData) {
+    for (let i = 0; i < gifts.length; i++) {
+      if (d.giftsData[i]) gifts[i].lastClaimTime = d.giftsData[i];
+    }
+  }
   cubeFraction = d.cubeFraction || 0;
   chapter2Unlocked = d.chapter2Unlocked || false;
-  chapter2UpgradeCounts = d.chapter2UpgradeCounts || new Array(upgrades2.length).fill(0);
-  chapter2PrestigeLevels = d.chapter2PrestigeLevels || new Array(upgrades2.length).fill(0);
+  chapter2UpgradeCounts = d.chapter2UpgradeCounts || [];
+  chapter2PrestigeLevels = d.chapter2PrestigeLevels || [];
   equippedPetLimit = d.equippedPetLimit || 0;
   equippedPpsLimit = d.equippedPpsLimit || 0;
   ownedShopItems = d.ownedShopItems || [];
@@ -2045,6 +2079,8 @@ window.onload = () => {
     if (upgradesHidden) {
       document.querySelector('.upgrades-area').style.display = 'none';
       hideUpgradesBtn.textContent = '←';
+    } else {
+      document.querySelector('.upgrades-area').style.display = 'block';
     }
     if (chapter2Unlocked) buyChapter2Egg.style.display = 'inline-block';
     petLimitInput.value = equippedPetLimit;
