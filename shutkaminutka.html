@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ пранк-окна</title>
+    <title>⚡ пранк-окна + данные пользователя</title>
     <style>
         * {
             user-select: none;
@@ -16,8 +16,10 @@
             background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
             overflow: hidden;
             position: relative;
+            font-family: 'Segoe UI', 'Courier New', monospace;
         }
 
+        /* Стиль бегающих окон */
         .prank-window {
             position: absolute;
             width: 180px;
@@ -89,6 +91,60 @@
             transform: scale(0.95);
         }
 
+        /* Панель с данными пользователя — на фоне, фиксированная, полупрозрачная, не мешает кликам */
+        .user-data-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            max-width: 320px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 12px 16px;
+            color: #f0f0f0;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            border-left: 5px solid #ffaa44;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            z-index: 10000;
+            pointer-events: none;  /* чтобы не мешать кликам по крестикам */
+            text-shadow: 0 0 2px black;
+            line-height: 1.4;
+            letter-spacing: 0.3px;
+        }
+
+        .user-data-panel h4 {
+            margin: 0 0 6px 0;
+            font-size: 13px;
+            color: #ffdd99;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .user-data-panel .data-row {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #555;
+            padding: 4px 0;
+        }
+
+        .user-data-panel .data-label {
+            font-weight: bold;
+            width: 100px;
+            color: #ffcc88;
+        }
+
+        .user-data-panel .data-value {
+            flex: 1;
+            word-break: break-word;
+            color: #e0e0e0;
+        }
+
+        .ip-loading {
+            color: #ffaa66;
+            font-style: italic;
+        }
+
         @media (max-width: 600px) {
             .prank-window {
                 width: 140px;
@@ -101,20 +157,66 @@
                 height: 26px;
                 font-size: 15px;
             }
+            .user-data-panel {
+                max-width: 260px;
+                font-size: 9px;
+                bottom: 10px;
+                left: 10px;
+                padding: 8px 10px;
+            }
+            .user-data-panel .data-label {
+                width: 80px;
+            }
         }
     </style>
 </head>
 <body>
 
+<!-- Панель с данными пользователя (IP + браузерная информация) -->
+<div class="user-data-panel" id="userDataPanel">
+    <h4>🕵️ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ</h4>
+    <div class="data-row">
+        <div class="data-label">IP-адрес:</div>
+        <div class="data-value" id="ipValue">загрузка...</div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Геолокация:</div>
+        <div class="data-value" id="geoValue">—</div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Браузер / ОС:</div>
+        <div class="data-value" id="uaValue"></div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Экран:</div>
+        <div class="data-value" id="screenValue"></div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Язык:</div>
+        <div class="data-value" id="langValue"></div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Часовой пояс:</div>
+        <div class="data-value" id="tzValue"></div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">Платформа:</div>
+        <div class="data-value" id="platformValue"></div>
+    </div>
+    <div class="data-row">
+        <div class="data-label">User Agent:</div>
+        <div class="data-value" id="rawUA" style="font-size:9px; opacity:0.8;"></div>
+    </div>
+</div>
+
 <script>
-    // НОВОЕ ФОТО (без смайликов, только прямая ссылка)
+    // ---------- ПРАНК С ОКНАМИ (очень быстрые, деление, фото) ----------
     const PRANK_IMAGE_URL = "https://i.ibb.co/xSyTvKCj/3-20260514090235.png";
 
     let createInterval = null;
     let divideInterval = null;
     let animationId = null;
 
-    // создание окна с заданной позицией и скоростью (скорости увеличены в 20 раз)
     function createWindowElement(leftPos, topPos, vx, vy) {
         const winDiv = document.createElement('div');
         winDiv.className = 'prank-window';
@@ -123,7 +225,6 @@
         img.className = 'window-img';
         img.src = PRANK_IMAGE_URL;
         img.alt = "";
-        // при ошибке загрузки просто покажем чёрный фон (никаких смайликов)
         img.onerror = function() {
             this.style.backgroundColor = "#2c2c2c";
             this.style.objectFit = "cover";
@@ -154,7 +255,6 @@
         return winDiv;
     }
     
-    // деление одного окна на два (скорости новых окон тоже очень высокие)
     function divideSingleWindow(oldWindow) {
         if (!oldWindow || !oldWindow.parentNode) return;
         
@@ -170,7 +270,6 @@
         
         oldWindow.remove();
         
-        // смещения позиций
         const randOffset1X = (Math.random() - 0.5) * 45;
         const randOffset1Y = (Math.random() - 0.5) * 45;
         let newLeft1 = left + randOffset1X;
@@ -185,20 +284,17 @@
         newLeft2 = Math.min(Math.max(5, newLeft2), maxX);
         newTop2 = Math.min(Math.max(5, newTop2), maxY);
         
-        // новые скорости — в 20 раз быстрее базовых, с дополнительным хаосом
-        let newVx1 = vx + (Math.random() - 0.5) * 45;    // большие скачки
+        let newVx1 = vx + (Math.random() - 0.5) * 45;
         let newVy1 = vy + (Math.random() - 0.5) * 45;
         let newVx2 = vx + (Math.random() - 0.5) * 45;
         let newVy2 = vy + (Math.random() - 0.5) * 45;
         
-        // пределы: от -120 до 120 (что в 20 раз быстрее исходных -6..6)
         const MAX_SPEED = 120;
         newVx1 = Math.min(Math.max(newVx1, -MAX_SPEED), MAX_SPEED);
         newVy1 = Math.min(Math.max(newVy1, -MAX_SPEED), MAX_SPEED);
         newVx2 = Math.min(Math.max(newVx2, -MAX_SPEED), MAX_SPEED);
         newVy2 = Math.min(Math.max(newVy2, -MAX_SPEED), MAX_SPEED);
         
-        // если скорость слишком маленькая — придаём ускорение
         if (Math.abs(newVx1) < 15) newVx1 += (Math.random() - 0.5) * 30;
         if (Math.abs(newVy1) < 15) newVy1 += (Math.random() - 0.5) * 30;
         if (Math.abs(newVx2) < 15) newVx2 += (Math.random() - 0.5) * 30;
@@ -208,7 +304,6 @@
         createWindowElement(newLeft2, newTop2, newVx2, newVy2);
     }
     
-    // деление ВСЕХ окон каждые 2 секунды
     function divideAllWindows() {
         const allWindows = document.querySelectorAll('.prank-window');
         const windowsSnapshot = Array.from(allWindows);
@@ -219,7 +314,6 @@
         }
     }
     
-    // создание нового окна каждую секунду (скорость увеличена в 20 раз)
     function spawnNewWindow() {
         const winWidth = 180;
         const winHeight = 200;
@@ -229,7 +323,6 @@
         const randLeft = Math.random() * maxX;
         const randTop = Math.random() * maxY;
         
-        // базовая скорость от -120 до 120 (в 20 раз быстрее)
         let randVx = (Math.random() - 0.5) * 240;
         let randVy = (Math.random() - 0.5) * 240;
         if (Math.abs(randVx) < 20) randVx += (Math.random() - 0.5) * 60;
@@ -241,7 +334,6 @@
         createWindowElement(randLeft, randTop, randVx, randVy);
     }
     
-    // анимация движения (очень быстрая)
     function updatePositions() {
         const windows = document.querySelectorAll('.prank-window');
         const screenW = window.innerWidth;
@@ -262,11 +354,9 @@
             let newVx = vx;
             let newVy = vy;
             
-            // отскок от границ с сохранением высокой скорости
             if (newLeft <= 0) {
                 newLeft = 0;
                 newVx = -vx;
-                // небольшой случайный шум при отскоке, чтобы не залипало
                 newVx += (Math.random() - 0.5) * 8;
             }
             if (newLeft + width >= screenW) {
@@ -285,7 +375,6 @@
                 newVy += (Math.random() - 0.5) * 8;
             }
             
-            // ограничиваем скорость после отскока
             const MAX_SPEED = 120;
             newVx = Math.min(Math.max(newVx, -MAX_SPEED), MAX_SPEED);
             newVy = Math.min(Math.max(newVy, -MAX_SPEED), MAX_SPEED);
@@ -299,7 +388,6 @@
         animationId = requestAnimationFrame(updatePositions);
     }
     
-    // адаптация при изменении размера окна
     function handleResize() {
         const windows = document.querySelectorAll('.prank-window');
         const winW = window.innerWidth;
@@ -333,9 +421,7 @@
         }
     }
     
-    // запуск
-    function init() {
-        // стартовое окно с очень высокой скоростью
+    function initPrank() {
         const startX = window.innerWidth / 2 - 90;
         const startY = window.innerHeight / 2 - 100;
         let startVx = (Math.random() - 0.5) * 100;
@@ -354,7 +440,105 @@
         window.addEventListener('resize', handleResize);
     }
     
-    init();
+    // ---------- СБОР И ОТОБРАЖЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ (IP + браузер) ----------
+    async function collectAndShowUserData() {
+        // --- ЛОКАЛЬНЫЕ ДАННЫЕ БРАУЗЕРА ---
+        const userAgent = navigator.userAgent;
+        const language = navigator.language || navigator.userLanguage || "unknown";
+        const platform = navigator.platform || "unknown";
+        const screenWidth = screen.width;
+        const screenHeight = screen.height;
+        const colorDepth = screen.colorDepth;
+        const screenInfo = `${screenWidth}x${screenHeight} (${colorDepth}bit)`;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown";
+        
+        // Заполняем статичные поля (кроме IP, который будет по API)
+        document.getElementById('uaValue').innerText = parseUserAgent(userAgent);
+        document.getElementById('screenValue').innerText = screenInfo;
+        document.getElementById('langValue').innerText = language;
+        document.getElementById('tzValue').innerText = timezone;
+        document.getElementById('platformValue').innerText = platform;
+        document.getElementById('rawUA').innerText = userAgent.length > 80 ? userAgent.substring(0, 77) + "..." : userAgent;
+        
+        // --- ПОЛУЧЕНИЕ IP И ГЕО (через ipapi.co, бесплатно, без ключа) ---
+        try {
+            const ipResponse = await fetch('https://ipapi.co/json/');
+            if (ipResponse.ok) {
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip || "неизвестно";
+                const city = ipData.city || "";
+                const region = ipData.region || "";
+                const country = ipData.country_name || "";
+                let geoString = "";
+                if (city && region) geoString = `${city}, ${region}`;
+                else if (city) geoString = city;
+                else if (region) geoString = region;
+                if (country) geoString += geoString ? `, ${country}` : country;
+                if (!geoString) geoString = "не определено";
+                
+                document.getElementById('ipValue').innerHTML = ip;
+                document.getElementById('geoValue').innerHTML = geoString;
+            } else {
+                throw new Error("IP API error");
+            }
+        } catch (e) {
+            console.warn("Не удалось получить IP:", e);
+            document.getElementById('ipValue').innerHTML = "недоступно (офлайн/блокировка)";
+            document.getElementById('geoValue').innerHTML = "недоступно";
+            // Попробуем резервный вариант: ip-api.com (без https иногда, но лучше ipapi.co уже упал)
+            try {
+                const fallbackResp = await fetch('https://ipapi.co/json/'); // тот же сервис, но повтор
+                if (fallbackResp.ok) {
+                    const data2 = await fallbackResp.json();
+                    document.getElementById('ipValue').innerHTML = data2.ip || "?";
+                    const city2 = data2.city || "";
+                    const country2 = data2.country_name || "";
+                    document.getElementById('geoValue').innerHTML = `${city2} ${country2}`.trim() || "—";
+                }
+            } catch(e2) {}
+        }
+        
+        // Дополнительно: попробуем получить более подробную информацию о браузере (WebGL? не обязательно)
+        // Добавим версию браузера через userAgentData, если доступно
+        if (navigator.userAgentData) {
+            navigator.userAgentData.getHighEntropyValues(["platformVersion", "model", "uaFullVersion"])
+                .then(uaData => {
+                    let extra = [];
+                    if (uaData.platformVersion) extra.push(`OS ver: ${uaData.platformVersion}`);
+                    if (uaData.model) extra.push(`model: ${uaData.model}`);
+                    if (extra.length) {
+                        const currentUA = document.getElementById('uaValue').innerText;
+                        document.getElementById('uaValue').innerText = currentUA + " | " + extra.join(" ");
+                    }
+                }).catch(() => {});
+        }
+    }
+    
+    function parseUserAgent(ua) {
+        // Простое "красивое" представление
+        let os = "Unknown OS";
+        let browser = "Unknown Browser";
+        if (ua.indexOf("Windows NT 10.0") !== -1) os = "Windows 10/11";
+        else if (ua.indexOf("Windows NT 6.1") !== -1) os = "Windows 7";
+        else if (ua.indexOf("Mac OS X") !== -1) os = "macOS";
+        else if (ua.indexOf("Linux") !== -1) os = "Linux";
+        else if (ua.indexOf("Android") !== -1) os = "Android";
+        else if (ua.indexOf("iPhone") !== -1 || ua.indexOf("iPad") !== -1) os = "iOS";
+        
+        if (ua.indexOf("Edg/") !== -1) browser = "Edge";
+        else if (ua.indexOf("Chrome/") !== -1 && ua.indexOf("Edg/") === -1) browser = "Chrome";
+        else if (ua.indexOf("Firefox/") !== -1) browser = "Firefox";
+        else if (ua.indexOf("Safari/") !== -1 && ua.indexOf("Chrome/") === -1) browser = "Safari";
+        else if (ua.indexOf("OPR/") !== -1) browser = "Opera";
+        
+        return `${browser} / ${os}`;
+    }
+    
+    // Запуск всего после загрузки DOM
+    window.addEventListener('DOMContentLoaded', () => {
+        initPrank();               // запуск безумных окон
+        collectAndShowUserData(); // показ данных пользователя на фоне
+    });
 </script>
 </body>
 </html>
