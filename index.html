@@ -39,6 +39,7 @@
     .upgrades-area {
       background:rgba(20,10,0,0.75); backdrop-filter:blur(12px); border-radius:30px;
       padding:12px; flex:1; overflow-y:auto; max-height:80vh;
+      -webkit-overflow-scrolling: touch;
     }
     .cookie-image { width:120px; height:120px; object-fit:contain; border-radius:50%; background:rgba(0,0,0,0.3); padding:8px; cursor:pointer; transition:0.1s; }
     .cookie-image:active { transform:scale(0.9); }
@@ -92,13 +93,14 @@
     .gift-timer { color:#ffd58c; font-weight:bold; }
     .claim-gift-btn { background:#27ae60; border:none; padding:4px 12px; border-radius:15px; color:white; font-weight:bold; cursor:pointer; }
     .ad-banner { margin-top:15px; background:rgba(0,0,0,0.4); padding:10px; border-radius:15px; }
-    .ad-banner img { max-width:100%; cursor:pointer; }
+    .ad-banner img { max-width:100%; cursor:pointer; display:block; margin:0 auto; }
     .referral-box { background:rgba(0,0,0,0.5); border-radius:15px; padding:10px; margin:10px 0; }
     .referral-input { padding:6px; border-radius:10px; border:1px solid #ffaa33; background:rgba(0,0,0,0.7); color:#ffd58c; margin:5px; }
     .title-display { font-size:0.9rem; background:#4a2c0f; padding:2px 10px; border-radius:10px; color:#ffd58c; margin-bottom:5px; }
     @media (max-width:750px) {
       .tab-content { flex-direction:column; }
       .clicker-area { flex:0 0 auto; width:100%; }
+      .upgrades-area { max-height: 50vh; }
     }
   </style>
 </head>
@@ -182,14 +184,14 @@
     <button id="claimDailyBtn" class="egg-btn">Забрать</button>
     <div class="ad-banner">
       <a id="adLink" href="https://aviso.bz/?r=kqt3k" target="_blank">
-        <img src="https://aviso.bz/statica/pictures/A-468.gif" style="width:468px;height:60px" alt="aviso | рекламный сервис">
+        <img src="https://aviso.bz/statica/pictures/A-468.gif" style="width:100%; max-width:468px; height:auto" alt="aviso | рекламный сервис">
       </a>
       <button id="claimAdRewardBtn" class="egg-btn" style="margin-top:8px;">Забрать награду (реклама)</button>
       <div id="adTimerText" style="color:#ffd58c; font-size:0.8rem;"></div>
     </div>
     <div class="ad-banner" style="margin-top:10px;">
       <a id="vkAdLink" href="https://vk.com/club238691099" target="_blank">
-        <img src="https://i.imgur.com/placeholder.png" style="width:200px;height:60px" alt="VK Club"> <!-- замени на реальный баннер -->
+        <img src="https://i127.fastpic.org/big/2026/0514/7b/1d3acdb8dd889f6677796e746967f97b.jpg" style="width:100%; max-width:200px; height:auto" alt="VK Club">
       </a>
       <button id="claimVkRewardBtn" class="egg-btn" style="margin-top:8px;">Забрать награду (ВК)</button>
       <div id="vkAdTimerText" style="color:#ffd58c; font-size:0.8rem;"></div>
@@ -1667,6 +1669,10 @@ accLoginBtn.onclick = async () => {
   const username = accUsername.value.trim();
   const password = accPassword.value.trim();
   if (!username || !password) { accError.textContent = 'Заполните поля'; accError.style.display='block'; return; }
+  if (!serverAvailable) {
+    showNotification('Сервер недоступен. Игра сохранена локально.');
+    return;
+  }
   const res = await apiCall('login', { username, password });
   if (res.error) { accError.textContent = res.error; accError.style.display='block'; }
   else {
@@ -1685,6 +1691,10 @@ accRegisterBtn.onclick = async () => {
   const username = accUsername.value.trim();
   const password = accPassword.value.trim();
   if (!username || password.length < 4) { accError.textContent = 'Пароль минимум 4 символа'; accError.style.display='block'; return; }
+  if (!serverAvailable) {
+    showNotification('Сервер недоступен. Игра сохранена локально.');
+    return;
+  }
   const res = await apiCall('register', { username, password });
   if (res.error) { accError.textContent = res.error; accError.style.display='block'; }
   else {
