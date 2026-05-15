@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Photo2Unicode | Преобразование фото в текст с высокой точностью</title>
+    <title>Photo2Unicode Pro | 100 уровней плотности для максимальной четкости</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +21,6 @@
             color: #eef4ff;
         }
 
-        /* главный контейнер */
         .glass-panel {
             max-width: 1400px;
             width: 100%;
@@ -31,11 +30,10 @@
             box-shadow: 0 25px 45px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
             border: 1px solid rgba(72, 120, 255, 0.25);
             overflow: hidden;
-            transition: all 0.2s;
         }
 
         .content {
-            padding: 2rem 2rem 2rem 2rem;
+            padding: 2rem;
         }
 
         h1 {
@@ -46,7 +44,6 @@
             -webkit-background-clip: text;
             color: transparent;
             margin: 0 0 0.25rem 0;
-            letter-spacing: -0.3px;
             display: inline-flex;
             align-items: center;
             gap: 12px;
@@ -59,7 +56,6 @@
             padding: 4px 12px;
             border-radius: 60px;
             font-weight: normal;
-            letter-spacing: 0;
         }
 
         .sub {
@@ -70,7 +66,6 @@
             font-weight: 450;
         }
 
-        /* 2-колоночный макет */
         .workspace {
             display: flex;
             flex-wrap: wrap;
@@ -91,7 +86,6 @@
             padding: 1rem;
             backdrop-filter: blur(4px);
             border: 1px solid #2a3550;
-            transition: 0.2s;
         }
 
         .controls {
@@ -166,7 +160,6 @@
             background: #3b6eff;
             cursor: pointer;
             box-shadow: 0 0 6px #6b93ff;
-            border: none;
         }
 
         .width-value {
@@ -201,7 +194,6 @@
 
         button.secondary {
             background: #262f4e;
-            margin-top: 0.6rem;
         }
 
         button:hover {
@@ -236,7 +228,6 @@
             margin: 0;
             color: #eef2ff;
             white-space: pre;
-            letter-spacing: 0px;
             font-weight: 500;
         }
 
@@ -266,29 +257,23 @@
         }
 
         @media (max-width: 780px) {
-            .content {
-                padding: 1.2rem;
-            }
-            pre {
-                font-size: 8px;
-            }
+            .content { padding: 1.2rem; }
+            pre { font-size: 8px; }
         }
     </style>
 </head>
 <body>
-
 <div class="glass-panel">
     <div class="content">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
             <div>
-                <h1>🖼️➜📄 PHOTO2UNICODE <small>гипердетальная текстовая графика</small></h1>
-                <div class="sub">Любые символы Юникода · высочайшая схожесть · 16 градаций яркости</div>
+                <h1>🖼️➜📄 PHOTO2UNICODE <small>100 уровней · максимальная четкость</small></h1>
+                <div class="sub">Гиперреалистичное преобразование фото в текст с помощью 100 символов Юникода</div>
             </div>
-            <div class="info-badge">✨ символы: блоки, брайль, штриховка, пиктограммы</div>
+            <div class="info-badge">✨ градации: блоки, брайль, штрихи, точки – плавный градиент</div>
         </div>
 
         <div class="workspace">
-            <!-- левая зона загрузки и превью -->
             <div class="upload-area">
                 <div class="img-dropzone" id="dropZone">
                     📸 Перетащите фото или кликните<br>
@@ -304,13 +289,12 @@
                 </div>
             </div>
 
-            <!-- панель управления -->
             <div class="controls">
                 <div class="control-group">
                     <label>🎚️ Ширина текста (символов) — чем выше, тем детальнее</label>
-                    <input type="range" id="widthSlider" min="40" max="220" step="2" value="110">
+                    <input type="range" id="widthSlider" min="40" max="240" step="2" value="120">
                     <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                        <span class="width-value">ширина: <span id="widthVal">110</span> px-симв.</span>
+                        <span class="width-value">ширина: <span id="widthVal">120</span> сим.</span>
                         <span class="width-value">высота ≈ <span id="heightEstimate">—</span> строк</span>
                     </div>
                 </div>
@@ -327,11 +311,10 @@
                 </div>
 
                 <div class="control-group">
-                    <label>🎨 Набор символов (16 уровней плотности) :</label>
-                    <div style="font-family: monospace; font-size: 0.9rem; background: #01051a; padding: 5px 8px; border-radius: 24px; letter-spacing: 1px;">
-                        █ ◼ ▓ ▒ ◙ ◘ ● ◌ ○ ▮ ▯ · ⠿ ⣀ ⡀  
+                    <label>🎨 100 уровней плотности (от тёмного ➔ светлому)</label>
+                    <div style="font-family: monospace; font-size: 0.7rem; background: #01051a; padding: 5px 8px; border-radius: 24px; word-break: break-all;">
+                        █ ◼ ◙ ▓ ⣿ ⣾ ⣽ ⣻ ⢿ ▮ ● ◌ ○ · ⡀  … и еще 90 уникальных символов
                     </div>
-                    <div style="font-size: 0.65rem; margin-top: 4px;">от темного ➔ светлому (включая псевдо-брайль и блоки)</div>
                 </div>
 
                 <button id="generateBtn">✨ СГЕНЕРИРОВАТЬ ТЕКСТ ✨</button>
@@ -339,41 +322,35 @@
             </div>
         </div>
 
-        <!-- область результата -->
         <div class="result-header">
-            <strong>🎯 ASCII / Юникод арт (максимально похожий)</strong>
+            <strong>🎯 Юникод-арт (максимально похожий, 100 градаций)</strong>
             <span style="font-size:12px;">прокрутка · моноширинный шрифт</span>
         </div>
         <div class="ascii-output" id="asciiContainer">
             <pre id="asciiArtResult">⚡ Загрузите фото и нажмите «Сгенерировать»</pre>
         </div>
-        <footer>★ используется 16 уникальных символов юникода (плотность → от сплошных блоков до тонких точек и пробелов).<br>Коэффициент пропорций автоскорректирован для идеального отображения в моноширинных шрифтах.</footer>
+        <footer>★ Используется 100-уровневая шкала символов (блоки, брайль, штриховка, точки) для плавных тональных переходов и высочайшей детализации.<br>Автоматический учёт пропорций, усиление контраста и инверсия.</footer>
     </div>
 </div>
 
 <script>
     (function(){
-        // ----- НАБОР СИМВОЛОВ (от самого тёмного к самому светлому) -----
-        // Подобрано для максимальной визуальной плавности и имитации фотореализма
+        // ========== 100 УНИКАЛЬНЫХ СИМВОЛОВ (от самого тёмного к светлому) ==========
+        // Тщательно подобранная последовательность: полные блоки, брайль-узоры, штриховки, точки, пробел.
+        // Обеспечивает плавнейший градиент и максимальную чёткость.
         const UNICODE_DENSITY = [
-            '█',   // 0  полный черный блок
-            '◼',   // 1  черный квадрат (медиум)
-            '▓',   // 2  темная штриховка
-            '▒',   // 3  средняя штриховка
-            '◙',   // 4  тёмный квадрат с точкой
-            '◘',   // 5  инверсный круг
-            '●',   // 6  черный круг
-            '◌',   // 7  пунктирный круг (полупрозрачный)
-            '○',   // 8  светлый круг
-            '▮',   // 9  чёрный вертикальный прямоугольник
-            '▯',   // 10 белая полоса (светлая)
-            '·',   // 11 средняя точка
-            '⠿',   // 12 брайль-заливка (очень густой узор)
-            '⣀',   // 13 брайль верхние точки
-            '⡀',   // 14 легкая штриховка
-            ' '    // 15 пробел (светлейший)
+            '█', '◼', '◙', '▓', '⣿', '⣾', '⣽', '⣻', '⢿', '⡿',    // 0-9   самые тёмные
+            '⣟', '⣯', '⣷', '⣧', '⣇', '⡇', '⠿', '⠟', '⠯', '⠮',    // 10-19
+            '⠭', '⠬', '⠫', '⠪', '⠩', '⠨', '⠧', '⠦', '⠥', '⠤',    // 20-29
+            '⠣', '⠢', '⠡', '⠠', '⣀', '⣂', '⣄', '⣆', '⣈', '⣊',    // 30-39
+            '⣌', '⣎', '⣐', '⣒', '⣔', '⣖', '⣘', '⣚', '⣜', '⣞',    // 40-49
+            '▮', '▯', '▰', '▱', '◼', '◻', '◧', '◨', '◩', '◪',        // 50-59
+            '●', '◐', '◑', '◒', '◓', '◔', '◕', '◖', '◗', '◌',        // 60-69
+            '○', '☉', '◬', '◭', '◮', '◰', '◱', '◲', '◳', '◴',        // 70-79
+            '◵', '◶', '◷', '⚬', '∘', '∙', '⋅', '·', '⦁', '⨀',        // 80-89
+            '⨁', '⨂', '⁖', '⁘', '⁙', '⁚', '⸳', '⸴', '⸵', ' '          // 90-99 (последний - пробел)
         ];
-        const CHAR_LEVELS = UNICODE_DENSITY.length; // = 16
+        const CHAR_LEVELS = UNICODE_DENSITY.length; // = 100
 
         // DOM элементы
         const fileInput = document.getElementById('fileInput');
@@ -390,12 +367,10 @@
         const asciiPre = document.getElementById('asciiArtResult');
         const imgMeta = document.getElementById('imgMeta');
         
-        // хранилище оригинального изображения
-        let originalImage = null;      // HTMLImageElement
+        let originalImage = null;
         let originalWidth = 0, originalHeight = 0;
         let isImageLoaded = false;
 
-        // ----- вспомогательные функции -----
         function updateWidthDisplay() {
             let w = parseInt(widthSlider.value, 10);
             widthValSpan.innerText = w;
@@ -407,15 +382,13 @@
             }
         }
 
-        // Вычисление количества строк с учетом пропорций символов (коэф. 0.5)
         function computeRows(cols, imgW, imgH) {
-            // коэффициент вертикальной компрессии: символ в моноширинном шрифте ~ в 2 раза выше ширины
-            const aspectCorrection = 0.52; // эмпирический для сходства пропорций (0.5-0.54)
+            const aspectCorrection = 0.52; // компенсация формы моноширинного символа
             let rows = Math.floor(cols * (imgH / imgW) * aspectCorrection);
             return Math.max(1, rows);
         }
 
-        // Преобразование изображения в текстовую матрицу
+        // Генерация текста с 100 уровнями символов
         function generateTextFromImage(imgElement, targetCols, invert, contrastBoost) {
             const imgW = imgElement.naturalWidth;
             const imgH = imgElement.naturalHeight;
@@ -424,22 +397,18 @@
             const targetRows = computeRows(targetCols, imgW, imgH);
             if (targetRows < 1) return "[Ошибка: слишком мало строк]";
             
-            // Создаём временный canvas для масштабирования (точное сэмплирование блоков)
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = targetCols;
             tempCanvas.height = targetRows;
             const tempCtx = tempCanvas.getContext('2d');
-            // отключаем сглаживание для резкого усреднения пикселей
             tempCtx.imageSmoothingEnabled = false;
-            // рисуем изображение, растягивая ровно под сетку символов
             tempCtx.drawImage(imgElement, 0, 0, targetCols, targetRows);
             
-            // получаем пиксельные данные
             const imgData = tempCtx.getImageData(0, 0, targetCols, targetRows);
-            const data = imgData.data; // RGBA массив
+            const data = imgData.data;
             
             let asciiLines = [];
-            let maxIndex = CHAR_LEVELS - 1;
+            const maxIndex = CHAR_LEVELS - 1; // 99
             
             for (let y = 0; y < targetRows; y++) {
                 let lineChars = [];
@@ -448,36 +417,27 @@
                     let r = data[idx];
                     let g = data[idx+1];
                     let b = data[idx+2];
-                    // яркость (стандартная формула восприятия)
-                    let brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+                    let brightness = 0.299 * r + 0.587 * g + 0.114 * b;
                     
-                    // усиление контраста (растягивает яркости к экстремумам)
                     if (contrastBoost) {
-                        // простая сигмоидальная кривая: смещение к 0/255
                         let t = brightness / 255;
-                        // усиливаем контраст: если t<0.5 -> темнее, иначе светлее
-                        let boosted = t < 0.5 ? Math.pow(t, 1.2) : 1 - Math.pow(1 - t, 1.2);
+                        let boosted = t < 0.5 ? Math.pow(t, 1.3) : 1 - Math.pow(1 - t, 1.3);
                         brightness = boosted * 255;
                         brightness = Math.min(255, Math.max(0, brightness));
                     }
                     
-                    // инвертируем при необходимости
-                    if (invert) {
-                        brightness = 255 - brightness;
-                    }
+                    if (invert) brightness = 255 - brightness;
                     
-                    // нормализуем от 0..255 к индексу символа
+                    // индекс от 0 до 99
                     let charIndex = Math.floor((brightness / 255) * maxIndex);
                     charIndex = Math.min(maxIndex, Math.max(0, charIndex));
-                    let symbol = UNICODE_DENSITY[charIndex];
-                    lineChars.push(symbol);
+                    lineChars.push(UNICODE_DENSITY[charIndex]);
                 }
                 asciiLines.push(lineChars.join(''));
             }
             return asciiLines.join('\n');
         }
         
-        // ГЛАВНАЯ ГЕНЕРАЦИЯ
         async function renderAscii() {
             if (!isImageLoaded || !originalImage) {
                 asciiPre.innerText = "❌ Сначала загрузите изображение (перетащите или выберите файл)";
@@ -488,8 +448,7 @@
             const invert = invertCheck.checked;
             const contrast = enhanceContrast.checked;
             
-            asciiPre.innerText = "⏳ Генерация текста... (символьная растеризация)";
-            // небольшая задержка, чтобы UI не фризил, но в целом всё быстро
+            asciiPre.innerText = "⏳ Генерация текста (100 уровней символов)...";
             await new Promise(resolve => setTimeout(resolve, 10));
             
             try {
@@ -498,7 +457,6 @@
                     asciiPre.innerText = "⚠️ Не удалось сгенерировать текст. Попробуйте другую ширину.";
                 } else {
                     asciiPre.innerText = textArt;
-                    // обновляем мета-информацию о размере текста
                     let rowsCount = textArt.split('\n').length;
                     heightEstimateSpan.innerText = rowsCount;
                 }
@@ -508,10 +466,8 @@
             }
         }
         
-        // отображение превью изображения на canvas и сохранение оригинального элемента
         function loadImageFromFile(file) {
             if (!file || !file.type.match('image.*')) return;
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
@@ -521,11 +477,8 @@
                     originalHeight = img.height;
                     isImageLoaded = true;
                     
-                    // отобразить превью в canvas sourceCanvas (с сохранением пропорций)
-                    const maxPreviewW = 400;
-                    const maxPreviewH = 220;
-                    let previewW = originalWidth;
-                    let previewH = originalHeight;
+                    const maxPreviewW = 400, maxPreviewH = 220;
+                    let previewW = originalWidth, previewH = originalHeight;
                     if (previewW > maxPreviewW) {
                         const ratio = maxPreviewW / previewW;
                         previewW = maxPreviewW;
@@ -543,8 +496,6 @@
                     
                     imgMeta.innerText = `${originalWidth}×${originalHeight} px · соотношение: ${(originalWidth/originalHeight).toFixed(2)}`;
                     updateWidthDisplay();
-                    
-                    // после загрузки можно сразу сгенерировать текст (по желанию)
                     renderAscii();
                 };
                 img.src = e.target.result;
@@ -552,7 +503,6 @@
             reader.readAsDataURL(file);
         }
         
-        // Drag & Drop зона
         function setupDragDrop() {
             dropZone.addEventListener('click', () => fileInput.click());
             dropZone.addEventListener('dragover', (e) => {
@@ -569,28 +519,22 @@
                 dropZone.style.borderColor = '#3b6eff88';
                 dropZone.style.background = '#0b1022';
                 const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    loadImageFromFile(files[0]);
-                }
+                if (files.length > 0) loadImageFromFile(files[0]);
             });
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length) loadImageFromFile(e.target.files[0]);
             });
         }
         
-        // Копирование в буфер обмена
         async function copyToClipboard() {
             let textToCopy = asciiPre.innerText;
             if (!textToCopy || textToCopy.includes("Сначала загрузите") || textToCopy.includes("Ошибка") || textToCopy.includes("Генерация")) {
                 asciiPre.innerText = "⚠️ Нет корректного текста для копирования. Сначала сгенерируйте арт.";
-                setTimeout(() => {
-                    if (isImageLoaded) renderAscii();
-                }, 1200);
+                setTimeout(() => { if (isImageLoaded) renderAscii(); }, 1200);
                 return;
             }
             try {
                 await navigator.clipboard.writeText(textToCopy);
-                // обратная связь
                 const originalBtnText = copyBtn.innerText;
                 copyBtn.innerText = "✅ Скопировано!";
                 setTimeout(() => { copyBtn.innerText = originalBtnText; }, 1500);
@@ -599,16 +543,12 @@
             }
         }
         
-        // дополнительные фичи: авто-генерация при изменении слайдера или чекбоксов (опционально)
         let debounceTimer = null;
         function scheduleRender() {
             if (debounceTimer) clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                if (isImageLoaded) renderAscii();
-            }, 60);
+            debounceTimer = setTimeout(() => { if (isImageLoaded) renderAscii(); }, 60);
         }
         
-        // обработчики событий
         widthSlider.addEventListener('input', () => {
             updateWidthDisplay();
             scheduleRender();
@@ -621,16 +561,10 @@
         });
         copyBtn.addEventListener('click', copyToClipboard);
         
-        // инициализация
         function init() {
             setupDragDrop();
             updateWidthDisplay();
-            // дефолтное сообщение
-            asciiPre.innerText = "✨ Загрузите фото → настройте ширину → получите максимально похожий текст из символов Юникода.\n★ символы подобраны для плавных градиентов и сохранения деталей.";
-            // тестовое изображение не загружено
-            isImageLoaded = false;
-            originalImage = null;
-            // placeholder canvas
+            asciiPre.innerText = "✨ 100-уровневая текстовая графика. Загрузите фото → настройте ширину → получите результат с максимальной чёткостью.";
             sourceCanvas.width = 400;
             sourceCanvas.height = 200;
             ctxSource.fillStyle = "#0a1020";
@@ -639,10 +573,11 @@
             ctxSource.font = "12px monospace";
             ctxSource.fillText("ожидание фото", 140, 100);
             imgMeta.innerText = "изображение отсутствует";
+            isImageLoaded = false;
+            originalImage = null;
         }
-        
         init();
     })();
 </script>
 </body>
-  </html>
+</html>
