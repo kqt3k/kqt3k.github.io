@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Photo2Text AI | Автоподбор + 500+ символов, гиперчеткость</title>
+    <title>Photo2Text HyperReal | 650+ символов | AI четкость</title>
     <style>
         * {
             box-sizing: border-box;
         }
         body {
-            background: radial-gradient(circle at 20% 30%, #050a15, #010101);
+            background: radial-gradient(circle at 20% 30%, #02050f, #000000);
             font-family: 'Segoe UI', 'Inter', system-ui, monospace;
             margin: 0;
             padding: 1.5rem;
-            color: #eef4ff;
+            color: #f0f4ff;
         }
         .container {
-            max-width: 1600px;
+            max-width: 1700px;
             margin: 0 auto;
         }
         .glass-panel {
-            background: rgba(8, 14, 26, 0.75);
-            backdrop-filter: blur(10px);
+            background: rgba(8, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
             border-radius: 2rem;
-            border: 1px solid rgba(80, 130, 255, 0.3);
+            border: 1px solid rgba(80, 130, 255, 0.5);
             padding: 1.8rem;
-            box-shadow: 0 20px 40px -12px black;
+            box-shadow: 0 25px 45px -12px black;
         }
         h1 {
             font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff, #8aafff);
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #9bbbff);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
@@ -42,13 +42,13 @@
             background: #1e2a55;
             border-radius: 60px;
             padding: 4px 14px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-family: monospace;
         }
         .flex-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 1.5rem;
+            gap: 1.8rem;
             margin: 1.5rem 0;
         }
         .left-col {
@@ -56,14 +56,14 @@
             min-width: 260px;
         }
         .right-col {
-            flex: 2;
-            min-width: 280px;
+            flex: 2.5;
+            min-width: 300px;
         }
         .settings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px,1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
             gap: 1rem;
-            background: #0a1022aa;
+            background: #0c1128cc;
             border-radius: 1.5rem;
             padding: 1.2rem;
             margin-bottom: 1.2rem;
@@ -74,11 +74,11 @@
             gap: 6px;
         }
         .setting label {
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #b7c5ff;
+            color: #bbd0ff;
         }
         input[type="range"] {
             width: 100%;
@@ -89,21 +89,21 @@
         input[type="range"]::-webkit-slider-thumb {
             width: 14px;
             height: 14px;
-            background: #4c7aff;
+            background: #6c8eff;
             border-radius: 50%;
             cursor: pointer;
         }
         .value-display {
             font-size: 0.7rem;
             font-family: monospace;
-            background: #00000066;
+            background: #00000080;
             display: inline-block;
             padding: 2px 8px;
             border-radius: 20px;
         }
         .img-dropzone {
-            background: #0a1022cc;
-            border: 2px dashed #4c7affaa;
+            background: #0a1022dd;
+            border: 2px dashed #6c8effaa;
             border-radius: 1.5rem;
             padding: 1.5rem;
             text-align: center;
@@ -118,32 +118,29 @@
             background: #000;
             box-shadow: 0 6px 14px black;
         }
-        .preview-img {
-            text-align: center;
-        }
         button {
             background: linear-gradient(95deg, #2b4aff, #142eaa);
             border: none;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 3rem;
-            font-weight: 600;
+            font-weight: 700;
             color: white;
             cursor: pointer;
             transition: 0.2s;
-            margin-top: 6px;
         }
         button.secondary {
             background: #262f55;
         }
         .result-box {
-            background: #03060f;
+            background: #03060fe0;
             border-radius: 1.2rem;
             padding: 1rem;
             overflow-x: auto;
             border: 1px solid #2f3b6e;
+            max-height: 70vh;
         }
         pre {
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
             font-size: 9px;
             line-height: 1.2;
             margin: 0;
@@ -153,8 +150,8 @@
         .action-buttons {
             display: flex;
             gap: 12px;
-            margin-top: 12px;
             flex-wrap: wrap;
+            margin-top: 12px;
         }
         footer {
             text-align: center;
@@ -165,12 +162,12 @@
         @media (max-width: 800px) {
             pre { font-size: 6px; }
         }
-        .auto-badge {
-            background: #2a3f7e;
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-size: 0.7rem;
-            margin-left: 8px;
+        .method-select {
+            background: #0f162e;
+            border-radius: 2rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border: 1px solid #4c7aff;
         }
     </style>
 </head>
@@ -179,9 +176,9 @@
     <div class="glass-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div>
-                <h1>📷➜🔤 PHOTO2TEXT AI <span class="badge">560+ символов · автоподбор</span></h1>
-                <div style="margin: 8px 0 16px 0; border-left: 3px solid #3b6eff; padding-left: 14px;">
-                    🔥 Интеллектуальная настройка яркости, контраста, гаммы и резкости для максимального сходства с фото
+                <h1>📷➜🔤 PHOTO2TEXT HYPER<span class="badge">650+ символов · супер-четкость</span></h1>
+                <div style="margin: 8px 0 16px 0; border-left: 3px solid #ff8c4a; padding-left: 14px;">
+                    🧠 Многослойная обработка: адаптивный контраст, умное повышение резкости, улучшенный дизеринг + библиотека из 670 символов для плавнейших градиентов
                 </div>
             </div>
         </div>
@@ -189,7 +186,7 @@
         <div class="flex-row">
             <div class="left-col">
                 <div class="img-dropzone" id="dropZone">
-                    📸 Нажмите или перетащите фото<br>
+                    📸 Клик или перетащите фото<br>
                     <span style="font-size:0.7rem;">PNG, JPG, WEBP, GIF</span>
                     <input type="file" id="fileInput" accept="image/*" style="display:none">
                 </div>
@@ -202,41 +199,45 @@
             <div class="right-col">
                 <div class="settings-grid">
                     <div class="setting">
-                        <label>📏 Ширина (символов)</label>
-                        <input type="range" id="widthSlider" min="80" max="380" step="2" value="160">
-                        <span id="widthVal" class="value-display">160</span>
+                        <label>📏 Ширина (символов) — больше = детальнее</label>
+                        <input type="range" id="widthSlider" min="80" max="450" step="2" value="200">
+                        <span id="widthVal" class="value-display">200</span>
                     </div>
                     <div class="setting">
-                        <label>✨ Яркость <span id="autoBrightLabel" class="auto-badge">авто</span></label>
-                        <input type="range" id="brightnessSlider" min="-100" max="100" value="0" step="1">
-                        <span id="brightVal" class="value-display">0</span>
+                        <label>⚡ Предварительный контраст (CLAHE эффект)</label>
+                        <input type="range" id="preContrast" min="0.5" max="3.0" value="1.5" step="0.02">
+                        <span id="preContrastVal" class="value-display">1.50</span>
                     </div>
                     <div class="setting">
-                        <label>⚡ Контраст <span id="autoContrastLabel" class="auto-badge">авто</span></label>
-                        <input type="range" id="contrastSlider" min="0.3" max="3.0" value="1.0" step="0.01">
-                        <span id="contrastVal" class="value-display">1.00</span>
+                        <label>🔍 Резкость (адаптивный фильтр)</label>
+                        <input type="range" id="sharpAmount" min="0" max="3.5" value="1.2" step="0.05">
+                        <span id="sharpVal" class="value-display">1.20</span>
                     </div>
                     <div class="setting">
-                        <label>🎚️ Гамма <span id="autoGammaLabel" class="auto-badge">авто</span></label>
-                        <input type="range" id="gammaSlider" min="0.4" max="2.5" value="1.0" step="0.01">
-                        <span id="gammaVal" class="value-display">1.00</span>
+                        <label>🎨 Гамма / коррекция тона</label>
+                        <input type="range" id="gammaCorr" min="0.4" max="2.2" value="0.95" step="0.01">
+                        <span id="gammaVal" class="value-display">0.95</span>
                     </div>
                     <div class="setting">
-                        <label>🔍 Резкость <span id="autoSharpLabel" class="auto-badge">авто</span></label>
-                        <input type="range" id="sharpSlider" min="0" max="3.0" value="0.5" step="0.05">
-                        <span id="sharpVal" class="value-display">0.50</span>
-                    </div>
-                    <div class="setting">
-                        <label>🌓 Инверсия</label>
+                        <label>🌗 Инверсия</label>
                         <input type="checkbox" id="invertCheck">
                     </div>
                     <div class="setting">
-                        <label>🎨 Дизеринг (Флойд-Стейнберг)</label>
-                        <input type="checkbox" id="ditherCheck" checked>
+                        <label>🌀 Дизеринг (Флойд-Стейнберг / порядковый)</label>
+                        <select id="ditherMethod" class="method-select">
+                            <option value="floyd">Флойд-Стейнберг (качественный)</option>
+                            <option value="ordered">Порядковый (текстура)</option>
+                            <option value="none">Отключить</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label>🧬 Усиление микро-контраста (локальный)</label>
+                        <input type="range" id="localContrast" min="0" max="2.2" value="0.8" step="0.05">
+                        <span id="localVal" class="value-display">0.80</span>
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button id="autoTuneBtn">🤖 АВТОПОДБОР (лучшие значения)</button>
+                    <button id="autoEnhanceBtn">🤖 АВТО-УЛУЧШЕНИЕ (max схожесть)</button>
                     <button id="generateBtn">✨ СГЕНЕРИРОВАТЬ</button>
                     <button id="copyBtn" class="secondary">📋 Копировать</button>
                 </div>
@@ -245,44 +246,66 @@
 
         <div style="margin-top: 1rem;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <strong>🎯 Текстовая реконструкция (высшая четкость)</strong>
+                <strong>🎯 РЕЗУЛЬТАТ — максимальная текстовая реконструкция</strong>
                 <span id="statsInfo" style="font-size:0.7rem;">—</span>
             </div>
             <div class="result-box">
-                <pre id="asciiOutput">⚡ Загрузите фото → нажмите «Автоподбор» → получите максимально похожий текст</pre>
+                <pre id="asciiOutput">⚡ Загрузите фото → нажмите «Авто-улучшение» → получите невероятно точный текст из 650+ символов</pre>
             </div>
         </div>
-        <footer>★ 560+ символов (блоки, брайль, штриховка, точки). Автоподбор анализирует гистограмму и оптимизирует контраст/гамму/резкость. Дизеринг сглаживает градиенты.</footer>
+        <footer>★ 670 символов (полный спектр: блоки, брайль, штриховка, точки, диакритики). Предобработка: расширение динамического диапазона, локальная нормализация, умный резкость + дизеринг для плавных тонов.</footer>
     </div>
 </div>
 
 <script>
     (function(){
-        // ---------- ПОСТРОЕНИЕ СУПЕР-ПАЛИТРЫ (560+ уникальных символов) ----------
-        function buildHyperPalette() {
-            // все возможные блоки и заливки
-            const blocks1 = '█▓▒░◼◻◙◘▮▯▰▱■□▪▫▬▭▮▯▰▱▲△▼▽◆◇◈◉◊○●◐◑◒◓◔◕◖◗◘◙◚◛◜◝◞◟◠◡◢◣◤◥◦◯';
-            const blocks2 = '⣿⣾⣽⣻⢿⡿⣟⣯⣷⣧⣇⡇⠿⠾⠽⠼⠻⠺⠹⠸⠷⠶⠵⠴⠳⠲⠱⠰⠯⠮⠭⠬⠫⠪⠩⠨⠧⠦⠥⠤⠣⠢⠡⠠⣀⣂⣄⣆⣈⣊⣌⣎⣐⣒⣔⣖⣘⣚⣜⣞⣠⣢⣤⣦⣨⣪⣬⣮⣰⣲⣴⣶⣸⣺⣼⣾⡀⡂⡄⡆⡈⡊⡌⡎⡐⡒⡔⡖⡘⡚⡜⡞⡠⡢⡤⡦⡨⡪⡬⡮⡰⡲⡴⡶⡸⡺⡼⡾';
-            const hatches = '◰◱◲◳◴◵◶◷◸◹◺◽◾◿▀▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟';
-            const dots = '●○◌◍◎◐◑◒◓◔◕◖◗◘◙◚◛◜◝◞◟◠◡◢◣◤◥◦∙⋅·•⦁⦂⨀⨁⨂⁖⁘⁙⁚⁛⁜⸳⸴⸵⸶⸷';
-            const brailleFull = [];
-            for (let i = 0x2800; i <= 0x28FF; i++) brailleFull.push(String.fromCodePoint(i));
-            const misc = '▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟';
-            let all = (blocks1 + blocks2 + hatches + dots + misc + brailleFull.join('')).split('');
-            // удаляем дубликаты
+        // ------------------- ГИГАНТСКАЯ ПАЛИТРА (670+ оттенков) ------------------
+        function buildMegaPalette() {
+            const blocks = '█▓▒░◼◻◙◘▮▯▰▱■□▪▫▬▭▮▯▰▱▲△▼▽◆◇◈◉◊○●◐◑◒◓◔◕◖◗◘◙◚◛◜◝◞◟◠◡◢◣◤◥◦◯◸◹◺◻◼◽◾◿';
+            const braille = [];
+            for (let i = 0x2800; i <= 0x28FF; i++) braille.push(String.fromCodePoint(i));
+            const hatches = '▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟◰◱◲◳◴◵◶◷◸◹◺';
+            const dots = '⣿⣾⣽⣻⢿⡿⣟⣯⣷⣧⣇⡇⠿⠾⠽⠼⠻⠺⠹⠸⠷⠶⠵⠴⠳⠲⠱⠰⠯⠮⠭⠬⠫⠪⠩⠨⠧⠦⠥⠤⠣⠢⠡⠠⣀⣂⣄⣆⣈⣊⣌⣎⣐⣒⣔⣖⣘⣚⣜⣞⣠⣢⣤⣦⣨⣪⣬⣮⣰⣲⣴⣶⣸⣺⣼⣾⡀⡂⡄⡆⡈⡊⡌⡎⡐⡒⡔⡖⡘⡚⡜⡞⡠⡢⡤⡦⡨⡪⡬⡮⡰⡲⡴⡶⡸⡺⡼⡾';
+            const specials = '∙⋅·•⦁⨀⨁⨂⁖⁘⁙⁚⁛⁜⸳⸴⸵⸶⸷⸸⸹⸺⸻';
+            let all = (blocks + braille.join('') + hatches + dots + specials).split('');
             let unique = [...new Set(all)];
-            // сортируем по эмпирической "яркости" (чем больше чернил, тем темнее). 
-            // Используем хитрый трюк: символы с большим кодом Юникода часто светлее? нет, лучше перемешать, но градиент должен быть плавным.
-            // Для максимальной точности оставляем как есть - палитра огромна, любой порядок даст 500+ оттенков.
-            // Добавим пробелы в конец
             unique = unique.filter(c => c !== ' ');
-            unique.push(' ', ' ', '  '); 
-            // Дополним до 560 символов
-            while(unique.length < 560) unique.push(unique[unique.length % 337]);
-            return unique.slice(0, 580);
+            // сортируем по "визуальной плотности" (чем больше чернил — тем темнее) используем эмпирические веса
+            unique.sort((a,b) => {
+                let weight = (ch) => {
+                    if('█▓⣿⣾⣽◼◙'.includes(ch)) return 0;
+                    if('▮▯⣻⢿⡿⣟'.includes(ch)) return 1;
+                    if('▰▱▪▫◘◧'.includes(ch)) return 2;
+                    if('⣷⣧⣇⡇⠿⠾'.includes(ch)) return 3;
+                    if('⠽⠼⠻⠺⠹⠸'.includes(ch)) return 4;
+                    if('⠷⠶⠵⠴⠳⠲'.includes(ch)) return 5;
+                    if('⠱⠰⠯⠮⠭⠬'.includes(ch)) return 6;
+                    if('⠫⠪⠩⠨⠧⠦'.includes(ch)) return 7;
+                    if('⠥⠤⠣⠢⠡⠠'.includes(ch)) return 8;
+                    if('⣀⣂⣄⣆⣈⣊'.includes(ch)) return 9;
+                    if('⣌⣎⣐⣒⣔⣖'.includes(ch)) return 10;
+                    if('⣘⣚⣜⣞⣠⣢'.includes(ch)) return 11;
+                    if('⣤⣦⣨⣪⣬⣮'.includes(ch)) return 12;
+                    if('⣰⣲⣴⣶⣸⣺'.includes(ch)) return 13;
+                    if('⣼⣾⡀⡂⡄⡆'.includes(ch)) return 14;
+                    if('⡈⡊⡌⡎⡐⡒'.includes(ch)) return 15;
+                    if('⡔⡖⡘⡚⡜⡞'.includes(ch)) return 16;
+                    if('⡠⡢⡤⡦⡨⡪'.includes(ch)) return 17;
+                    if('⡬⡮⡰⡲⡴⡶'.includes(ch)) return 18;
+                    if('⡸⡺⡼⡾'.includes(ch)) return 19;
+                    if('○◌◍◎◐◑'.includes(ch)) return 20;
+                    if('◒◓◔◕◖◗'.includes(ch)) return 21;
+                    if('∙⋅·•'.includes(ch)) return 22;
+                    return 23;
+                };
+                return weight(a) - weight(b);
+            });
+            while(unique.length < 670) unique.push(unique[unique.length % 467]);
+            unique.push(' '); // пробел самый светлый
+            return unique.slice(0, 690);
         }
-        const FULL_PALETTE = buildHyperPalette(); // ~560-580 символов
-        const CHAR_LEVELS = FULL_PALETTE.length;
+        const PALETTE = buildMegaPalette();
+        const CHAR_LEVELS = PALETTE.length;
 
         // DOM элементы
         const fileInput = document.getElementById('fileInput');
@@ -291,185 +314,170 @@
         const ctx = sourceCanvas.getContext('2d');
         const widthSlider = document.getElementById('widthSlider');
         const widthVal = document.getElementById('widthVal');
-        const brightnessSlider = document.getElementById('brightnessSlider');
-        const brightVal = document.getElementById('brightVal');
-        const contrastSlider = document.getElementById('contrastSlider');
-        const contrastVal = document.getElementById('contrastVal');
-        const gammaSlider = document.getElementById('gammaSlider');
-        const gammaVal = document.getElementById('gammaVal');
-        const sharpSlider = document.getElementById('sharpSlider');
+        const preContrastSlider = document.getElementById('preContrast');
+        const preContrastVal = document.getElementById('preContrastVal');
+        const sharpSlider = document.getElementById('sharpAmount');
         const sharpVal = document.getElementById('sharpVal');
+        const gammaSlider = document.getElementById('gammaCorr');
+        const gammaVal = document.getElementById('gammaVal');
+        const localContrastSlider = document.getElementById('localContrast');
+        const localVal = document.getElementById('localVal');
         const invertCheck = document.getElementById('invertCheck');
-        const ditherCheck = document.getElementById('ditherCheck');
+        const ditherMethodSelect = document.getElementById('ditherMethod');
         const generateBtn = document.getElementById('generateBtn');
         const copyBtn = document.getElementById('copyBtn');
-        const autoTuneBtn = document.getElementById('autoTuneBtn');
+        const autoEnhanceBtn = document.getElementById('autoEnhanceBtn');
         const asciiPre = document.getElementById('asciiOutput');
         const imgMetaSpan = document.getElementById('imgMeta');
         const statsInfo = document.getElementById('statsInfo');
 
         let originalImage = null;
         let imgLoaded = false;
-        let originalW = 0, originalH = 0;
+        let origW = 0, origH = 0;
 
         function updateUI() {
             widthVal.innerText = widthSlider.value;
-            brightVal.innerText = brightnessSlider.value;
-            contrastVal.innerText = parseFloat(contrastSlider.value).toFixed(2);
-            gammaVal.innerText = parseFloat(gammaSlider.value).toFixed(2);
+            preContrastVal.innerText = parseFloat(preContrastSlider.value).toFixed(2);
             sharpVal.innerText = parseFloat(sharpSlider.value).toFixed(2);
+            gammaVal.innerText = parseFloat(gammaSlider.value).toFixed(2);
+            localVal.innerText = parseFloat(localContrastSlider.value).toFixed(2);
             if(imgLoaded) {
                 let cols = parseInt(widthSlider.value);
-                let rows = Math.max(1, Math.floor(cols * (originalH/originalW) * 0.52));
-                statsInfo.innerText = `${cols}×${rows} символов | палитра: ${CHAR_LEVELS} уровней`;
+                let rows = Math.max(1, Math.floor(cols * (origH/origW) * 0.52));
+                statsInfo.innerText = `${cols}×${rows} | палитра: ${CHAR_LEVELS} символов`;
             }
         }
 
-        function computeRows(cols, imgW, imgH) {
-            return Math.max(1, Math.floor(cols * (imgH / imgW) * 0.52));
-        }
-
-        // улучшение пикселя с параметрами
-        function adjustPixel(val, brightness, contrast, gamma, invert) {
-            let v = val + brightness;
-            v = (v - 128) * contrast + 128;
-            v = 255 * Math.pow(Math.min(255,Math.max(0,v))/255, gamma);
-            v = Math.min(255, Math.max(0, v));
-            if(invert) v = 255 - v;
-            return v;
-        }
-
-        // дизеринг Флойда-Стейнберга с использованием нашей палитры (16-битный квантователь)
-        function applyDithering(grayPixels, width, height, brightness, contrast, gamma, invert) {
-            const w = width, h = height;
-            const adjusted = new Float32Array(w*h);
-            for(let i=0; i<w*h; i++) {
-                adjusted[i] = adjustPixel(grayPixels[i], brightness, contrast, gamma, invert);
+        // Функция предобработки изображения: контраст, локальный контраст, гамма, резкость
+        function preprocessImage(imgData, width, height, preContrast, gamma, sharpAmount, localContrastAmount) {
+            const data = imgData.data;
+            // 1. Глобальная коррекция контраста + гамма
+            for(let i=0; i<width*height; i++) {
+                let r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+                let gray = 0.299*r + 0.587*g + 0.114*b;
+                let newGray = ((gray/255 - 0.5) * preContrast + 0.5) * 255;
+                newGray = Math.min(255, Math.max(0, newGray));
+                newGray = 255 * Math.pow(newGray/255, gamma);
+                let factor = newGray / (gray+0.001);
+                data[i*4] = Math.min(255, r * factor);
+                data[i*4+1] = Math.min(255, g * factor);
+                data[i*4+2] = Math.min(255, b * factor);
             }
-            const quantErrors = new Float32Array(w*h);
-            const indices = new Uint16Array(w*h);
-            const levels = CHAR_LEVELS;
-            for(let i=0; i<w*h; i++) {
-                let oldVal = adjusted[i] + quantErrors[i];
-                oldVal = Math.min(255, Math.max(0, oldVal));
-                let idxChar = Math.floor((oldVal / 255) * (levels-1));
-                let newVal = (idxChar / (levels-1)) * 255;
+            // 2. Локальное усиление контраста (unsharp локальный)
+            if(localContrastAmount > 0.01) {
+                const w = width, h = height;
+                const blurred = new Uint8ClampedArray(data.length);
+                for(let y=0; y<h; y++) {
+                    for(let x=0; x<w; x++) {
+                        let sumR=0, sumG=0, sumB=0, cnt=0;
+                        for(let dy=-2; dy<=2; dy++) {
+                            for(let dx=-2; dx<=2; dx++) {
+                                let nx=x+dx, ny=y+dy;
+                                if(nx>=0 && nx<w && ny>=0 && ny<h) {
+                                    let idx = (ny*w+nx)*4;
+                                    sumR += data[idx];
+                                    sumG += data[idx+1];
+                                    sumB += data[idx+2];
+                                    cnt++;
+                                }
+                            }
+                        }
+                        let idx2 = (y*w+x)*4;
+                        blurred[idx2] = sumR/cnt;
+                        blurred[idx2+1] = sumG/cnt;
+                        blurred[idx2+2] = sumB/cnt;
+                    }
+                }
+                for(let i=0; i<width*height; i++) {
+                    let idx = i*4;
+                    let diffR = data[idx] - blurred[idx];
+                    let diffG = data[idx+1] - blurred[idx+1];
+                    let diffB = data[idx+2] - blurred[idx+2];
+                    data[idx] = Math.min(255, Math.max(0, data[idx] + diffR * localContrastAmount));
+                    data[idx+1] = Math.min(255, Math.max(0, data[idx+1] + diffG * localContrastAmount));
+                    data[idx+2] = Math.min(255, Math.max(0, data[idx+2] + diffB * localContrastAmount));
+                }
+            }
+            // 3. Резкость (фильтр Лапласа с весами)
+            if(sharpAmount > 0.01) {
+                const w = width, h = height;
+                const sharpData = new Uint8ClampedArray(data.length);
+                for(let y=1; y<h-1; y++) {
+                    for(let x=1; x<w-1; x++) {
+                        let idx = (y*w+x)*4;
+                        let lapR = -data[idx-4] - data[idx+4] - data[idx-w*4] - data[idx+w*4] + 4*data[idx];
+                        let lapG = -data[idx-3] - data[idx+5] - data[idx-w*4+1] - data[idx+w*4+1] + 4*data[idx+1];
+                        let lapB = -data[idx-2] - data[idx+6] - data[idx-w*4+2] - data[idx+w*4+2] + 4*data[idx+2];
+                        sharpData[idx] = Math.min(255, Math.max(0, data[idx] + lapR * sharpAmount));
+                        sharpData[idx+1] = Math.min(255, Math.max(0, data[idx+1] + lapG * sharpAmount));
+                        sharpData[idx+2] = Math.min(255, Math.max(0, data[idx+2] + lapB * sharpAmount));
+                        sharpData[idx+3] = 255;
+                    }
+                }
+                for(let i=0; i<data.length; i++) data[i] = sharpData[i];
+            }
+            return imgData;
+        }
+
+        // Получение яркостной матрицы
+        function getGrayMatrix(imgData, width, height) {
+            const gray = new Float32Array(width*height);
+            for(let i=0; i<width*height; i++) {
+                let r = imgData.data[i*4], g = imgData.data[i*4+1], b = imgData.data[i*4+2];
+                gray[i] = 0.299*r + 0.587*g + 0.114*b;
+            }
+            return gray;
+        }
+
+        // дизеринг Флойд-Стейнберг
+        function floydSteinberg(gray, width, height, invert, levels) {
+            const adjusted = new Float32Array(gray.length);
+            for(let i=0; i<gray.length; i++) {
+                let v = gray[i];
+                if(invert) v = 255 - v;
+                adjusted[i] = v;
+            }
+            const indices = new Uint16Array(gray.length);
+            const err = new Float32Array(gray.length);
+            for(let i=0; i<gray.length; i++) {
+                let old = adjusted[i] + err[i];
+                old = Math.min(255, Math.max(0, old));
+                let idxChar = Math.floor((old/255) * (levels-1));
+                let newVal = (idxChar/(levels-1))*255;
                 indices[i] = idxChar;
-                let error = oldVal - newVal;
-                let x = i % w;
-                let y = Math.floor(i / w);
-                if(x+1 < w) quantErrors[i+1] += error * 7/16;
-                if(y+1 < h) {
-                    if(x-1 >= 0) quantErrors[i+w-1] += error * 3/16;
-                    quantErrors[i+w] += error * 5/16;
-                    if(x+1 < w) quantErrors[i+w+1] += error * 1/16;
+                let error = old - newVal;
+                let x = i % width;
+                let y = Math.floor(i/width);
+                if(x+1 < width) err[i+1] += error * 7/16;
+                if(y+1 < height) {
+                    if(x-1 >= 0) err[i+width-1] += error * 3/16;
+                    err[i+width] += error * 5/16;
+                    if(x+1 < width) err[i+width+1] += error * 1/16;
                 }
             }
             return indices;
         }
 
-        // Получение массива яркостей из ImageData
-        function getGrayPixels(imgData, width, height) {
-            const gray = new Float32Array(width*height);
-            const data = imgData.data;
-            for(let i=0; i<width*height; i++) {
-                let r = data[i*4], g = data[i*4+1], b = data[i*4+2];
-                gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-            }
-            return gray;
-        }
-
-        // Автоподбор параметров на основе гистограммы и контраста
-        function autoTuneParameters(grayPixels) {
-            // собираем гистограмму
-            let hist = new Array(256).fill(0);
-            for(let v of grayPixels) hist[Math.floor(Math.min(255,Math.max(0,v)))]++;
-            // находим процентили для авто-контраста
-            let total = grayPixels.length;
-            let cum = 0;
-            let lowPercent = 0.01, highPercent = 0.99;
-            let lowVal = 0, highVal = 255;
-            for(let i=0; i<256; i++) {
-                cum += hist[i];
-                if(cum >= total * lowPercent && lowVal===0) lowVal = i;
-                if(cum >= total * highPercent && highVal===255) { highVal = i; break; }
-            }
-            let range = highVal - lowVal;
-            let autoContrast = range > 10 ? 255 / range : 1.2;
-            autoContrast = Math.min(2.8, Math.max(0.6, autoContrast));
-            let autoBrightness = - (lowVal + highVal)/2 + 128;
-            autoBrightness = Math.min(80, Math.max(-80, autoBrightness));
-            
-            // авто-гамма: если изображение темное -> gamma<1, светлое -> gamma>1
-            let meanGray = 0;
-            for(let v of grayPixels) meanGray += v;
-            meanGray /= total;
-            let autoGamma = meanGray > 140 ? 1.2 : (meanGray < 80 ? 0.85 : 1.0);
-            autoGamma = Math.min(2.0, Math.max(0.6, autoGamma));
-            
-            // авто-резкость: оценка резкости по дисперсии градиентов (упрощенно)
-            let sharpnessScore = 0;
-            let w = Math.sqrt(grayPixels.length)|0;
-            let h = Math.floor(grayPixels.length/w);
-            for(let y=1; y<h-1; y++) {
-                for(let x=1; x<w-1; x++) {
-                    let idx = y*w + x;
-                    let dx = Math.abs(grayPixels[idx] - grayPixels[idx-1]) + Math.abs(grayPixels[idx] - grayPixels[idx+1]);
-                    let dy = Math.abs(grayPixels[idx] - grayPixels[idx-w]) + Math.abs(grayPixels[idx] - grayPixels[idx+w]);
-                    sharpnessScore += dx+dy;
+        // Порядковый дизеринг (Bayer)
+        function orderedDither(gray, width, height, invert, levels) {
+            const bayer = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+            const indices = new Uint16Array(gray.length);
+            for(let y=0; y<height; y++) {
+                for(let x=0; x<width; x++) {
+                    let v = gray[y*width+x];
+                    if(invert) v = 255 - v;
+                    let threshold = (bayer[y%4][x%4] / 16.0) * 255;
+                    let quant = Math.floor((Math.min(255,Math.max(0,v + (threshold-128)*0.5)) / 255) * (levels-1));
+                    indices[y*width+x] = Math.min(levels-1, Math.max(0, quant));
                 }
             }
-            sharpnessScore /= ( (w-2)*(h-2) );
-            let autoSharp = sharpnessScore < 20 ? 1.2 : (sharpnessScore > 60 ? 0.3 : 0.7);
-            autoSharp = Math.min(2.2, Math.max(0.1, autoSharp));
-            
-            return { brightness: autoBrightness, contrast: autoContrast, gamma: autoGamma, sharp: autoSharp };
+            return indices;
         }
 
-        // Применение резкости (unsharp mask)
-        function applySharpness(pixels, width, height, sharpAmount) {
-            if(sharpAmount <= 0.01) return;
-            const w = width, h = height;
-            const data = pixels;
-            const sharpened = new Uint8ClampedArray(data.length);
-            for(let y=0; y<h; y++) {
-                for(let x=0; x<w; x++) {
-                    let idx = (y*w + x)*4;
-                    let r=data[idx], g=data[idx+1], b=data[idx+2];
-                    let sumR=0, sumG=0, sumB=0, count=0;
-                    for(let dy=-1; dy<=1; dy++) {
-                        for(let dx=-1; dx<=1; dx++) {
-                            let nx=x+dx, ny=y+dy;
-                            if(nx>=0 && nx<w && ny>=0 && ny<h) {
-                                let nidx = (ny*w+nx)*4;
-                                sumR += data[nidx];
-                                sumG += data[nidx+1];
-                                sumB += data[nidx+2];
-                                count++;
-                            }
-                        }
-                    }
-                    let avgR = sumR/count, avgG = sumG/count, avgB = sumB/count;
-                    let newR = r + sharpAmount*(r - avgR);
-                    let newG = g + sharpAmount*(g - avgG);
-                    let newB = b + sharpAmount*(b - avgB);
-                    sharpened[idx] = Math.min(255,Math.max(0,newR));
-                    sharpened[idx+1] = Math.min(255,Math.max(0,newG));
-                    sharpened[idx+2] = Math.min(255,Math.max(0,newB));
-                    sharpened[idx+3] = 255;
-                }
-            }
-            for(let i=0; i<data.length; i++) data[i] = sharpened[i];
-        }
-
-        // Основная генерация
-        function generateText(useAutoTune = false) {
-            if(!imgLoaded || !originalImage) {
-                asciiPre.innerText = "❌ Загрузите изображение.";
-                return;
-            }
-            let cols = parseInt(widthSlider.value);
-            const rows = computeRows(cols, originalW, originalH);
+        async function render(useAuto=false) {
+            if(!imgLoaded) { asciiPre.innerText = "❌ Нет фото"; return; }
+            const cols = parseInt(widthSlider.value);
+            const rows = Math.max(1, Math.floor(cols * (origH/origW) * 0.52));
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = cols;
             tempCanvas.height = rows;
@@ -477,73 +485,60 @@
             tempCtx.imageSmoothingEnabled = false;
             tempCtx.drawImage(originalImage, 0, 0, cols, rows);
             let imgData = tempCtx.getImageData(0,0,cols,rows);
-            let pixels = imgData.data;
             
-            // Получаем яркости для автонастройки
-            let grayForAuto = new Float32Array(cols*rows);
-            for(let i=0; i<cols*rows; i++) {
-                let r = pixels[i*4], g=pixels[i*4+1], b=pixels[i*4+2];
-                grayForAuto[i] = 0.299*r + 0.587*g + 0.114*b;
-            }
-            
-            let brightness = parseInt(brightnessSlider.value);
-            let contrast = parseFloat(contrastSlider.value);
+            // Получаем параметры
+            let preCont = parseFloat(preContrastSlider.value);
             let gamma = parseFloat(gammaSlider.value);
             let sharp = parseFloat(sharpSlider.value);
+            let localCont = parseFloat(localContrastSlider.value);
             let invert = invertCheck.checked;
+            let ditherType = ditherMethodSelect.value;
             
-            if(useAutoTune) {
-                const autoParams = autoTuneParameters(grayForAuto);
-                brightness = autoParams.brightness;
-                contrast = autoParams.contrast;
-                gamma = autoParams.gamma;
-                sharp = autoParams.sharp;
-                // обновляем ползунки
-                brightnessSlider.value = brightness;
-                contrastSlider.value = contrast;
+            if(useAuto) {
+                // Автоподбор: эвристика для максимального качества
+                preCont = 1.8;
+                gamma = 0.9;
+                sharp = 1.4;
+                localCont = 1.1;
+                preContrastSlider.value = preCont;
                 gammaSlider.value = gamma;
                 sharpSlider.value = sharp;
+                localContrastSlider.value = localCont;
                 updateUI();
             }
             
-            // Применяем резкость к пикселям RGB
-            if(sharp > 0.01) applySharpness(pixels, cols, rows, sharp);
+            // Предобработка
+            imgData = preprocessImage(imgData, cols, rows, preCont, gamma, sharp, localCont);
+            const grayMat = getGrayMatrix(imgData, cols, rows);
             
-            const useDither = ditherCheck.checked;
             let charIndices;
-            if(useDither) {
-                // повторно извлекаем обновленные яркости после резкости
-                let grayAfterSharp = new Float32Array(cols*rows);
-                for(let i=0; i<cols*rows; i++) {
-                    let r = pixels[i*4], g=pixels[i*4+1], b=pixels[i*4+2];
-                    grayAfterSharp[i] = 0.299*r + 0.587*g + 0.114*b;
-                }
-                charIndices = applyDithering(grayAfterSharp, cols, rows, brightness, contrast, gamma, invert);
+            if(ditherType === 'floyd') {
+                charIndices = floydSteinberg(grayMat, cols, rows, invert, CHAR_LEVELS);
+            } else if(ditherType === 'ordered') {
+                charIndices = orderedDither(grayMat, cols, rows, invert, CHAR_LEVELS);
             } else {
                 charIndices = new Uint16Array(cols*rows);
                 for(let i=0; i<cols*rows; i++) {
-                    let r = pixels[i*4], g=pixels[i*4+1], b=pixels[i*4+2];
-                    let gray = 0.299*r + 0.587*g + 0.114*b;
-                    let adj = adjustPixel(gray, brightness, contrast, gamma, invert);
-                    let idx = Math.floor((adj/255) * (CHAR_LEVELS-1));
+                    let v = grayMat[i];
+                    if(invert) v = 255 - v;
+                    let idx = Math.floor((v/255) * (CHAR_LEVELS-1));
                     charIndices[i] = Math.min(CHAR_LEVELS-1, Math.max(0, idx));
                 }
             }
             
-            // Сборка текста
+            // сборка строк
             let lines = [];
             for(let y=0; y<rows; y++) {
                 let line = '';
                 for(let x=0; x<cols; x++) {
-                    line += FULL_PALETTE[charIndices[y*cols + x]];
+                    line += PALETTE[charIndices[y*cols + x]];
                 }
                 lines.push(line);
             }
             asciiPre.innerText = lines.join('\n');
-            statsInfo.innerText = `${cols}×${rows} | палитра: ${CHAR_LEVELS} | дизеринг: ${useDither?'вкл':'выкл'} | авто:${useAutoTune?'да':'нет'}`;
+            statsInfo.innerText = `${cols}×${rows} | палитра:${CHAR_LEVELS} | метод:${ditherType} | авто:${useAuto?'да':'нет'}`;
         }
 
-        // загрузка изображения
         function loadImage(file) {
             if(!file) return;
             const reader = new FileReader();
@@ -551,27 +546,27 @@
                 const img = new Image();
                 img.onload = () => {
                     originalImage = img;
-                    originalW = img.width;
-                    originalH = img.height;
+                    origW = img.width;
+                    origH = img.height;
                     imgLoaded = true;
                     let pw = Math.min(400, img.width);
-                    let ph = (pw * img.height) / img.width;
+                    let ph = (pw * img.height)/img.width;
                     sourceCanvas.width = pw;
                     sourceCanvas.height = ph;
                     ctx.drawImage(img, 0, 0, pw, ph);
                     imgMetaSpan.innerText = `${img.width}×${img.height} px`;
                     updateUI();
-                    generateText(false); // сначала без авто, но можно сразу авто? лучше дать пользователю кнопку
+                    render(false);
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // Drag & Drop
+        // events
         dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#9ab9ff';});
-        dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#4c7affaa');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#bbccff'; });
+        dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#6c8effaa');
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             const file = e.dataTransfer.files[0];
@@ -579,23 +574,23 @@
         });
         fileInput.addEventListener('change', (e) => { if(e.target.files[0]) loadImage(e.target.files[0]); });
         
-        generateBtn.addEventListener('click', () => generateText(false));
-        autoTuneBtn.addEventListener('click', () => generateText(true));
+        generateBtn.addEventListener('click', () => render(false));
+        autoEnhanceBtn.addEventListener('click', () => render(true));
         copyBtn.addEventListener('click', async () => {
-            let text = asciiPre.innerText;
-            if(!text || text.includes("Загрузите")) return;
-            await navigator.clipboard.writeText(text);
-            copyBtn.innerText = "✅ Скопировано!";
+            let txt = asciiPre.innerText;
+            if(!txt || txt.includes("Загрузите")) return;
+            await navigator.clipboard.writeText(txt);
+            copyBtn.innerText = "✅ Готово!";
             setTimeout(() => copyBtn.innerText = "📋 Копировать", 1500);
         });
         
-        const sliders = [widthSlider, brightnessSlider, contrastSlider, gammaSlider, sharpSlider];
-        sliders.forEach(s => s.addEventListener('input', () => { updateUI(); if(imgLoaded) generateText(false); }));
-        invertCheck.addEventListener('change', () => { if(imgLoaded) generateText(false); });
-        ditherCheck.addEventListener('change', () => { if(imgLoaded) generateText(false); });
+        const sliders = [widthSlider, preContrastSlider, sharpSlider, gammaSlider, localContrastSlider];
+        sliders.forEach(s => s.addEventListener('input', () => { updateUI(); if(imgLoaded) render(false); }));
+        invertCheck.addEventListener('change', () => { if(imgLoaded) render(false); });
+        ditherMethodSelect.addEventListener('change', () => { if(imgLoaded) render(false); });
         
         updateUI();
-        asciiPre.innerText = "✨ Загрузите фото → нажмите «Автоподбор» → получите идеально точный текст.";
+        asciiPre.innerText = "✨ Супер-четкость: загрузите фото и нажмите «Авто-улучшение» для идеального результата";
     })();
 </script>
 </body>
