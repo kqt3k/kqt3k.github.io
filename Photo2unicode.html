@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Photo2Unicode | Преобразование фото в текст с высокой точностью</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Roboto', monospace;
+            margin: 0;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #eef4ff;
+        }
+
+        /* главный контейнер */
+        .glass-panel {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(18, 25, 45, 0.65);
+            backdrop-filter: blur(4px);
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+            border: 1px solid rgba(72, 120, 255, 0.25);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .content {
+            padding: 2rem 2rem 2rem 2rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF, #9bbdff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0 0 0.25rem 0;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 small {
+            font-size: 0.85rem;
+            background: #1e2a44;
+            color: #b7d0ff;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-weight: normal;
+            letter-spacing: 0;
+        }
+
+        .sub {
+            color: #8e9fc3;
+            margin-bottom: 2rem;
+            border-left: 3px solid #3b6eff;
+            padding-left: 1rem;
+            font-weight: 450;
+        }
+
+        /* 2-колоночный макет */
+        .workspace {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            flex: 1.2;
+            min-width: 260px;
+        }
+
+        .preview-area {
+            flex: 1;
+            min-width: 260px;
+            background: #0b1020cc;
+            border-radius: 1.8rem;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid #2a3550;
+            transition: 0.2s;
+        }
+
+        .controls {
+            flex: 1;
+            min-width: 240px;
+            background: #0f1629cc;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.5rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid #2a3a60;
+        }
+
+        .img-dropzone {
+            background: #0b1022;
+            border: 2px dashed #3b6eff88;
+            border-radius: 2rem;
+            padding: 1.8rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .img-dropzone:hover {
+            border-color: #6b93ff;
+            background: #11182e;
+        }
+
+        .preview-img {
+            text-align: center;
+        }
+
+        canvas#sourceCanvas {
+            max-width: 100%;
+            max-height: 260px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            background: #010101;
+            object-fit: contain;
+        }
+
+        .control-group {
+            margin-bottom: 1.4rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            color: #cddcff;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: #1e2a44;
+            height: 5px;
+            border-radius: 10px;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]:focus {
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b6eff;
+            cursor: pointer;
+            box-shadow: 0 0 6px #6b93ff;
+            border: none;
+        }
+
+        .width-value {
+            background: #00000066;
+            padding: 4px 10px;
+            border-radius: 26px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        button {
+            background: linear-gradient(100deg, #2b4aff, #1332b0);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3rem;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-top: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        button.secondary {
+            background: #262f4e;
+            margin-top: 0.6rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            background: linear-gradient(100deg, #3d61ff, #1f3ec0);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin: 1rem 0 0.8rem 0;
+            border-top: 1px solid #2a3a60;
+            padding-top: 1.5rem;
+        }
+
+        .ascii-output {
+            background: #03060f;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            overflow-x: auto;
+            border: 1px solid #2f3b5e;
+            box-shadow: inset 0 0 8px #00000030;
+        }
+
+        pre {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.2;
+            margin: 0;
+            color: #eef2ff;
+            white-space: pre;
+            letter-spacing: 0px;
+            font-weight: 500;
+        }
+
+        .btn-copy {
+            background: #1f2a48;
+            width: auto;
+            padding: 7px 18px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .info-badge {
+            background: #0f162a;
+            border-radius: 50px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            color: #96acf0;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 1.8rem;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 780px) {
+            .content {
+                padding: 1.2rem;
+            }
+            pre {
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass-panel">
+    <div class="content">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+            <div>
+                <h1>🖼️➜📄 PHOTO2UNICODE <small>гипердетальная текстовая графика</small></h1>
+                <div class="sub">Любые символы Юникода · высочайшая схожесть · 16 градаций яркости</div>
+            </div>
+            <div class="info-badge">✨ символы: блоки, брайль, штриховка, пиктограммы</div>
+        </div>
+
+        <div class="workspace">
+            <!-- левая зона загрузки и превью -->
+            <div class="upload-area">
+                <div class="img-dropzone" id="dropZone">
+                    📸 Перетащите фото или кликните<br>
+                    <span style="font-size: 0.75rem;">JPG, PNG, WEBP, GIF</span>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                <div class="preview-area" style="margin-top: 0.8rem; background: #070c1a;">
+                    <div style="font-size: 0.75rem; margin-bottom: 6px;">🔍 превью изображения</div>
+                    <div class="preview-img" id="previewContainer">
+                        <canvas id="sourceCanvas" width="400" height="200" style="width:100%; height:auto; max-height: 220px; background: #000;"></canvas>
+                        <div style="font-size: 11px; margin-top: 6px; color:#7c8db0;" id="imgMeta">изображение не загружено</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- панель управления -->
+            <div class="controls">
+                <div class="control-group">
+                    <label>🎚️ Ширина текста (символов) — чем выше, тем детальнее</label>
+                    <input type="range" id="widthSlider" min="40" max="220" step="2" value="110">
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span class="width-value">ширина: <span id="widthVal">110</span> px-симв.</span>
+                        <span class="width-value">высота ≈ <span id="heightEstimate">—</span> строк</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="invertCheckbox">
+                        <label style="margin:0;">🌗 Инвертировать яркость (негатив)</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enhanceContrast" checked>
+                        <label style="margin:0;">⚡ Усиление контраста (для чёткости)</label>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>🎨 Набор символов (16 уровней плотности) :</label>
+                    <div style="font-family: monospace; font-size: 0.9rem; background: #01051a; padding: 5px 8px; border-radius: 24px; letter-spacing: 1px;">
+                        █ ◼ ▓ ▒ ◙ ◘ ● ◌ ○ ▮ ▯ · ⠿ ⣀ ⡀  
+                    </div>
+                    <div style="font-size: 0.65rem; margin-top: 4px;">от темного ➔ светлому (включая псевдо-брайль и блоки)</div>
+                </div>
+
+                <button id="generateBtn">✨ СГЕНЕРИРОВАТЬ ТЕКСТ ✨</button>
+                <button id="copyBtn" class="secondary">📋 Копировать в буфер</button>
+            </div>
+        </div>
+
+        <!-- область результата -->
+        <div class="result-header">
+            <strong>🎯 ASCII / Юникод арт (максимально похожий)</strong>
+            <span style="font-size:12px;">прокрутка · моноширинный шрифт</span>
+        </div>
+        <div class="ascii-output" id="asciiContainer">
+            <pre id="asciiArtResult">⚡ Загрузите фото и нажмите «Сгенерировать»</pre>
+        </div>
+        <footer>★ используется 16 уникальных символов юникода (плотность → от сплошных блоков до тонких точек и пробелов).<br>Коэффициент пропорций автоскорректирован для идеального отображения в моноширинных шрифтах.</footer>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ----- НАБОР СИМВОЛОВ (от самого тёмного к самому светлому) -----
+        // Подобрано для максимальной визуальной плавности и имитации фотореализма
+        const UNICODE_DENSITY = [
+            '█',   // 0  полный черный блок
+            '◼',   // 1  черный квадрат (медиум)
+            '▓',   // 2  темная штриховка
+            '▒',   // 3  средняя штриховка
+            '◙',   // 4  тёмный квадрат с точкой
+            '◘',   // 5  инверсный круг
+            '●',   // 6  черный круг
+            '◌',   // 7  пунктирный круг (полупрозрачный)
+            '○',   // 8  светлый круг
+            '▮',   // 9  чёрный вертикальный прямоугольник
+            '▯',   // 10 белая полоса (светлая)
+            '·',   // 11 средняя точка
+            '⠿',   // 12 брайль-заливка (очень густой узор)
+            '⣀',   // 13 брайль верхние точки
+            '⡀',   // 14 легкая штриховка
+            ' '    // 15 пробел (светлейший)
+        ];
+        const CHAR_LEVELS = UNICODE_DENSITY.length; // = 16
+
+        // DOM элементы
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const sourceCanvas = document.getElementById('sourceCanvas');
+        const ctxSource = sourceCanvas.getContext('2d');
+        const widthSlider = document.getElementById('widthSlider');
+        const widthValSpan = document.getElementById('widthVal');
+        const heightEstimateSpan = document.getElementById('heightEstimate');
+        const invertCheck = document.getElementById('invertCheckbox');
+        const enhanceContrast = document.getElementById('enhanceContrast');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const asciiPre = document.getElementById('asciiArtResult');
+        const imgMeta = document.getElementById('imgMeta');
+        
+        // хранилище оригинального изображения
+        let originalImage = null;      // HTMLImageElement
+        let originalWidth = 0, originalHeight = 0;
+        let isImageLoaded = false;
+
+        // ----- вспомогательные функции -----
+        function updateWidthDisplay() {
+            let w = parseInt(widthSlider.value, 10);
+            widthValSpan.innerText = w;
+            if (isImageLoaded && originalWidth && originalHeight) {
+                let rows = computeRows(w, originalWidth, originalHeight);
+                heightEstimateSpan.innerText = rows;
+            } else {
+                heightEstimateSpan.innerText = '—';
+            }
+        }
+
+        // Вычисление количества строк с учетом пропорций символов (коэф. 0.5)
+        function computeRows(cols, imgW, imgH) {
+            // коэффициент вертикальной компрессии: символ в моноширинном шрифте ~ в 2 раза выше ширины
+            const aspectCorrection = 0.52; // эмпирический для сходства пропорций (0.5-0.54)
+            let rows = Math.floor(cols * (imgH / imgW) * aspectCorrection);
+            return Math.max(1, rows);
+        }
+
+        // Преобразование изображения в текстовую матрицу
+        function generateTextFromImage(imgElement, targetCols, invert, contrastBoost) {
+            const imgW = imgElement.naturalWidth;
+            const imgH = imgElement.naturalHeight;
+            if (imgW === 0 || imgH === 0) return "";
+            
+            const targetRows = computeRows(targetCols, imgW, imgH);
+            if (targetRows < 1) return "[Ошибка: слишком мало строк]";
+            
+            // Создаём временный canvas для масштабирования (точное сэмплирование блоков)
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = targetCols;
+            tempCanvas.height = targetRows;
+            const tempCtx = tempCanvas.getContext('2d');
+            // отключаем сглаживание для резкого усреднения пикселей
+            tempCtx.imageSmoothingEnabled = false;
+            // рисуем изображение, растягивая ровно под сетку символов
+            tempCtx.drawImage(imgElement, 0, 0, targetCols, targetRows);
+            
+            // получаем пиксельные данные
+            const imgData = tempCtx.getImageData(0, 0, targetCols, targetRows);
+            const data = imgData.data; // RGBA массив
+            
+            let asciiLines = [];
+            let maxIndex = CHAR_LEVELS - 1;
+            
+            for (let y = 0; y < targetRows; y++) {
+                let lineChars = [];
+                for (let x = 0; x < targetCols; x++) {
+                    const idx = (y * targetCols + x) * 4;
+                    let r = data[idx];
+                    let g = data[idx+1];
+                    let b = data[idx+2];
+                    // яркость (стандартная формула восприятия)
+                    let brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+                    
+                    // усиление контраста (растягивает яркости к экстремумам)
+                    if (contrastBoost) {
+                        // простая сигмоидальная кривая: смещение к 0/255
+                        let t = brightness / 255;
+                        // усиливаем контраст: если t<0.5 -> темнее, иначе светлее
+                        let boosted = t < 0.5 ? Math.pow(t, 1.2) : 1 - Math.pow(1 - t, 1.2);
+                        brightness = boosted * 255;
+                        brightness = Math.min(255, Math.max(0, brightness));
+                    }
+                    
+                    // инвертируем при необходимости
+                    if (invert) {
+                        brightness = 255 - brightness;
+                    }
+                    
+                    // нормализуем от 0..255 к индексу символа
+                    let charIndex = Math.floor((brightness / 255) * maxIndex);
+                    charIndex = Math.min(maxIndex, Math.max(0, charIndex));
+                    let symbol = UNICODE_DENSITY[charIndex];
+                    lineChars.push(symbol);
+                }
+                asciiLines.push(lineChars.join(''));
+            }
+            return asciiLines.join('\n');
+        }
+        
+        // ГЛАВНАЯ ГЕНЕРАЦИЯ
+        async function renderAscii() {
+            if (!isImageLoaded || !originalImage) {
+                asciiPre.innerText = "❌ Сначала загрузите изображение (перетащите или выберите файл)";
+                return;
+            }
+            
+            const cols = parseInt(widthSlider.value, 10);
+            const invert = invertCheck.checked;
+            const contrast = enhanceContrast.checked;
+            
+            asciiPre.innerText = "⏳ Генерация текста... (символьная растеризация)";
+            // небольшая задержка, чтобы UI не фризил, но в целом всё быстро
+            await new Promise(resolve => setTimeout(resolve, 10));
+            
+            try {
+                const textArt = generateTextFromImage(originalImage, cols, invert, contrast);
+                if (!textArt || textArt.length === 0) {
+                    asciiPre.innerText = "⚠️ Не удалось сгенерировать текст. Попробуйте другую ширину.";
+                } else {
+                    asciiPre.innerText = textArt;
+                    // обновляем мета-информацию о размере текста
+                    let rowsCount = textArt.split('\n').length;
+                    heightEstimateSpan.innerText = rowsCount;
+                }
+            } catch(e) {
+                console.error(e);
+                asciiPre.innerText = "⚠️ Ошибка преобразования: " + e.message;
+            }
+        }
+        
+        // отображение превью изображения на canvas и сохранение оригинального элемента
+        function loadImageFromFile(file) {
+            if (!file || !file.type.match('image.*')) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    isImageLoaded = true;
+                    
+                    // отобразить превью в canvas sourceCanvas (с сохранением пропорций)
+                    const maxPreviewW = 400;
+                    const maxPreviewH = 220;
+                    let previewW = originalWidth;
+                    let previewH = originalHeight;
+                    if (previewW > maxPreviewW) {
+                        const ratio = maxPreviewW / previewW;
+                        previewW = maxPreviewW;
+                        previewH = previewH * ratio;
+                    }
+                    if (previewH > maxPreviewH) {
+                        const ratio = maxPreviewH / previewH;
+                        previewH = maxPreviewH;
+                        previewW = previewW * ratio;
+                    }
+                    sourceCanvas.width = previewW;
+                    sourceCanvas.height = previewH;
+                    ctxSource.clearRect(0, 0, previewW, previewH);
+                    ctxSource.drawImage(img, 0, 0, previewW, previewH);
+                    
+                    imgMeta.innerText = `${originalWidth}×${originalHeight} px · соотношение: ${(originalWidth/originalHeight).toFixed(2)}`;
+                    updateWidthDisplay();
+                    
+                    // после загрузки можно сразу сгенерировать текст (по желанию)
+                    renderAscii();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Drag & Drop зона
+        function setupDragDrop() {
+            dropZone.addEventListener('click', () => fileInput.click());
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#9ab9ff';
+                dropZone.style.background = '#151e3a';
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.style.borderColor = '#3b6eff88';
+                dropZone.style.background = '#0b1022';
+            });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#3b6eff88';
+                dropZone.style.background = '#0b1022';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    loadImageFromFile(files[0]);
+                }
+            });
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) loadImageFromFile(e.target.files[0]);
+            });
+        }
+        
+        // Копирование в буфер обмена
+        async function copyToClipboard() {
+            let textToCopy = asciiPre.innerText;
+            if (!textToCopy || textToCopy.includes("Сначала загрузите") || textToCopy.includes("Ошибка") || textToCopy.includes("Генерация")) {
+                asciiPre.innerText = "⚠️ Нет корректного текста для копирования. Сначала сгенерируйте арт.";
+                setTimeout(() => {
+                    if (isImageLoaded) renderAscii();
+                }, 1200);
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                // обратная связь
+                const originalBtnText = copyBtn.innerText;
+                copyBtn.innerText = "✅ Скопировано!";
+                setTimeout(() => { copyBtn.innerText = originalBtnText; }, 1500);
+            } catch (err) {
+                alert("Не удалось скопировать: " + err);
+            }
+        }
+        
+        // дополнительные фичи: авто-генерация при изменении слайдера или чекбоксов (опционально)
+        let debounceTimer = null;
+        function scheduleRender() {
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (isImageLoaded) renderAscii();
+            }, 60);
+        }
+        
+        // обработчики событий
+        widthSlider.addEventListener('input', () => {
+            updateWidthDisplay();
+            scheduleRender();
+        });
+        invertCheck.addEventListener('change', () => scheduleRender());
+        enhanceContrast.addEventListener('change', () => scheduleRender());
+        generateBtn.addEventListener('click', () => {
+            if (isImageLoaded) renderAscii();
+            else asciiPre.innerText = "📸 Загрузите фотографию перед генерацией!";
+        });
+        copyBtn.addEventListener('click', copyToClipboard);
+        
+        // инициализация
+        function init() {
+            setupDragDrop();
+            updateWidthDisplay();
+            // дефолтное сообщение
+            asciiPre.innerText = "✨ Загрузите фото → настройте ширину → получите максимально похожий текст из символов Юникода.\n★ символы подобраны для плавных градиентов и сохранения деталей.";
+            // тестовое изображение не загружено
+            isImageLoaded = false;
+            originalImage = null;
+            // placeholder canvas
+            sourceCanvas.width = 400;
+            sourceCanvas.height = 200;
+            ctxSource.fillStyle = "#0a1020";
+            ctxSource.fillRect(0,0,400,200);
+            ctxSource.fillStyle = "#415a77";
+            ctxSource.font = "12px monospace";
+            ctxSource.fillText("ожидание фото", 140, 100);
+            imgMeta.innerText = "изображение отсутствует";
+        }
+        
+        init();
+    })();
+</script>
+</body>
+  </html>
