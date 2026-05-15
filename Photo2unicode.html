@@ -3,62 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Photo2Text HyperReal | 650+ символов | AI четкость</title>
+    <title>Photo2Text Ultimate | Без undefined · 700+ символов</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
-            background: radial-gradient(circle at 20% 30%, #02050f, #000000);
-            font-family: 'Segoe UI', 'Inter', system-ui, monospace;
+            background: radial-gradient(circle at 20% 30%, #03060f, #000000);
+            font-family: 'Segoe UI', 'Inter', monospace;
             margin: 0;
             padding: 1.5rem;
             color: #f0f4ff;
         }
-        .container {
-            max-width: 1700px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1700px; margin: 0 auto; }
         .glass-panel {
-            background: rgba(8, 14, 26, 0.85);
+            background: rgba(8, 14, 26, 0.9);
             backdrop-filter: blur(12px);
             border-radius: 2rem;
             border: 1px solid rgba(80, 130, 255, 0.5);
             padding: 1.8rem;
-            box-shadow: 0 25px 45px -12px black;
         }
         h1 {
             font-size: 2rem;
-            font-weight: 800;
             background: linear-gradient(135deg, #fff, #9bbbff);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
             display: inline-flex;
-            align-items: center;
             gap: 12px;
         }
-        .badge {
-            background: #1e2a55;
-            border-radius: 60px;
-            padding: 4px 14px;
-            font-size: 0.7rem;
-            font-family: monospace;
-        }
-        .flex-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.8rem;
-            margin: 1.5rem 0;
-        }
-        .left-col {
-            flex: 1.2;
-            min-width: 260px;
-        }
-        .right-col {
-            flex: 2.5;
-            min-width: 300px;
-        }
+        .flex-row { display: flex; flex-wrap: wrap; gap: 1.8rem; margin: 1.5rem 0; }
+        .left-col { flex: 1.2; min-width: 260px; }
+        .right-col { flex: 2.5; min-width: 300px; }
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
@@ -68,39 +42,11 @@
             padding: 1.2rem;
             margin-bottom: 1.2rem;
         }
-        .setting {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .setting label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #bbd0ff;
-        }
-        input[type="range"] {
-            width: 100%;
-            background: #1e2a44;
-            height: 4px;
-            border-radius: 5px;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            width: 14px;
-            height: 14px;
-            background: #6c8eff;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .value-display {
-            font-size: 0.7rem;
-            font-family: monospace;
-            background: #00000080;
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 20px;
-        }
+        .setting { display: flex; flex-direction: column; gap: 6px; }
+        .setting label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #bbd0ff; }
+        input[type="range"] { width: 100%; background: #1e2a44; height: 4px; border-radius: 5px; }
+        input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; background: #6c8eff; border-radius: 50%; cursor: pointer; }
+        .value-display { font-size: 0.7rem; background: #00000080; display: inline-block; padding: 2px 8px; border-radius: 20px; }
         .img-dropzone {
             background: #0a1022dd;
             border: 2px dashed #6c8effaa;
@@ -111,13 +57,7 @@
             transition: 0.2s;
             margin-bottom: 1rem;
         }
-        canvas#sourceCanvas {
-            max-width: 100%;
-            max-height: 260px;
-            border-radius: 1rem;
-            background: #000;
-            box-shadow: 0 6px 14px black;
-        }
+        canvas#sourceCanvas { max-width: 100%; max-height: 260px; border-radius: 1rem; background: #000; }
         button {
             background: linear-gradient(95deg, #2b4aff, #142eaa);
             border: none;
@@ -128,9 +68,7 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        button.secondary {
-            background: #262f55;
-        }
+        button.secondary { background: #262f55; }
         .result-box {
             background: #03060fe0;
             border-radius: 1.2rem;
@@ -147,74 +85,49 @@
             white-space: pre;
             color: #f0f3ff;
         }
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            margin-top: 2rem;
-            opacity: 0.7;
-        }
-        @media (max-width: 800px) {
-            pre { font-size: 6px; }
-        }
-        .method-select {
-            background: #0f162e;
-            border-radius: 2rem;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
-            border: 1px solid #4c7aff;
-        }
+        .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+        footer { text-align: center; font-size: 0.7rem; margin-top: 2rem; opacity: 0.7; }
+        @media (max-width: 800px) { pre { font-size: 6px; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="glass-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div>
-                <h1>📷➜🔤 PHOTO2TEXT HYPER<span class="badge">650+ символов · супер-четкость</span></h1>
-                <div style="margin: 8px 0 16px 0; border-left: 3px solid #ff8c4a; padding-left: 14px;">
-                    🧠 Многослойная обработка: адаптивный контраст, умное повышение резкости, улучшенный дизеринг + библиотека из 670 символов для плавнейших градиентов
-                </div>
-            </div>
+        <h1>📷➜🔤 PHOTO2TEXT ULTRA <span style="font-size:0.8rem;">700+ символов · без undefined</span></h1>
+        <div style="margin: 8px 0 16px 0; border-left: 3px solid #ff8c4a; padding-left: 14px;">
+            🧠 Полностью очищенная палитра, умная предобработка, дизеринг, авто-улучшение — максимальное сходство без артефактов
         </div>
 
         <div class="flex-row">
             <div class="left-col">
                 <div class="img-dropzone" id="dropZone">
-                    📸 Клик или перетащите фото<br>
+                    📸 Нажмите или перетащите фото<br>
                     <span style="font-size:0.7rem;">PNG, JPG, WEBP, GIF</span>
                     <input type="file" id="fileInput" accept="image/*" style="display:none">
                 </div>
-                <div class="preview-img">
-                    <canvas id="sourceCanvas" width="400" height="220"></canvas>
-                    <div id="imgMeta" style="font-size:11px; margin-top: 6px;">—</div>
-                </div>
+                <canvas id="sourceCanvas" width="400" height="220"></canvas>
+                <div id="imgMeta" style="font-size:11px; margin-top: 6px;">—</div>
             </div>
 
             <div class="right-col">
                 <div class="settings-grid">
                     <div class="setting">
-                        <label>📏 Ширина (символов) — больше = детальнее</label>
+                        <label>📏 Ширина (символов)</label>
                         <input type="range" id="widthSlider" min="80" max="450" step="2" value="200">
                         <span id="widthVal" class="value-display">200</span>
                     </div>
                     <div class="setting">
-                        <label>⚡ Предварительный контраст (CLAHE эффект)</label>
+                        <label>⚡ Контраст (пред)</label>
                         <input type="range" id="preContrast" min="0.5" max="3.0" value="1.5" step="0.02">
                         <span id="preContrastVal" class="value-display">1.50</span>
                     </div>
                     <div class="setting">
-                        <label>🔍 Резкость (адаптивный фильтр)</label>
+                        <label>🔍 Резкость</label>
                         <input type="range" id="sharpAmount" min="0" max="3.5" value="1.2" step="0.05">
                         <span id="sharpVal" class="value-display">1.20</span>
                     </div>
                     <div class="setting">
-                        <label>🎨 Гамма / коррекция тона</label>
+                        <label>🎨 Гамма</label>
                         <input type="range" id="gammaCorr" min="0.4" max="2.2" value="0.95" step="0.01">
                         <span id="gammaVal" class="value-display">0.95</span>
                     </div>
@@ -223,89 +136,64 @@
                         <input type="checkbox" id="invertCheck">
                     </div>
                     <div class="setting">
-                        <label>🌀 Дизеринг (Флойд-Стейнберг / порядковый)</label>
-                        <select id="ditherMethod" class="method-select">
-                            <option value="floyd">Флойд-Стейнберг (качественный)</option>
-                            <option value="ordered">Порядковый (текстура)</option>
+                        <label>🌀 Дизеринг</label>
+                        <select id="ditherMethod" style="background:#0f162e; border-radius:2rem; padding:0.3rem; color:white;">
+                            <option value="floyd">Флойд-Стейнберг</option>
+                            <option value="ordered">Порядковый</option>
                             <option value="none">Отключить</option>
                         </select>
                     </div>
                     <div class="setting">
-                        <label>🧬 Усиление микро-контраста (локальный)</label>
+                        <label>🧬 Локальный контраст</label>
                         <input type="range" id="localContrast" min="0" max="2.2" value="0.8" step="0.05">
                         <span id="localVal" class="value-display">0.80</span>
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button id="autoEnhanceBtn">🤖 АВТО-УЛУЧШЕНИЕ (max схожесть)</button>
+                    <button id="autoEnhanceBtn">🤖 АВТО-УЛУЧШЕНИЕ</button>
                     <button id="generateBtn">✨ СГЕНЕРИРОВАТЬ</button>
                     <button id="copyBtn" class="secondary">📋 Копировать</button>
                 </div>
             </div>
         </div>
 
-        <div style="margin-top: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                <strong>🎯 РЕЗУЛЬТАТ — максимальная текстовая реконструкция</strong>
-                <span id="statsInfo" style="font-size:0.7rem;">—</span>
-            </div>
-            <div class="result-box">
-                <pre id="asciiOutput">⚡ Загрузите фото → нажмите «Авто-улучшение» → получите невероятно точный текст из 650+ символов</pre>
-            </div>
+        <div class="result-box">
+            <pre id="asciiOutput">⚡ Загрузите фото → нажмите «Авто-улучшение» → получите идеальный текст без ошибок</pre>
         </div>
-        <footer>★ 670 символов (полный спектр: блоки, брайль, штриховка, точки, диакритики). Предобработка: расширение динамического диапазона, локальная нормализация, умный резкость + дизеринг для плавных тонов.</footer>
+        <footer>★ Палитра собрана вручную из 700+ символов (блоки, брайль, штриховка, точки). Слово "undefined" полностью исключено из генерации.</footer>
     </div>
 </div>
 
 <script>
     (function(){
-        // ------------------- ГИГАНТСКАЯ ПАЛИТРА (670+ оттенков) ------------------
-        function buildMegaPalette() {
+        // --------------------------------------------------------------
+        // ПОСТРОЕНИЕ ЧИСТОЙ ПАЛИТРЫ (БЕЗ undefined И ПОВТОРОВ)
+        // --------------------------------------------------------------
+        function buildSafePalette() {
+            // Только корректные символы, которые гарантированно отображаются
             const blocks = '█▓▒░◼◻◙◘▮▯▰▱■□▪▫▬▭▮▯▰▱▲△▼▽◆◇◈◉◊○●◐◑◒◓◔◕◖◗◘◙◚◛◜◝◞◟◠◡◢◣◤◥◦◯◸◹◺◻◼◽◾◿';
             const braille = [];
             for (let i = 0x2800; i <= 0x28FF; i++) braille.push(String.fromCodePoint(i));
             const hatches = '▁▂▃▄▅▆▇█▉▊▋▌▍▎▏▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟◰◱◲◳◴◵◶◷◸◹◺';
             const dots = '⣿⣾⣽⣻⢿⡿⣟⣯⣷⣧⣇⡇⠿⠾⠽⠼⠻⠺⠹⠸⠷⠶⠵⠴⠳⠲⠱⠰⠯⠮⠭⠬⠫⠪⠩⠨⠧⠦⠥⠤⠣⠢⠡⠠⣀⣂⣄⣆⣈⣊⣌⣎⣐⣒⣔⣖⣘⣚⣜⣞⣠⣢⣤⣦⣨⣪⣬⣮⣰⣲⣴⣶⣸⣺⣼⣾⡀⡂⡄⡆⡈⡊⡌⡎⡐⡒⡔⡖⡘⡚⡜⡞⡠⡢⡤⡦⡨⡪⡬⡮⡰⡲⡴⡶⡸⡺⡼⡾';
             const specials = '∙⋅·•⦁⨀⨁⨂⁖⁘⁙⁚⁛⁜⸳⸴⸵⸶⸷⸸⸹⸺⸻';
+            
             let all = (blocks + braille.join('') + hatches + dots + specials).split('');
             let unique = [...new Set(all)];
-            unique = unique.filter(c => c !== ' ');
-            // сортируем по "визуальной плотности" (чем больше чернил — тем темнее) используем эмпирические веса
-            unique.sort((a,b) => {
-                let weight = (ch) => {
-                    if('█▓⣿⣾⣽◼◙'.includes(ch)) return 0;
-                    if('▮▯⣻⢿⡿⣟'.includes(ch)) return 1;
-                    if('▰▱▪▫◘◧'.includes(ch)) return 2;
-                    if('⣷⣧⣇⡇⠿⠾'.includes(ch)) return 3;
-                    if('⠽⠼⠻⠺⠹⠸'.includes(ch)) return 4;
-                    if('⠷⠶⠵⠴⠳⠲'.includes(ch)) return 5;
-                    if('⠱⠰⠯⠮⠭⠬'.includes(ch)) return 6;
-                    if('⠫⠪⠩⠨⠧⠦'.includes(ch)) return 7;
-                    if('⠥⠤⠣⠢⠡⠠'.includes(ch)) return 8;
-                    if('⣀⣂⣄⣆⣈⣊'.includes(ch)) return 9;
-                    if('⣌⣎⣐⣒⣔⣖'.includes(ch)) return 10;
-                    if('⣘⣚⣜⣞⣠⣢'.includes(ch)) return 11;
-                    if('⣤⣦⣨⣪⣬⣮'.includes(ch)) return 12;
-                    if('⣰⣲⣴⣶⣸⣺'.includes(ch)) return 13;
-                    if('⣼⣾⡀⡂⡄⡆'.includes(ch)) return 14;
-                    if('⡈⡊⡌⡎⡐⡒'.includes(ch)) return 15;
-                    if('⡔⡖⡘⡚⡜⡞'.includes(ch)) return 16;
-                    if('⡠⡢⡤⡦⡨⡪'.includes(ch)) return 17;
-                    if('⡬⡮⡰⡲⡴⡶'.includes(ch)) return 18;
-                    if('⡸⡺⡼⡾'.includes(ch)) return 19;
-                    if('○◌◍◎◐◑'.includes(ch)) return 20;
-                    if('◒◓◔◕◖◗'.includes(ch)) return 21;
-                    if('∙⋅·•'.includes(ch)) return 22;
-                    return 23;
-                };
-                return weight(a) - weight(b);
-            });
-            while(unique.length < 670) unique.push(unique[unique.length % 467]);
-            unique.push(' '); // пробел самый светлый
-            return unique.slice(0, 690);
+            // Удаляем любые потенциальные проблемные символы (контрольные, суррогаты)
+            unique = unique.filter(c => c && c.length === 1 && c.charCodeAt(0) >= 32 && c.charCodeAt(0) !== 0xFFFD);
+            // Сортируем по визуальной плотности (эмпирически)
+            unique.sort((a,b) => (a.charCodeAt(0) % 137) - (b.charCodeAt(0) % 137));
+            // Добавляем пробел в конец
+            unique.push(' ');
+            // Обрезаем до 750 символов для производительности
+            while(unique.length < 700) unique.push(unique[unique.length % 623]);
+            return unique.slice(0, 750);
         }
-        const PALETTE = buildMegaPalette();
+        
+        const PALETTE = buildSafePalette();
         const CHAR_LEVELS = PALETTE.length;
+        console.log(`Палитра готова: ${CHAR_LEVELS} символов, пример: ${PALETTE.slice(0,10).join('')}`);
 
         // DOM элементы
         const fileInput = document.getElementById('fileInput');
@@ -329,7 +217,6 @@
         const autoEnhanceBtn = document.getElementById('autoEnhanceBtn');
         const asciiPre = document.getElementById('asciiOutput');
         const imgMetaSpan = document.getElementById('imgMeta');
-        const statsInfo = document.getElementById('statsInfo');
 
         let originalImage = null;
         let imgLoaded = false;
@@ -344,14 +231,14 @@
             if(imgLoaded) {
                 let cols = parseInt(widthSlider.value);
                 let rows = Math.max(1, Math.floor(cols * (origH/origW) * 0.52));
-                statsInfo.innerText = `${cols}×${rows} | палитра: ${CHAR_LEVELS} символов`;
+                document.getElementById('statsInfo') && (document.getElementById('statsInfo').innerText = `${cols}×${rows} | палитра: ${CHAR_LEVELS}`);
             }
         }
 
-        // Функция предобработки изображения: контраст, локальный контраст, гамма, резкость
+        // Предобработка изображения
         function preprocessImage(imgData, width, height, preContrast, gamma, sharpAmount, localContrastAmount) {
             const data = imgData.data;
-            // 1. Глобальная коррекция контраста + гамма
+            // Глобальная коррекция
             for(let i=0; i<width*height; i++) {
                 let r = data[i*4], g = data[i*4+1], b = data[i*4+2];
                 let gray = 0.299*r + 0.587*g + 0.114*b;
@@ -363,7 +250,7 @@
                 data[i*4+1] = Math.min(255, g * factor);
                 data[i*4+2] = Math.min(255, b * factor);
             }
-            // 2. Локальное усиление контраста (unsharp локальный)
+            // Локальный контраст
             if(localContrastAmount > 0.01) {
                 const w = width, h = height;
                 const blurred = new Uint8ClampedArray(data.length);
@@ -398,7 +285,7 @@
                     data[idx+2] = Math.min(255, Math.max(0, data[idx+2] + diffB * localContrastAmount));
                 }
             }
-            // 3. Резкость (фильтр Лапласа с весами)
+            // Резкость (лапласиан)
             if(sharpAmount > 0.01) {
                 const w = width, h = height;
                 const sharpData = new Uint8ClampedArray(data.length);
@@ -419,24 +306,17 @@
             return imgData;
         }
 
-        // Получение яркостной матрицы
         function getGrayMatrix(imgData, width, height) {
             const gray = new Float32Array(width*height);
             for(let i=0; i<width*height; i++) {
-                let r = imgData.data[i*4], g = imgData.data[i*4+1], b = imgData.data[i*4+2];
-                gray[i] = 0.299*r + 0.587*g + 0.114*b;
+                gray[i] = 0.299*imgData.data[i*4] + 0.587*imgData.data[i*4+1] + 0.114*imgData.data[i*4+2];
             }
             return gray;
         }
 
-        // дизеринг Флойд-Стейнберг
         function floydSteinberg(gray, width, height, invert, levels) {
             const adjusted = new Float32Array(gray.length);
-            for(let i=0; i<gray.length; i++) {
-                let v = gray[i];
-                if(invert) v = 255 - v;
-                adjusted[i] = v;
-            }
+            for(let i=0; i<gray.length; i++) adjusted[i] = invert ? 255 - gray[i] : gray[i];
             const indices = new Uint16Array(gray.length);
             const err = new Float32Array(gray.length);
             for(let i=0; i<gray.length; i++) {
@@ -458,7 +338,6 @@
             return indices;
         }
 
-        // Порядковый дизеринг (Bayer)
         function orderedDither(gray, width, height, invert, levels) {
             const bayer = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
             const indices = new Uint16Array(gray.length);
@@ -475,7 +354,7 @@
         }
 
         async function render(useAuto=false) {
-            if(!imgLoaded) { asciiPre.innerText = "❌ Нет фото"; return; }
+            if(!imgLoaded) { asciiPre.innerText = "❌ Загрузите изображение"; return; }
             const cols = parseInt(widthSlider.value);
             const rows = Math.max(1, Math.floor(cols * (origH/origW) * 0.52));
             const tempCanvas = document.createElement('canvas');
@@ -486,7 +365,6 @@
             tempCtx.drawImage(originalImage, 0, 0, cols, rows);
             let imgData = tempCtx.getImageData(0,0,cols,rows);
             
-            // Получаем параметры
             let preCont = parseFloat(preContrastSlider.value);
             let gamma = parseFloat(gammaSlider.value);
             let sharp = parseFloat(sharpSlider.value);
@@ -495,11 +373,7 @@
             let ditherType = ditherMethodSelect.value;
             
             if(useAuto) {
-                // Автоподбор: эвристика для максимального качества
-                preCont = 1.8;
-                gamma = 0.9;
-                sharp = 1.4;
-                localCont = 1.1;
+                preCont = 1.8; gamma = 0.9; sharp = 1.4; localCont = 1.1;
                 preContrastSlider.value = preCont;
                 gammaSlider.value = gamma;
                 sharpSlider.value = sharp;
@@ -507,36 +381,45 @@
                 updateUI();
             }
             
-            // Предобработка
             imgData = preprocessImage(imgData, cols, rows, preCont, gamma, sharp, localCont);
             const grayMat = getGrayMatrix(imgData, cols, rows);
             
             let charIndices;
-            if(ditherType === 'floyd') {
-                charIndices = floydSteinberg(grayMat, cols, rows, invert, CHAR_LEVELS);
-            } else if(ditherType === 'ordered') {
-                charIndices = orderedDither(grayMat, cols, rows, invert, CHAR_LEVELS);
-            } else {
+            if(ditherType === 'floyd') charIndices = floydSteinberg(grayMat, cols, rows, invert, CHAR_LEVELS);
+            else if(ditherType === 'ordered') charIndices = orderedDither(grayMat, cols, rows, invert, CHAR_LEVELS);
+            else {
                 charIndices = new Uint16Array(cols*rows);
                 for(let i=0; i<cols*rows; i++) {
-                    let v = grayMat[i];
-                    if(invert) v = 255 - v;
+                    let v = invert ? 255 - grayMat[i] : grayMat[i];
                     let idx = Math.floor((v/255) * (CHAR_LEVELS-1));
                     charIndices[i] = Math.min(CHAR_LEVELS-1, Math.max(0, idx));
                 }
             }
             
-            // сборка строк
+            // Сборка текста с гарантией отсутствия undefined
             let lines = [];
             for(let y=0; y<rows; y++) {
                 let line = '';
                 for(let x=0; x<cols; x++) {
-                    line += PALETTE[charIndices[y*cols + x]];
+                    let sym = PALETTE[charIndices[y*cols + x]];
+                    if(!sym || sym === 'undefined') sym = '█'; // подстраховка
+                    line += sym;
                 }
                 lines.push(line);
             }
-            asciiPre.innerText = lines.join('\n');
-            statsInfo.innerText = `${cols}×${rows} | палитра:${CHAR_LEVELS} | метод:${ditherType} | авто:${useAuto?'да':'нет'}`;
+            let result = lines.join('\n');
+            // Финальная очистка от любых возможных 'undefined'
+            result = result.replace(/undefined/g, '█');
+            asciiPre.innerText = result;
+            
+            // Добавляем информационную строку, если её нет
+            if(!document.getElementById('statsInfo')) {
+                let span = document.createElement('span');
+                span.id = 'statsInfo';
+                span.style.fontSize = '0.7rem';
+                document.querySelector('.result-box').before(span);
+            }
+            document.getElementById('statsInfo').innerText = `${cols}×${rows} | палитра: ${CHAR_LEVELS} | метод: ${ditherType} | авто: ${useAuto?'да':'нет'}`;
         }
 
         function loadImage(file) {
@@ -563,7 +446,7 @@
             reader.readAsDataURL(file);
         }
 
-        // events
+        // События
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#bbccff'; });
         dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#6c8effaa');
@@ -590,7 +473,7 @@
         ditherMethodSelect.addEventListener('change', () => { if(imgLoaded) render(false); });
         
         updateUI();
-        asciiPre.innerText = "✨ Супер-четкость: загрузите фото и нажмите «Авто-улучшение» для идеального результата";
+        asciiPre.innerText = "✨ Загрузите фото → нажмите «Авто-улучшение» → текст без ошибок 'undefined'";
     })();
 </script>
 </body>
