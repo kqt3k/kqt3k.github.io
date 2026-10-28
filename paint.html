@@ -33,7 +33,7 @@
     color: #7c8595; margin-bottom: 8px; font-weight: 600;
   }
 
-  /* ---------- Палитра 50 квадратиков ---------- */
+  /* ---------- Палитра ---------- */
   .palette {
     display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
   }
@@ -62,16 +62,28 @@
 
   /* ---------- Инструменты ---------- */
   .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .tools button, .actions button, .sizes button, .custom button {
+  .tools button, .actions button, .sizes button, .custom button, .zoom-controls button {
     font: inherit; font-size: 12.5px; color: #cfd6e2;
     background: #23272f; border: 1px solid #2f3540; border-radius: 7px;
     padding: 8px 6px; cursor: pointer; transition: .12s;
   }
   .tools button:hover, .actions button:hover,
-  .sizes button:hover, .custom button:hover { background: #2c313b; }
+  .sizes button:hover, .custom button:hover,
+  .zoom-controls button:hover { background: #2c313b; }
   .tools button.active, .sizes button.active {
     background: #2f6fed; border-color: #2f6fed; color: #fff;
   }
+
+  /* ---------- Зум ---------- */
+  .zoom-controls {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .zoom-controls button { min-width: 34px; padding: 7px 10px; font-size: 14px; }
+  .zoom-controls #zoomDisplay {
+    flex: 1; text-align: center; font-size: 13px; color: #9aa4b5;
+    font-variant-numeric: tabular-nums; user-select: none;
+  }
+  .zoom-controls #zoomFit { font-size: 11.5px; padding: 7px 8px; min-width: 0; }
 
   /* ---------- Размер ---------- */
   .sizes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
@@ -87,7 +99,6 @@
 
   /* ---------- Действия ---------- */
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .actions button.wide { grid-column: span 2; }
   .actions button.on { background: #2f6fed; border-color: #2f6fed; color: #fff; }
 
   .hint { font-size: 11px; color: #5f6878; line-height: 1.5; margin-top: 6px; }
@@ -95,15 +106,17 @@
 
   /* ---------- Сцена ---------- */
   .stage {
-    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
     background:
       radial-gradient(circle at 50% 40%, #1a1d23 0%, #0d0f12 100%);
     overflow: hidden; padding: 24px;
   }
   .canvas-box {
-    position: relative; line-height: 0;
+    position: relative; line-height: 0; flex-shrink: 0;
     box-shadow: 0 12px 40px rgba(0,0,0,.65), 0 0 0 1px #2a2f38;
     background: #fff;
+    will-change: transform;
   }
   #board {
     display: block; image-rendering: pixelated;
@@ -140,6 +153,21 @@
     </section>
 
     <section>
+      <div class="label">Масштаб</div>
+      <div class="zoom-controls">
+        <button id="zoomOut" title="Уменьшить (−)">−</button>
+        <span id="zoomDisplay">100%</span>
+        <button id="zoomIn" title="Увеличить (+)">+</button>
+        <button id="zoomFit" title="Вписать в экран (0)">Fit</button>
+      </div>
+      <div class="hint">
+        <b>Колесо мыши</b> — зум к курсору.<br>
+        <b>Пробел + перетаскивание</b> или <b>средняя кнопка</b> — панорама.<br>
+        Клавиши <b>+</b> / <b>−</b> / <b>0</b> тоже работают.
+      </div>
+    </section>
+
+    <section>
       <div class="label">Размер холста</div>
       <div class="sizes" id="sizes"></div>
       <div class="custom">
@@ -148,7 +176,7 @@
         <input type="number" id="hInput" min="1" max="256" value="16">
         <button id="applySize">OK</button>
       </div>
-      <div class="hint">Маленькие холсты (16×16, 32×32) автоматически увеличиваются на экране — рисуешь по пикселям.</div>
+      <div class="hint">Маленькие холсты (16×16, 32×32) автоматически увеличиваются — рисуешь по пикселям.</div>
     </section>
 
     <section class="actions">
@@ -156,7 +184,6 @@
       <button id="clearBtn">🗑 Очистить</button>
       <button id="gridBtn" class="on">▦ Сетка</button>
       <button id="saveBtn">⬇ PNG</button>
-      <button class="wide" id="fitBtn">⤢ Вписать в экран</button>
     </section>
   </aside>
 
@@ -174,19 +201,12 @@
 
   /* ======================== ПАЛИТРА (ровно 50) ======================== */
   const PALETTE = [
-    // серые (6)
     '#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff',
-    // красные / розовые (7)
     '#7f0000', '#b30000', '#ff0000', '#ff4d4d', '#ff9999', '#ff0066', '#ff66a3',
-    // оранжевые / коричневые (8)
     '#7f3f00', '#b35900', '#ff8000', '#ffb366', '#f4a460', '#8b5a2b', '#5a3d2b', '#2b1d14',
-    // жёлтые (6)
     '#7f7f00', '#ffff00', '#ffff66', '#ffe699', '#ffd700', '#c9a227',
-    // зелёные (8)
     '#003300', '#006600', '#00b300', '#00ff00', '#66ff66', '#99ff99', '#00ff7f', '#7fff7f',
-    // голубые / синие (8)
     '#00ffff', '#66ffff', '#00bfff', '#0066cc', '#0000ff', '#6666ff', '#000080', '#7f7fff',
-    // фиолетовые / маджента (7)
     '#330066', '#6600cc', '#9933ff', '#cc66ff', '#ff00ff', '#ff66ff', '#7f007f'
   ];
 
@@ -206,6 +226,7 @@
   const hexEl     = document.getElementById('currentHex');
   const wInput    = document.getElementById('wInput');
   const hInput    = document.getElementById('hInput');
+  const zoomDisplay = document.getElementById('zoomDisplay');
 
   /* ======================== СОСТОЯНИЕ ======================== */
   let W = 16, H = 16;
@@ -213,6 +234,15 @@
   let currentColor = '#000000';
   let tool = 'pencil';
   let showGrid = true;
+
+  // зум
+  let zoom = 1;            // множитель к «fit»-масштабу
+  let panX = 0, panY = 0;  // сдвиг в пикселях
+  let spaceDown = false;
+  let isPanning = false;
+  let panStart = null;
+
+  // рисование
   let drawing = false;
   let lastPt = null;
 
@@ -241,7 +271,6 @@
     ctx.fillRect(x, y, 1, 1);
   }
 
-  /* Линия Брезенхэма — чтобы при быстром движении мыши не было дырок */
   function bresenham(x0, y0, x1, y1, cb) {
     let dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     let dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
@@ -255,34 +284,35 @@
     }
   }
 
-  /* ======================== РАЗМЕР ХОЛСТА ======================== */
-  function setSize(w, h) {
-    W = clamp(parseInt(w, 10) || 16, 1, 256);
-    H = clamp(parseInt(h, 10) || 16, 1, 256);
-
-    board.width = W;
-    board.height = H;
-    ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-
-    undoStack.length = 0;
-    wInput.value = W;
-    hInput.value = H;
-    markActiveSize();
-    layout();
+  /* ======================== МАСШТАБ ======================== */
+  // ограничитель размера сетки: не более 16M пикселей (~64 МБ)
+  function maxAllowedScale() {
+    const gridBudget = 16e6;
+    const byArea = Math.sqrt(gridBudget / (W * H));
+    return Math.max(8, Math.min(128, byArea));
   }
 
-  function layout() {
+  function computeScale() {
     const pad = 48;
     const availW = Math.max(40, stage.clientWidth - pad);
     const availH = Math.max(40, stage.clientHeight - pad);
+    const baseScale = Math.min(availW / W, availH / H);
+    let s = baseScale * zoom;
+    if (s >= 1) s = Math.floor(s);
+    s = Math.max(0.05, Math.min(s, maxAllowedScale()));
+    return s;
+  }
 
-    let s = Math.min(availW / W, availH / H);
-    s = s >= 1 ? Math.floor(s) : s;   // целый масштаб для чётких пикселей
-    s = Math.min(s, 64);              // не раздуваем слишком сильно
-    if (!isFinite(s) || s <= 0) s = 1;
-    scale = s;
+  function clampPan() {
+    const maxPanX = Math.max(0, (W * scale - stage.clientWidth) / 2);
+    const maxPanY = Math.max(0, (H * scale - stage.clientHeight) / 2);
+    panX = clamp(panX, -maxPanX, maxPanX);
+    panY = clamp(panY, -maxPanY, maxPanY);
+  }
+
+  function layout() {
+    scale = computeScale();
+    clampPan();
 
     const dw = Math.round(W * scale);
     const dh = Math.round(H * scale);
@@ -295,7 +325,11 @@
     gridCv.style.width  = dw + 'px';
     gridCv.style.height = dh + 'px';
 
+    box.style.transform = `translate(${panX}px, ${panY}px)`;
+
     drawGrid();
+    updateZoomUI();
+    updateCursor();
   }
 
   function drawGrid() {
@@ -316,6 +350,51 @@
       gctx.lineTo(gridCv.width, py);
     }
     gctx.stroke();
+  }
+
+  function updateZoomUI() {
+    zoomDisplay.textContent = Math.round(zoom * 100) + '%';
+  }
+
+  function setZoom(newZoom, cursorX, cursorY) {
+    newZoom = clamp(newZoom, 0.25, 32);
+    if (Math.abs(newZoom - zoom) < 0.001) return;
+
+    const stageRect = stage.getBoundingClientRect();
+    const stageCX = stageRect.left + stageRect.width  / 2;
+    const stageCY = stageRect.top  + stageRect.height / 2;
+
+    if (cursorX === undefined) {
+      cursorX = stageCX + panX;
+      cursorY = stageCY + panY;
+    }
+
+    const oldScale = scale;
+    const originX = stageCX - (W * oldScale) / 2 + panX;
+    const originY = stageCY - (H * oldScale) / 2 + panY;
+
+    const canvasPx = (cursorX - originX) / oldScale;
+    const canvasPy = (cursorY - originY) / oldScale;
+
+    zoom = newZoom;
+    const newScale = computeScale();
+
+    panX = cursorX - stageCX + (W * newScale) / 2 - canvasPx * newScale;
+    panY = cursorY - stageCY + (H * newScale) / 2 - canvasPy * newScale;
+
+    layout();
+  }
+
+  function zoomFromCenter(factor) {
+    const stageRect = stage.getBoundingClientRect();
+    const cx = stageRect.left + stageRect.width  / 2 + panX;
+    const cy = stageRect.top  + stageRect.height / 2 + panY;
+    setZoom(zoom * factor, cx, cy);
+  }
+
+  function fitToScreen() {
+    zoom = 1; panX = 0; panY = 0;
+    layout();
   }
 
   /* ======================== UNDO ======================== */
@@ -341,7 +420,6 @@
     const start = (y * W + x) * 4;
     const tr = d[start], tg = d[start + 1], tb = d[start + 2];
     const [nr, ng, nb] = hexToRgb(hex);
-
     if (tr === nr && tg === ng && tb === nb) return;
 
     const stack = [x, y];
@@ -349,12 +427,9 @@
       const cy = stack.pop();
       const cx = stack.pop();
       if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
-
       const i = (cy * W + cx) * 4;
       if (d[i] !== tr || d[i + 1] !== tg || d[i + 2] !== tb) continue;
-
       d[i] = nr; d[i + 1] = ng; d[i + 2] = nb; d[i + 3] = 255;
-
       stack.push(cx + 1, cy, cx - 1, cy, cx, cy + 1, cx, cy - 1);
     }
     ctx.putImageData(img, 0, 0);
@@ -371,24 +446,20 @@
 
   /* ======================== РИСОВАНИЕ ======================== */
   board.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    if (e.button !== 0 && e.pointerType === 'mouse') return; // только ЛКМ
-    board.setPointerCapture(e.pointerId);
+    // панорама или средняя кнопка — отдаём событие сцене
+    if (spaceDown || e.button === 1) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
 
     const p = getPos(e);
     if (p.x < 0 || p.y < 0 || p.x >= W || p.y >= H) return;
 
-    if (tool === 'picker') {
-      pickColorAt(p.x, p.y);
-      return;
-    }
+    if (tool === 'picker') { pickColorAt(p.x, p.y); return; }
 
+    board.setPointerCapture(e.pointerId);
+    e.preventDefault();
     pushUndo();
 
-    if (tool === 'fill') {
-      floodFill(p.x, p.y, currentColor);
-      return;
-    }
+    if (tool === 'fill') { floodFill(p.x, p.y, currentColor); return; }
 
     drawing = true;
     lastPt = p;
@@ -397,13 +468,10 @@
 
   board.addEventListener('pointermove', (e) => {
     if (!drawing || !lastPt) return;
-
     const p = getPos(e);
-    // ограничиваем, чтобы не гонять цикл по огромным координатам
     const cx = clamp(p.x, -1, W);
     const cy = clamp(p.y, -1, H);
     const color = activeColor();
-
     bresenham(lastPt.x, lastPt.y, cx, cy, (x, y) => putPixel(x, y, color));
     lastPt = { x: cx, y: cy };
   });
@@ -420,6 +488,52 @@
   board.addEventListener('pointercancel', endStroke);
   board.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  /* ======================== ПАНОРАМА ======================== */
+  stage.addEventListener('pointerdown', (e) => {
+    const wantPan = (e.button === 1) || (e.button === 0 && spaceDown);
+    if (!wantPan) return;
+    e.preventDefault();
+    isPanning = true;
+    panStart = { x: e.clientX - panX, y: e.clientY - panY };
+    stage.setPointerCapture(e.pointerId);
+    updateCursor();
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!isPanning || !panStart) return;
+    panX = e.clientX - panStart.x;
+    panY = e.clientY - panStart.y;
+    clampPan();
+    box.style.transform = `translate(${panX}px, ${panY}px)`;
+  });
+
+  function endPan(e) {
+    if (!isPanning) return;
+    isPanning = false;
+    panStart = null;
+    if (e && e.pointerId !== undefined && stage.hasPointerCapture(e.pointerId)) {
+      stage.releasePointerCapture(e.pointerId);
+    }
+    updateCursor();
+  }
+  stage.addEventListener('pointerup', endPan);
+  stage.addEventListener('pointercancel', endPan);
+
+  function updateCursor() {
+    if (isPanning) board.style.cursor = 'grabbing';
+    else if (spaceDown) board.style.cursor = 'grab';
+    else if (tool === 'picker') board.style.cursor = 'copy';
+    else board.style.cursor = 'crosshair';
+  }
+
+  /* ======================== КОЛЕСО ======================== */
+  stage.addEventListener('wheel', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+    const factor = Math.exp(-e.deltaY * 0.0018);
+    setZoom(zoom * factor, e.clientX, e.clientY);
+  }, { passive: false });
+
   /* ======================== ПИПЕТКА ======================== */
   function pickColorAt(x, y) {
     if (x < 0 || y < 0 || x >= W || y >= H) return;
@@ -435,13 +549,10 @@
     currentColor = hex;
     chipEl.style.background = hex;
     hexEl.textContent = hex;
-
     document.querySelectorAll('.swatch').forEach(el => {
       el.classList.toggle('active',
         el.dataset.color.toLowerCase() === hex.toLowerCase());
     });
-
-    // если был ластик — вернёмся к карандашу
     if (tool === 'eraser') setTool('pencil');
   }
 
@@ -466,7 +577,7 @@
     toolsEl.querySelectorAll('button').forEach(b => {
       b.classList.toggle('active', b.dataset.tool === t);
     });
-    board.style.cursor = (t === 'picker') ? 'copy' : 'crosshair';
+    updateCursor();
   }
 
   toolsEl.addEventListener('click', (e) => {
@@ -494,6 +605,25 @@
     });
   }
 
+  function setSize(w, h) {
+    W = clamp(parseInt(w, 10) || 16, 1, 256);
+    H = clamp(parseInt(h, 10) || 16, 1, 256);
+
+    board.width = W;
+    board.height = H;
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    undoStack.length = 0;
+    zoom = 1; panX = 0; panY = 0;
+
+    wInput.value = W;
+    hInput.value = H;
+    markActiveSize();
+    layout();
+  }
+
   document.getElementById('applySize').addEventListener('click', () => {
     setSize(wInput.value, hInput.value);
   });
@@ -502,6 +632,11 @@
       if (e.key === 'Enter') setSize(wInput.value, hInput.value);
     });
   });
+
+  /* ======================== UI: ЗУМ ======================== */
+  document.getElementById('zoomIn').addEventListener('click',  () => zoomFromCenter(1.5));
+  document.getElementById('zoomOut').addEventListener('click', () => zoomFromCenter(1 / 1.5));
+  document.getElementById('zoomFit').addEventListener('click', fitToScreen);
 
   /* ======================== UI: ДЕЙСТВИЯ ======================== */
   document.getElementById('undoBtn').addEventListener('click', undo);
@@ -526,11 +661,16 @@
     a.click();
   });
 
-  document.getElementById('fitBtn').addEventListener('click', layout);
-
   /* ======================== ГОРЯЧИЕ КЛАВИШИ ======================== */
   window.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
+
+    if (e.code === 'Space' && !e.repeat) {
+      spaceDown = true;
+      e.preventDefault();
+      updateCursor();
+      return;
+    }
 
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
       e.preventDefault();
@@ -544,7 +684,18 @@
       case 'e': setTool('eraser'); break;
       case 'g': setTool('fill');   break;
       case 'i': setTool('picker'); break;
-      case 'h': layout();          break;
+      case '0': fitToScreen();     break;
+      case '+':
+      case '=': zoomFromCenter(1.5); break;
+      case '-':
+      case '_': zoomFromCenter(1 / 1.5); break;
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') {
+      spaceDown = false;
+      updateCursor();
     }
   });
 
@@ -562,7 +713,6 @@
   setTool('pencil');
   setSize(16, 16);
 
-  // пересчёт после того, как браузер всё отрисовал
   requestAnimationFrame(() => { layout(); });
 
 })();
