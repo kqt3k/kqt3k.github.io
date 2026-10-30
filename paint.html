@@ -1,137 +1,282 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="d-dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Супер Пеинт 1.0</title>
 <style>
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: #14161a; color: #e6e8ec; overflow: hidden;
-    -webkit-user-select: none; user-select: none;
-  }
-  .app { display: flex; height: 100vh; }
+/* ============================================================
+   ТЕМЫ: 5 для ПК + 5 для телефона
+   ============================================================ */
+:root { --radius: 10px; --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 
-  /* ---------- Панель ---------- */
-  .panel {
-    width: 310px; flex: 0 0 310px; padding: 16px 16px 40px;
-    background: #1b1e24; border-right: 1px solid #2a2f38;
-    overflow-y: auto;
-  }
-  .panel h1 {
-    font-size: 18px; margin: 0 0 18px; font-weight: 700; letter-spacing: .3px;
-  }
-  .panel h1 span {
-    font-size: 11px; background: #2f6fed; color: #fff; padding: 2px 6px;
-    border-radius: 5px; vertical-align: middle; margin-left: 4px;
-  }
-  section { margin-bottom: 20px; }
-  .label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-    color: #7c8595; margin-bottom: 8px; font-weight: 600;
-  }
+/* ---------- ПК ---------- */
+html[data-theme="d-dark"]{
+  --bg:#0d0f12; --panel:#1b1e24; --panel2:#23272f; --border:#2a2f38; --input:#14161a;
+  --text:#e6e8ec; --muted:#7c8595; --muted2:#5f6878; --accent:#2f6fed; --accentText:#fff;
+  --radius:10px; --stageBg: radial-gradient(circle at 50% 40%, #1a1d23 0%, #0d0f12 100%);
+}
+html[data-theme="d-light"]{
+  --bg:#eef1f6; --panel:#ffffff; --panel2:#f2f4f8; --border:#d7dce5; --input:#f7f9fc;
+  --text:#1b2130; --muted:#6b7484; --muted2:#8a93a3; --accent:#2563eb; --accentText:#fff;
+  --radius:10px; --stageBg: radial-gradient(circle at 50% 40%, #e7ecf4 0%, #d5dce8 100%);
+}
+html[data-theme="d-midnight"]{
+  --bg:#0a0a1a; --panel:#141428; --panel2:#1d1d38; --border:#2b2b4d; --input:#0f0f20;
+  --text:#dcdcff; --muted:#8888b3; --muted2:#66668c; --accent:#8b5cf6; --accentText:#fff;
+  --radius:12px; --stageBg: radial-gradient(circle at 50% 40%, #16162e 0%, #07070f 100%);
+}
+html[data-theme="d-terminal"]{
+  --bg:#050805; --panel:#0a0f0a; --panel2:#0f170f; --border:#1d331d; --input:#0a0f0a;
+  --text:#9dff9d; --muted:#4f8a4f; --muted2:#3a6b3a; --accent:#22c55e; --accentText:#04120a;
+  --radius:4px; --font: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --stageBg: radial-gradient(circle at 50% 40%, #0a120a 0%, #030503 100%);
+}
+html[data-theme="d-paper"]{
+  --bg:#efe6d8; --panel:#faf4ea; --panel2:#f2e9db; --border:#d8cbb8; --input:#fdfaf4;
+  --text:#3b3229; --muted:#8a7a66; --muted2:#a99a86; --accent:#b45309; --accentText:#fff;
+  --radius:12px; --stageBg: radial-gradient(circle at 50% 40%, #f6efe3 0%, #e2d6c3 100%);
+}
 
-  /* ---------- Палитра ---------- */
-  .palette {
-    display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
-  }
-  .swatch {
-    aspect-ratio: 1 / 1; width: 100%; padding: 0; border-radius: 4px;
-    border: 2px solid rgba(255,255,255,.08); cursor: pointer;
-    transition: transform .08s, box-shadow .08s;
-  }
-  .swatch:hover { transform: scale(1.15); z-index: 2; position: relative; }
-  .swatch.active {
-    border-color: #fff;
-    box-shadow: 0 0 0 2px #2f6fed, 0 0 8px rgba(47,111,237,.9);
-    transform: scale(1.1); position: relative; z-index: 3;
-  }
+/* ---------- Телефон ---------- */
+html[data-theme="m-dark"]{
+  --bg:#101014; --panel:#18181f; --panel2:#22222c; --border:#2c2c38; --input:#101014;
+  --text:#f0f0f5; --muted:#8a8a9a; --muted2:#63636f; --accent:#ff5c8a; --accentText:#fff;
+  --radius:16px; --stageBg: linear-gradient(160deg,#131319,#08080c);
+}
+html[data-theme="m-light"]{
+  --bg:#f6f7fb; --panel:#ffffff; --panel2:#eef0f7; --border:#e0e4ee; --input:#f6f7fb;
+  --text:#1a1d29; --muted:#7a8195; --muted2:#98a0b3; --accent:#3b82f6; --accentText:#fff;
+  --radius:18px; --stageBg: linear-gradient(160deg,#eef1f8,#dfe4ef);
+}
+html[data-theme="m-neon"]{
+  --bg:#07060f; --panel:#100c1f; --panel2:#1a1233; --border:#33235c; --input:#0b0817;
+  --text:#e9dcff; --muted:#9a7fd1; --muted2:#6f5a99; --accent:#00e5ff; --accentText:#001318;
+  --radius:20px; --stageBg: radial-gradient(circle at 30% 20%, #221043 0%, #05030c 70%);
+}
+html[data-theme="m-ocean"]{
+  --bg:#062033; --panel:#0a2c45; --panel2:#0e3a5a; --border:#155070; --input:#071f31;
+  --text:#dff3ff; --muted:#7fb3d0; --muted2:#5a89a3; --accent:#22d3ee; --accentText:#04202b;
+  --radius:16px; --stageBg: linear-gradient(180deg,#0a3550,#04141f);
+}
+html[data-theme="m-sand"]{
+  --bg:#f3ece1; --panel:#fffaf3; --panel2:#efe6d8; --border:#e0d3bf; --input:#fbf6ee;
+  --text:#3a332b; --muted:#95866f; --muted2:#b0a390; --accent:#0d9488; --accentText:#fff;
+  --radius:18px; --stageBg: linear-gradient(180deg,#faf4ea,#e9dfcd);
+}
 
-  .current {
-    display: flex; align-items: center; gap: 10px; margin-top: 10px;
-    background: #14161a; padding: 8px 10px; border-radius: 8px;
-    border: 1px solid #2a2f38;
-  }
-  .current .chip {
-    width: 26px; height: 26px; border-radius: 6px;
-    border: 1px solid rgba(255,255,255,.15);
-  }
-  .current code { font-size: 13px; color: #9aa4b5; }
+/* ============================================================
+   БАЗА
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg); color: var(--text);
+  overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s ease, color .2s ease;
+}
+.app { display: flex; height: 100vh; height: 100dvh; }
 
-  /* ---------- Инструменты ---------- */
-  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .tools button, .actions button, .sizes button, .custom button, .zoom-controls button {
-    font: inherit; font-size: 12.5px; color: #cfd6e2;
-    background: #23272f; border: 1px solid #2f3540; border-radius: 7px;
-    padding: 8px 6px; cursor: pointer; transition: .12s;
-  }
-  .tools button:hover, .actions button:hover,
-  .sizes button:hover, .custom button:hover,
-  .zoom-controls button:hover { background: #2c313b; }
-  .tools button.active, .sizes button.active {
-    background: #2f6fed; border-color: #2f6fed; color: #fff;
-  }
+/* ---------- Панель ---------- */
+.panel {
+  width: 316px; flex: 0 0 316px; padding: 16px 16px 40px;
+  background: var(--panel); border-right: 1px solid var(--border);
+  overflow-y: auto; transition: background .2s, border-color .2s;
+  scrollbar-width: thin;
+}
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
+.panel h1 { font-size: 17px; margin: 0; font-weight: 700; letter-spacing: .3px; }
+.panel h1 span {
+  font-size: 10px; background: var(--accent); color: var(--accentText);
+  padding: 2px 6px; border-radius: 5px; vertical-align: middle; margin-left: 4px;
+}
+.device-toggle { display: flex; gap: 3px; background: var(--panel2); padding: 3px; border-radius: 9px; border: 1px solid var(--border); }
+.device-toggle button {
+  font: inherit; font-size: 13px; line-height: 1; padding: 5px 8px; cursor: pointer;
+  background: transparent; border: 0; border-radius: 6px; color: var(--muted);
+}
+.device-toggle button.active { background: var(--accent); color: var(--accentText); }
 
-  /* ---------- Зум ---------- */
-  .zoom-controls {
-    display: flex; align-items: center; gap: 6px;
-  }
-  .zoom-controls button { min-width: 34px; padding: 7px 10px; font-size: 14px; }
-  .zoom-controls #zoomDisplay {
-    flex: 1; text-align: center; font-size: 13px; color: #9aa4b5;
-    font-variant-numeric: tabular-nums; user-select: none;
-  }
-  .zoom-controls #zoomFit { font-size: 11.5px; padding: 7px 8px; min-width: 0; }
+section { margin-bottom: 18px; }
+.label {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin-bottom: 8px; font-weight: 700;
+}
 
-  /* ---------- Размер ---------- */
-  .sizes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-  .sizes button { padding: 7px 0; }
-  .custom { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
-  .custom input {
-    width: 100%; min-width: 0; font: inherit; font-size: 13px;
-    background: #14161a; color: #e6e8ec; border: 1px solid #2f3540;
-    border-radius: 7px; padding: 6px 8px; text-align: center;
-  }
-  .custom span { color: #7c8595; }
-  .custom button { padding: 6px 10px; flex: 0 0 auto; }
+/* ---------- Палитра ---------- */
+.palette { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.swatch {
+  aspect-ratio: 1 / 1; width: 100%; padding: 0; border-radius: 4px;
+  border: 2px solid rgba(128,128,128,.18); cursor: pointer;
+  transition: transform .08s, box-shadow .08s;
+}
+.swatch:hover { transform: scale(1.18); position: relative; z-index: 2; }
+.swatch.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 8px var(--accent);
+  transform: scale(1.12); position: relative; z-index: 3;
+}
+.current {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  background: var(--input); padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.current .chip { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); }
+.current code { font-size: 13px; color: var(--muted); }
 
-  /* ---------- Действия ---------- */
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .actions button.on { background: #2f6fed; border-color: #2f6fed; color: #fff; }
+/* ---------- Кнопки ---------- */
+.tools, .actions, .sizes, .custom, .zoom-controls, .file-row, .scale-row { display: grid; gap: 6px; }
+.tools { grid-template-columns: 1fr 1fr; }
+.actions { grid-template-columns: 1fr 1fr; }
+.sizes { grid-template-columns: repeat(5, 1fr); }
+.zoom-controls { grid-template-columns: 40px 1fr 40px 56px; align-items: center; }
+.file-row { grid-template-columns: 1fr 1fr; }
+.scale-row { grid-template-columns: repeat(4, 1fr); }
 
-  .hint { font-size: 11px; color: #5f6878; line-height: 1.5; margin-top: 6px; }
-  .hint b { color: #8b94a5; font-weight: 600; }
+button {
+  font: inherit; font-size: 12.5px; color: var(--text);
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 6px; cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+button:hover { border-color: var(--accent); }
+button:active { transform: translateY(1px); }
+button.active, button.on {
+  background: var(--accent); border-color: var(--accent); color: var(--accentText);
+}
+button:disabled { opacity: .45; cursor: not-allowed; }
 
-  /* ---------- Сцена ---------- */
-  .stage {
-    flex: 1; position: relative;
-    display: flex; align-items: center; justify-content: center;
-    background:
-      radial-gradient(circle at 50% 40%, #1a1d23 0%, #0d0f12 100%);
-    overflow: hidden; padding: 24px;
-  }
-  .canvas-box {
-    position: relative; line-height: 0; flex-shrink: 0;
-    box-shadow: 0 12px 40px rgba(0,0,0,.65), 0 0 0 1px #2a2f38;
-    background: #fff;
-    will-change: transform;
-  }
-  #board {
-    display: block; image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    cursor: crosshair; touch-action: none;
-  }
-  #gridCanvas {
-    position: absolute; left: 0; top: 0; pointer-events: none;
-  }
+.sizes button { padding: 7px 0; }
+.custom { grid-template-columns: 1fr auto 1fr auto; align-items: center; }
+.custom input {
+  width: 100%; min-width: 0; font: inherit; font-size: 13px;
+  background: var(--input); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 8px; text-align: center;
+}
+.custom span { color: var(--muted); font-size: 12px; }
+.custom button { padding: 7px 11px; }
+
+#zoomDisplay {
+  text-align: center; font-size: 13px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  display: flex; align-items: center; gap: 7px; margin-top: 8px;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+}
+.check input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
+.hint { font-size: 11px; color: var(--muted2); line-height: 1.5; margin-top: 8px; }
+.hint b { color: var(--muted); font-weight: 600; }
+
+/* ---------- Темы ---------- */
+.themes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.theme-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 7px 2px 5px; font-size: 9px; color: var(--muted);
+  border-radius: 9px; border-width: 2px;
+}
+.theme-btn .dot { width: 17px; height: 17px; border-radius: 50%; box-shadow: 0 0 0 2px var(--border); }
+.theme-btn.active { border-color: var(--accent); color: var(--text); }
+
+/* ---------- Сцена ---------- */
+.stage {
+  flex: 1; position: relative; display: flex;
+  align-items: center; justify-content: center;
+  background: var(--stageBg); overflow: hidden; padding: 24px;
+  transition: background .25s ease;
+}
+.canvas-box {
+  position: relative; line-height: 0; flex-shrink: 0;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px var(--border);
+  background: #fff; will-change: transform;
+}
+#board {
+  display: block; image-rendering: pixelated; image-rendering: crisp-edges;
+  cursor: crosshair; touch-action: none;
+}
+#gridCanvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+
+/* ---------- Мобильные инструменты поверх сцены ---------- */
+.stage-tools {
+  position: absolute; right: 10px; top: 10px; z-index: 6;
+  display: none; flex-direction: column; gap: 6px;
+}
+.stage-tools button {
+  width: 42px; height: 42px; border-radius: 13px; font-size: 17px;
+  background: var(--panel); box-shadow: 0 4px 14px rgba(0,0,0,.28);
+}
+
+/* ---------- Док (только телефон) ---------- */
+.dock {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  flex-direction: column; gap: 7px;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: var(--panel); border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 28px rgba(0,0,0,.32);
+}
+.dock-colors { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.dock-colors::-webkit-scrollbar { display: none; }
+.dock-colors .swatch { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; }
+.dock-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.dock-row button {
+  font-size: 18px; padding: 10px 0; border-radius: 13px; line-height: 1;
+}
+.dock-row button.active { background: var(--accent); border-color: var(--accent); color: var(--accentText); }
+
+/* ---------- Тосты ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 11px 18px; font-size: 13px; max-width: min(92vw, 520px);
+  box-shadow: 0 10px 34px rgba(0,0,0,.45);
+  opacity: 0; pointer-events: none; transition: .22s ease; z-index: 100; text-align: center;
+  line-height: 1.4;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+html.mobile .toast { bottom: 132px; }
+
+/* ============================================================
+   МОБИЛЬНЫЙ РЕЖИМ
+   ============================================================ */
+html.mobile .app { flex-direction: column; }
+html.mobile .stage { padding: 8px 8px 150px; }
+html.mobile .panel {
+  position: fixed; inset: auto 0 0 0; width: 100%; max-width: 100%;
+  flex: none; max-height: 80vh; border-right: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 22px 22px 0 0;
+  transform: translateY(103%);
+  transition: transform .3s cubic-bezier(.2,.85,.25,1);
+  z-index: 30; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -14px 44px rgba(0,0,0,.45);
+}
+html.mobile .panel.open { transform: translateY(0); }
+html.mobile .panel::before {
+  content: ""; display: block; width: 42px; height: 4px; border-radius: 4px;
+  background: var(--border); margin: -6px auto 12px;
+}
+html.mobile .dock { display: flex; }
+html.mobile .stage-tools { display: flex; }
+html.mobile .panel h1 { font-size: 16px; }
+html.mobile .panel { overscroll-behavior: contain; }
 </style>
 </head>
 <body>
 <div class="app">
-  <aside class="panel">
-    <h1>Супер Пеинт <span>1.0</span></h1>
+  <aside class="panel" id="panel">
+    <div class="panel-head">
+      <h1>Супер Пеинт <span>1.0</span></h1>
+      <div class="device-toggle" id="deviceToggle">
+        <button data-mode="desktop" title="Интерфейс для ПК">💻</button>
+        <button data-mode="mobile" title="Интерфейс для телефона">📱</button>
+      </div>
+    </div>
 
     <section>
       <div class="label">Палитра — 50 цветов</div>
@@ -153,41 +298,83 @@
     </section>
 
     <section>
-      <div class="label">Масштаб</div>
+      <div class="label">Масштаб просмотра</div>
       <div class="zoom-controls">
-        <button id="zoomOut" title="Уменьшить (−)">−</button>
+        <button id="zoomOut" title="Уменьшить">−</button>
         <span id="zoomDisplay">100%</span>
-        <button id="zoomIn" title="Увеличить (+)">+</button>
-        <button id="zoomFit" title="Вписать в экран (0)">Fit</button>
+        <button id="zoomIn" title="Увеличить">+</button>
+        <button id="zoomFit" title="Вписать">Fit</button>
       </div>
       <div class="hint">
-        <b>Колесо мыши</b> — зум к курсору.<br>
-        <b>Пробел + перетаскивание</b> или <b>средняя кнопка</b> — панорама.<br>
-        Клавиши <b>+</b> / <b>−</b> / <b>0</b> тоже работают.
+        <b>Колесо мыши</b> — зум к курсору, <b>пробел + тянуть</b> / <b>средняя кнопка</b> — панорама.
       </div>
     </section>
 
     <section>
-      <div class="label">Размер холста</div>
+      <div class="label">Холст</div>
       <div class="sizes" id="sizes"></div>
-      <div class="custom">
-        <input type="number" id="wInput" min="1" max="256" value="16">
+      <div class="custom" style="margin-top:6px">
+        <input type="number" id="wInput" min="1" max="256000" value="16">
         <span>×</span>
-        <input type="number" id="hInput" min="1" max="256" value="16">
+        <input type="number" id="hInput" min="1" max="256000" value="16">
         <button id="applySize">OK</button>
       </div>
-      <div class="hint">Маленькие холсты (16×16, 32×32) автоматически увеличиваются — рисуешь по пикселям.</div>
+      <label class="check">
+        <input type="checkbox" id="keepContent" checked>
+        Сохранить рисунок при изменении размера
+      </label>
+      <label class="check">
+        <input type="checkbox" id="stretchContent">
+        Растянуть рисунок под новый размер
+      </label>
+
+      <div class="label" style="margin-top:14px">Масштабировать рисунок</div>
+      <div class="scale-row">
+        <button data-scale="0.5">÷2</button>
+        <button data-scale="2">×2</button>
+        <button data-scale="4">×4</button>
+        <button data-scale="8">×8</button>
+      </div>
+      <div class="hint">
+        Пиксели не размываются — рисунок увеличивается «квадратиками».
+      </div>
+    </section>
+
+    <section>
+      <div class="label">Файл картины</div>
+      <div class="file-row">
+        <button id="exportSave">💾 Экспорт .paintingsave</button>
+        <button id="importBtn">📂 Импорт</button>
+      </div>
+      <div class="file-row" style="margin-top:6px">
+        <button id="saveBtn">⬇ PNG</button>
+        <button id="openBtn">🖼 Открыть картинку</button>
+      </div>
+      <div class="hint">
+        <b>.paintingsave</b> хранит пиксели, размер холста и дату — можно продолжить позже.
+      </div>
+    </section>
+
+    <section>
+      <div class="label" id="themeLabel">Интерфейс</div>
+      <div class="themes" id="themes"></div>
     </section>
 
     <section class="actions">
       <button id="undoBtn">↶ Отменить</button>
       <button id="clearBtn">🗑 Очистить</button>
-      <button id="gridBtn" class="on">▦ Сетка</button>
-      <button id="saveBtn">⬇ PNG</button>
+      <button id="gridBtn" class="on" style="grid-column: span 2">▦ Сетка</button>
     </section>
+
+    <div class="hint" id="limitHint"></div>
   </aside>
 
   <main class="stage" id="stage">
+    <div class="stage-tools">
+      <button id="mZoomIn">+</button>
+      <button id="mZoomOut">−</button>
+      <button id="mZoomFit">⤢</button>
+    </div>
     <div class="canvas-box" id="box">
       <canvas id="board"></canvas>
       <canvas id="gridCanvas"></canvas>
@@ -195,368 +382,524 @@
   </main>
 </div>
 
+<!-- Нижний док для телефона -->
+<div class="dock" id="dock">
+  <div class="dock-colors" id="dockColors"></div>
+  <div class="dock-row">
+    <button data-tool="pencil" class="active">✏️</button>
+    <button data-tool="eraser">🧽</button>
+    <button data-tool="fill">🪣</button>
+    <button data-tool="picker">💧</button>
+    <button id="dockUndo">↶</button>
+    <button id="dockMore">⋯</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".paintingsave,.json,image/*" hidden>
+
 <script>
 (() => {
-  "use strict";
+"use strict";
 
-  /* ======================== ПАЛИТРА (ровно 50) ======================== */
-  const PALETTE = [
-    '#000000', '#333333', '#666666', '#999999', '#cccccc', '#ffffff',
-    '#7f0000', '#b30000', '#ff0000', '#ff4d4d', '#ff9999', '#ff0066', '#ff66a3',
-    '#7f3f00', '#b35900', '#ff8000', '#ffb366', '#f4a460', '#8b5a2b', '#5a3d2b', '#2b1d14',
-    '#7f7f00', '#ffff00', '#ffff66', '#ffe699', '#ffd700', '#c9a227',
-    '#003300', '#006600', '#00b300', '#00ff00', '#66ff66', '#99ff99', '#00ff7f', '#7fff7f',
-    '#00ffff', '#66ffff', '#00bfff', '#0066cc', '#0000ff', '#6666ff', '#000080', '#7f7fff',
-    '#330066', '#6600cc', '#9933ff', '#cc66ff', '#ff00ff', '#ff66ff', '#7f007f'
-  ];
+/* ============================================================
+   ПАЛИТРА (ровно 50 цветов)
+   ============================================================ */
+const PALETTE = [
+  '#000000','#333333','#666666','#999999','#cccccc','#ffffff',
+  '#7f0000','#b30000','#ff0000','#ff4d4d','#ff9999','#ff0066','#ff66a3',
+  '#7f3f00','#b35900','#ff8000','#ffb366','#f4a460','#8b5a2b','#5a3d2b','#2b1d14',
+  '#7f7f00','#ffff00','#ffff66','#ffe699','#ffd700','#c9a227',
+  '#003300','#006600','#00b300','#00ff00','#66ff66','#99ff99','#00ff7f','#7fff7f',
+  '#00ffff','#66ffff','#00bfff','#0066cc','#0000ff','#6666ff','#000080','#7f7fff',
+  '#330066','#6600cc','#9933ff','#cc66ff','#ff00ff','#ff66ff','#7f007f'
+];
 
-  const SIZES = [8, 16, 24, 32, 48];
+const SIZES = [8, 16, 24, 32, 48];
 
-  /* ======================== ЭЛЕМЕНТЫ ======================== */
-  const board   = document.getElementById('board');
-  const ctx     = board.getContext('2d', { willReadFrequently: true });
-  const gridCv  = document.getElementById('gridCanvas');
-  const gctx    = gridCv.getContext('2d');
-  const stage   = document.getElementById('stage');
-  const box     = document.getElementById('box');
-  const paletteEl = document.getElementById('palette');
-  const sizesEl   = document.getElementById('sizes');
-  const toolsEl   = document.getElementById('tools');
-  const chipEl    = document.getElementById('currentChip');
-  const hexEl     = document.getElementById('currentHex');
-  const wInput    = document.getElementById('wInput');
-  const hInput    = document.getElementById('hInput');
-  const zoomDisplay = document.getElementById('zoomDisplay');
+/* Пределы. 256000×256000 = 65,5 млрд пикселей ≈ 262 ГБ памяти —
+   физически невозможно в браузере. Реальный предел ~8K. */
+const MAX_SIDE = 8192;
+const MAX_AREA = 40_000_000;   // ~40 Мп
 
-  /* ======================== СОСТОЯНИЕ ======================== */
-  let W = 16, H = 16;
-  let scale = 20;
-  let currentColor = '#000000';
-  let tool = 'pencil';
-  let showGrid = true;
+/* ============================================================
+   ТЕМЫ
+   ============================================================ */
+const THEMES = {
+  desktop: [
+    { id:'d-dark',     name:'Тёмная',   dot:'#2f6fed' },
+    { id:'d-light',    name:'Светлая',  dot:'#2563eb' },
+    { id:'d-midnight', name:'Полночь',  dot:'#8b5cf6' },
+    { id:'d-terminal', name:'Терминал', dot:'#22c55e' },
+    { id:'d-paper',    name:'Бумага',   dot:'#b45309' }
+  ],
+  mobile: [
+    { id:'m-dark',  name:'Ночь',  dot:'#ff5c8a' },
+    { id:'m-light', name:'День',  dot:'#3b82f6' },
+    { id:'m-neon',  name:'Неон',  dot:'#00e5ff' },
+    { id:'m-ocean', name:'Океан', dot:'#22d3ee' },
+    { id:'m-sand',  name:'Песок', dot:'#0d9488' }
+  ]
+};
 
-  // зум
-  let zoom = 1;            // множитель к «fit»-масштабу
-  let panX = 0, panY = 0;  // сдвиг в пикселях
-  let spaceDown = false;
-  let isPanning = false;
-  let panStart = null;
+/* ============================================================
+   ЭЛЕМЕНТЫ
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const html      = document.documentElement;
+const board     = $('board');
+const ctx       = board.getContext('2d', { willReadFrequently: true });
+const gridCv    = $('gridCanvas');
+const gctx      = gridCv.getContext('2d');
+const stage     = $('stage');
+const box       = $('box');
+const panel     = $('panel');
+const paletteEl = $('palette');
+const dockColorsEl = $('dockColors');
+const sizesEl   = $('sizes');
+const toolsEl   = $('tools');
+const themesEl  = $('themes');
+const chipEl    = $('currentChip');
+const hexEl     = $('currentHex');
+const wInput    = $('wInput');
+const hInput    = $('hInput');
+const zoomDisplay = $('zoomDisplay');
+const toastEl   = $('toast');
+const fileInput = $('fileInput');
 
-  // рисование
-  let drawing = false;
-  let lastPt = null;
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+let W = 16, H = 16;
+let scale = 20;
+let currentColor = '#000000';
+let tool = 'pencil';
+let showGrid = true;
 
-  const undoStack = [];
-  const MAX_UNDO = 80;
+let zoom = 1, panX = 0, panY = 0;
+let spaceDown = false, isPanning = false, panStart = null;
+let drawing = false, lastPt = null;
 
-  /* ======================== УТИЛИТЫ ======================== */
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+let mode = 'desktop';
+let themeId = 'd-dark';
 
-  function hexToRgb(hex) {
-    const h = hex.replace('#', '');
-    return [
-      parseInt(h.slice(0, 2), 16),
-      parseInt(h.slice(2, 4), 16),
-      parseInt(h.slice(4, 6), 16)
-    ];
-  }
+const undoStack = [];
+const MAX_UNDO = 60;
+const UNDO_BUDGET = 96 * 1024 * 1024;
+let undoBytes = 0;
 
-  function activeColor() {
-    return tool === 'eraser' ? '#ffffff' : currentColor;
-  }
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
-  function putPixel(x, y, color) {
-    if (x < 0 || y < 0 || x >= W || y >= H) return;
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, 1, 1);
-  }
+function hexToRgb(hex) {
+  const h = hex.replace('#','');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function activeColor(){ return tool === 'eraser' ? '#ffffff' : currentColor; }
 
-  function bresenham(x0, y0, x1, y1, cb) {
-    let dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-    let dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-    let err = dx + dy;
-    for (;;) {
-      cb(x0, y0);
-      if (x0 === x1 && y0 === y1) break;
-      const e2 = 2 * err;
-      if (e2 >= dy) { err += dy; x0 += sx; }
-      if (e2 <= dx) { err += dx; y0 += sy; }
-    }
-  }
+let toastTimer = null;
+function toast(msg, ms = 2600) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
+}
 
-  /* ======================== МАСШТАБ ======================== */
-  // ограничитель размера сетки: не более 16M пикселей (~64 МБ)
-  function maxAllowedScale() {
-    const gridBudget = 16e6;
-    const byArea = Math.sqrt(gridBudget / (W * H));
-    return Math.max(8, Math.min(128, byArea));
-  }
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
 
-  function computeScale() {
-    const pad = 48;
-    const availW = Math.max(40, stage.clientWidth - pad);
-    const availH = Math.max(40, stage.clientHeight - pad);
-    const baseScale = Math.min(availW / W, availH / H);
-    let s = baseScale * zoom;
-    if (s >= 1) s = Math.floor(s);
-    s = Math.max(0.05, Math.min(s, maxAllowedScale()));
-    return s;
-  }
+/* ============================================================
+   ТЕМЫ / РЕЖИМ
+   ============================================================ */
+function savedTheme(m){ return localStorage.getItem('sp-theme-' + m) || THEMES[m][0].id; }
 
-  function clampPan() {
-    const maxPanX = Math.max(0, (W * scale - stage.clientWidth) / 2);
-    const maxPanY = Math.max(0, (H * scale - stage.clientHeight) / 2);
-    panX = clamp(panX, -maxPanX, maxPanX);
-    panY = clamp(panY, -maxPanY, maxPanY);
-  }
+function applyTheme(id) {
+  themeId = id;
+  html.dataset.theme = id;
+  localStorage.setItem('sp-theme-' + mode, id);
+  buildThemeButtons();
+}
 
-  function layout() {
-    scale = computeScale();
-    clampPan();
+function currentThemeId(){ return themeId; }
 
-    const dw = Math.round(W * scale);
-    const dh = Math.round(H * scale);
-
-    board.style.width  = dw + 'px';
-    board.style.height = dh + 'px';
-
-    gridCv.width  = dw;
-    gridCv.height = dh;
-    gridCv.style.width  = dw + 'px';
-    gridCv.style.height = dh + 'px';
-
-    box.style.transform = `translate(${panX}px, ${panY}px)`;
-
-    drawGrid();
-    updateZoomUI();
-    updateCursor();
-  }
-
-  function drawGrid() {
-    gctx.clearRect(0, 0, gridCv.width, gridCv.height);
-    if (!showGrid || scale < 4) return;
-
-    gctx.strokeStyle = 'rgba(0,0,0,0.22)';
-    gctx.lineWidth = 1;
-    gctx.beginPath();
-    for (let x = 1; x < W; x++) {
-      const px = Math.round(x * scale) + 0.5;
-      gctx.moveTo(px, 0);
-      gctx.lineTo(px, gridCv.height);
-    }
-    for (let y = 1; y < H; y++) {
-      const py = Math.round(y * scale) + 0.5;
-      gctx.moveTo(0, py);
-      gctx.lineTo(gridCv.width, py);
-    }
-    gctx.stroke();
-  }
-
-  function updateZoomUI() {
-    zoomDisplay.textContent = Math.round(zoom * 100) + '%';
-  }
-
-  function setZoom(newZoom, cursorX, cursorY) {
-    newZoom = clamp(newZoom, 0.25, 32);
-    if (Math.abs(newZoom - zoom) < 0.001) return;
-
-    const stageRect = stage.getBoundingClientRect();
-    const stageCX = stageRect.left + stageRect.width  / 2;
-    const stageCY = stageRect.top  + stageRect.height / 2;
-
-    if (cursorX === undefined) {
-      cursorX = stageCX + panX;
-      cursorY = stageCY + panY;
-    }
-
-    const oldScale = scale;
-    const originX = stageCX - (W * oldScale) / 2 + panX;
-    const originY = stageCY - (H * oldScale) / 2 + panY;
-
-    const canvasPx = (cursorX - originX) / oldScale;
-    const canvasPy = (cursorY - originY) / oldScale;
-
-    zoom = newZoom;
-    const newScale = computeScale();
-
-    panX = cursorX - stageCX + (W * newScale) / 2 - canvasPx * newScale;
-    panY = cursorY - stageCY + (H * newScale) / 2 - canvasPy * newScale;
-
-    layout();
-  }
-
-  function zoomFromCenter(factor) {
-    const stageRect = stage.getBoundingClientRect();
-    const cx = stageRect.left + stageRect.width  / 2 + panX;
-    const cy = stageRect.top  + stageRect.height / 2 + panY;
-    setZoom(zoom * factor, cx, cy);
-  }
-
-  function fitToScreen() {
-    zoom = 1; panX = 0; panY = 0;
-    layout();
-  }
-
-  /* ======================== UNDO ======================== */
-  function pushUndo() {
-    try {
-      undoStack.push(ctx.getImageData(0, 0, W, H));
-      if (undoStack.length > MAX_UNDO) undoStack.shift();
-    } catch (e) { /* ignore */ }
-  }
-
-  function undo() {
-    const snapshot = undoStack.pop();
-    if (!snapshot) return;
-    ctx.putImageData(snapshot, 0, 0);
-  }
-
-  /* ======================== ЗАЛИВКА ======================== */
-  function floodFill(x, y, hex) {
-    if (x < 0 || y < 0 || x >= W || y >= H) return;
-
-    const img = ctx.getImageData(0, 0, W, H);
-    const d = img.data;
-    const start = (y * W + x) * 4;
-    const tr = d[start], tg = d[start + 1], tb = d[start + 2];
-    const [nr, ng, nb] = hexToRgb(hex);
-    if (tr === nr && tg === ng && tb === nb) return;
-
-    const stack = [x, y];
-    while (stack.length) {
-      const cy = stack.pop();
-      const cx = stack.pop();
-      if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
-      const i = (cy * W + cx) * 4;
-      if (d[i] !== tr || d[i + 1] !== tg || d[i + 2] !== tb) continue;
-      d[i] = nr; d[i + 1] = ng; d[i + 2] = nb; d[i + 3] = 255;
-      stack.push(cx + 1, cy, cx - 1, cy, cx, cy + 1, cx, cy - 1);
-    }
-    ctx.putImageData(img, 0, 0);
-  }
-
-  /* ======================== КООРДИНАТЫ ======================== */
-  function getPos(e) {
-    const r = board.getBoundingClientRect();
-    return {
-      x: Math.floor((e.clientX - r.left) / r.width  * W),
-      y: Math.floor((e.clientY - r.top)  / r.height * H)
-    };
-  }
-
-  /* ======================== РИСОВАНИЕ ======================== */
-  board.addEventListener('pointerdown', (e) => {
-    // панорама или средняя кнопка — отдаём событие сцене
-    if (spaceDown || e.button === 1) return;
-    if (e.button !== 0 && e.pointerType === 'mouse') return;
-
-    const p = getPos(e);
-    if (p.x < 0 || p.y < 0 || p.x >= W || p.y >= H) return;
-
-    if (tool === 'picker') { pickColorAt(p.x, p.y); return; }
-
-    board.setPointerCapture(e.pointerId);
-    e.preventDefault();
-    pushUndo();
-
-    if (tool === 'fill') { floodFill(p.x, p.y, currentColor); return; }
-
-    drawing = true;
-    lastPt = p;
-    putPixel(p.x, p.y, activeColor());
+function buildThemeButtons() {
+  themesEl.innerHTML = '';
+  THEMES[mode].forEach(t => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'theme-btn' + (t.id === themeId ? ' active' : '');
+    b.innerHTML = `<span class="dot" style="background:${t.dot}"></span>${t.name}`;
+    b.addEventListener('click', () => applyTheme(t.id));
+    themesEl.appendChild(b);
   });
+  $('themeLabel').textContent = mode === 'mobile' ? 'Интерфейс (телефон)' : 'Интерфейс (ПК)';
+}
 
-  board.addEventListener('pointermove', (e) => {
-    if (!drawing || !lastPt) return;
-    const p = getPos(e);
-    const cx = clamp(p.x, -1, W);
-    const cy = clamp(p.y, -1, H);
-    const color = activeColor();
-    bresenham(lastPt.x, lastPt.y, cx, cy, (x, y) => putPixel(x, y, color));
-    lastPt = { x: cx, y: cy };
-  });
+function setMode(m, silent) {
+  mode = m;
+  html.classList.toggle('mobile', m === 'mobile');
+  localStorage.setItem('sp-mode', m);
+  document.querySelectorAll('#deviceToggle button').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === m));
+  applyTheme(savedTheme(m));
+  if (m !== 'mobile') panel.classList.remove('open');
+  layout();
+  if (!silent) toast(m === 'mobile' ? 'Мобильный интерфейс' : 'Интерфейс для ПК', 1400);
+}
 
-  function endStroke(e) {
-    if (!drawing) return;
-    drawing = false;
-    lastPt = null;
-    if (e && e.pointerId !== undefined && board.hasPointerCapture(e.pointerId)) {
-      board.releasePointerCapture(e.pointerId);
+/* ============================================================
+   РАЗМЕР ХОЛСТА (с сохранением рисунка)
+   ============================================================ */
+function applySizeLimits(nw, nh) {
+  nw = Math.round(nw); nh = Math.round(nh);
+  if (!isFinite(nw) || !isFinite(nh) || nw < 1 || nh < 1) return null;
+
+  let limited = false;
+  if (nw > MAX_SIDE) { nw = MAX_SIDE; limited = true; }
+  if (nh > MAX_SIDE) { nh = MAX_SIDE; limited = true; }
+
+  if (nw * nh > MAX_AREA) {
+    const k = Math.sqrt(MAX_AREA / (nw * nh));
+    nw = Math.max(1, Math.floor(nw * k));
+    nh = Math.max(1, Math.floor(nh * k));
+    limited = true;
+  }
+  return { w: nw, h: nh, limited };
+}
+
+function setSize(nw, nh, opts = {}) {
+  const lim = applySizeLimits(nw, nh);
+  if (!lim) { toast('Некорректный размер'); return; }
+  nw = lim.w; nh = lim.h;
+
+  const keep = !!opts.keep;
+  const stretch = !!opts.stretch;
+
+  let snapshot = null;
+  if (keep && W > 0 && H > 0) {
+    const tmp = document.createElement('canvas');
+    tmp.width = W; tmp.height = H;
+    tmp.getContext('2d').drawImage(board, 0, 0);
+    snapshot = tmp;
+  }
+
+  W = nw; H = nh;
+  board.width = W; board.height = H;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  if (snapshot) {
+    if (stretch) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(snapshot, 0, 0, W, H);
+    } else {
+      const ox = Math.floor((W - snapshot.width) / 2);
+      const oy = Math.floor((H - snapshot.height) / 2);
+      ctx.drawImage(snapshot, ox, oy);
     }
   }
-  board.addEventListener('pointerup', endStroke);
-  board.addEventListener('pointercancel', endStroke);
-  board.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  /* ======================== ПАНОРАМА ======================== */
-  stage.addEventListener('pointerdown', (e) => {
-    const wantPan = (e.button === 1) || (e.button === 0 && spaceDown);
-    if (!wantPan) return;
-    e.preventDefault();
-    isPanning = true;
-    panStart = { x: e.clientX - panX, y: e.clientY - panY };
-    stage.setPointerCapture(e.pointerId);
-    updateCursor();
-  });
+  undoStack.length = 0;
+  undoBytes = 0;
 
-  stage.addEventListener('pointermove', (e) => {
-    if (!isPanning || !panStart) return;
-    panX = e.clientX - panStart.x;
-    panY = e.clientY - panStart.y;
-    clampPan();
-    box.style.transform = `translate(${panX}px, ${panY}px)`;
-  });
+  wInput.value = W;
+  hInput.value = H;
+  markActiveSize();
+  layout();
 
-  function endPan(e) {
-    if (!isPanning) return;
-    isPanning = false;
-    panStart = null;
-    if (e && e.pointerId !== undefined && stage.hasPointerCapture(e.pointerId)) {
-      stage.releasePointerCapture(e.pointerId);
+  if (lim.limited && !opts.quiet) {
+    toast(`Холст ограничен до ${W}×${H}. Предел браузера — сторона 8192 px и ~40 Мп. ` +
+          `256000×256000 потребовали бы ~262 ГБ памяти.`, 5200);
+  }
+}
+
+function scaleContent(factor) {
+  const nw = Math.round(W * factor);
+  const nh = Math.round(H * factor);
+  if (nw < 1 || nh < 1) { toast('Слишком мелко'); return; }
+  setSize(nw, nh, { keep: true, stretch: true });
+  fitToScreen();
+  toast(`Рисунок увеличен ×${factor} → ${W}×${H}`, 1800);
+}
+
+/* ============================================================
+   МАСШТАБ ПРОСМОТРА
+   ============================================================ */
+function maxAllowedScale() {
+  const budget = 16e6;
+  const byArea = Math.sqrt(budget / (W * H));
+  return Math.max(8, Math.min(128, byArea));
+}
+
+function computeScale() {
+  const pad = 48;
+  const availW = Math.max(40, stage.clientWidth - pad);
+  const availH = Math.max(40, stage.clientHeight - pad);
+  let s = Math.min(availW / W, availH / H) * zoom;
+  if (s >= 1) s = Math.floor(s);
+  s = Math.max(0.04, Math.min(s, maxAllowedScale()));
+  return s;
+}
+
+function clampPan() {
+  const maxX = Math.max(0, (W * scale - stage.clientWidth) / 2);
+  const maxY = Math.max(0, (H * scale - stage.clientHeight) / 2);
+  panX = clamp(panX, -maxX, maxX);
+  panY = clamp(panY, -maxY, maxY);
+}
+
+function layout() {
+  scale = computeScale();
+  clampPan();
+
+  const dw = Math.max(1, Math.round(W * scale));
+  const dh = Math.max(1, Math.round(H * scale));
+
+  board.style.width = dw + 'px';
+  board.style.height = dh + 'px';
+
+  gridCv.width = dw; gridCv.height = dh;
+  gridCv.style.width = dw + 'px';
+  gridCv.style.height = dh + 'px';
+
+  box.style.transform = `translate(${panX}px, ${panY}px)`;
+  drawGrid();
+  zoomDisplay.textContent = Math.round(zoom * 100) + '%';
+  updateCursor();
+}
+
+function drawGrid() {
+  gctx.clearRect(0, 0, gridCv.width, gridCv.height);
+  if (!showGrid || scale < 4) return;
+  gctx.strokeStyle = 'rgba(0,0,0,0.22)';
+  gctx.lineWidth = 1;
+  gctx.beginPath();
+  for (let x = 1; x < W; x++) {
+    const px = Math.round(x * scale) + 0.5;
+    gctx.moveTo(px, 0); gctx.lineTo(px, gridCv.height);
+  }
+  for (let y = 1; y < H; y++) {
+    const py = Math.round(y * scale) + 0.5;
+    gctx.moveTo(0, py); gctx.lineTo(gridCv.width, py);
+  }
+  gctx.stroke();
+}
+
+function setZoom(newZoom, cx, cy) {
+  newZoom = clamp(newZoom, 0.25, 32);
+  if (Math.abs(newZoom - zoom) < 0.001) return;
+
+  const r = stage.getBoundingClientRect();
+  const scx = r.left + r.width / 2;
+  const scy = r.top + r.height / 2;
+  if (cx === undefined) { cx = scx + panX; cy = scy + panY; }
+
+  const oldScale = scale;
+  const originX = scx - (W * oldScale) / 2 + panX;
+  const originY = scy - (H * oldScale) / 2 + panY;
+  const px = (cx - originX) / oldScale;
+  const py = (cy - originY) / oldScale;
+
+  zoom = newZoom;
+  const ns = computeScale();
+  panX = cx - scx + (W * ns) / 2 - px * ns;
+  panY = cy - scy + (H * ns) / 2 - py * ns;
+  layout();
+}
+
+function zoomFromCenter(f) {
+  const r = stage.getBoundingClientRect();
+  setZoom(zoom * f, r.left + r.width / 2 + panX, r.top + r.height / 2 + panY);
+}
+function fitToScreen(){ zoom = 1; panX = 0; panY = 0; layout(); }
+
+/* ============================================================
+   UNDO
+   ============================================================ */
+function pushUndo() {
+  try {
+    const snap = ctx.getImageData(0, 0, W, H);
+    undoStack.push(snap);
+    undoBytes += snap.data.byteLength;
+    while ((undoBytes > UNDO_BUDGET || undoStack.length > MAX_UNDO) && undoStack.length > 1) {
+      const old = undoStack.shift();
+      undoBytes -= old.data.byteLength;
     }
-    updateCursor();
+  } catch (e) {
+    toast('Не хватает памяти для шага отмены');
   }
-  stage.addEventListener('pointerup', endPan);
-  stage.addEventListener('pointercancel', endPan);
+}
+function undo() {
+  const snap = undoStack.pop();
+  if (!snap) return;
+  undoBytes -= snap.data.byteLength;
+  if (snap.width !== W || snap.height !== H) return; // размер изменился
+  ctx.putImageData(snap, 0, 0);
+}
 
-  function updateCursor() {
-    if (isPanning) board.style.cursor = 'grabbing';
-    else if (spaceDown) board.style.cursor = 'grab';
-    else if (tool === 'picker') board.style.cursor = 'copy';
-    else board.style.cursor = 'crosshair';
+/* ============================================================
+   РИСОВАНИЕ
+   ============================================================ */
+function putPixel(x, y, color) {
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, 1, 1);
+}
+function bresenham(x0, y0, x1, y1, cb) {
+  let dx = Math.abs(x1-x0), sx = x0 < x1 ? 1 : -1;
+  let dy = -Math.abs(y1-y0), sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy;
+  for (;;) {
+    cb(x0, y0);
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x0 += sx; }
+    if (e2 <= dx) { err += dx; y0 += sy; }
   }
+}
+function floodFill(x, y, hex) {
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  const img = ctx.getImageData(0, 0, W, H);
+  const d = img.data;
+  const i0 = (y * W + x) * 4;
+  const tr = d[i0], tg = d[i0+1], tb = d[i0+2];
+  const [nr, ng, nb] = hexToRgb(hex);
+  if (tr === nr && tg === ng && tb === nb) return;
 
-  /* ======================== КОЛЕСО ======================== */
-  stage.addEventListener('wheel', (e) => {
-    if (e.target.tagName === 'INPUT') return;
-    e.preventDefault();
-    const factor = Math.exp(-e.deltaY * 0.0018);
-    setZoom(zoom * factor, e.clientX, e.clientY);
-  }, { passive: false });
-
-  /* ======================== ПИПЕТКА ======================== */
-  function pickColorAt(x, y) {
-    if (x < 0 || y < 0 || x >= W || y >= H) return;
-    const d = ctx.getImageData(x, y, 1, 1).data;
-    const hex = '#' + [d[0], d[1], d[2]]
-      .map(v => v.toString(16).padStart(2, '0')).join('');
-    selectColor(hex);
-    setTool('pencil');
+  const stack = [x, y];
+  while (stack.length) {
+    const cy = stack.pop();
+    const cx = stack.pop();
+    if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
+    const i = (cy * W + cx) * 4;
+    if (d[i] !== tr || d[i+1] !== tg || d[i+2] !== tb) continue;
+    d[i] = nr; d[i+1] = ng; d[i+2] = nb; d[i+3] = 255;
+    stack.push(cx+1, cy, cx-1, cy, cx, cy+1, cx, cy-1);
   }
+  ctx.putImageData(img, 0, 0);
+}
 
-  /* ======================== UI: ЦВЕТА ======================== */
-  function selectColor(hex) {
-    currentColor = hex;
-    chipEl.style.background = hex;
-    hexEl.textContent = hex;
-    document.querySelectorAll('.swatch').forEach(el => {
-      el.classList.toggle('active',
-        el.dataset.color.toLowerCase() === hex.toLowerCase());
-    });
-    if (tool === 'eraser') setTool('pencil');
+function getPos(e) {
+  const r = board.getBoundingClientRect();
+  return {
+    x: Math.floor((e.clientX - r.left) / r.width * W),
+    y: Math.floor((e.clientY - r.top) / r.height * H)
+  };
+}
+
+board.addEventListener('pointerdown', (e) => {
+  if (spaceDown || e.button === 1) return;
+  if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+  const p = getPos(e);
+  if (p.x < 0 || p.y < 0 || p.x >= W || p.y >= H) return;
+
+  if (tool === 'picker') { pickColorAt(p.x, p.y); return; }
+
+  board.setPointerCapture(e.pointerId);
+  e.preventDefault();
+  pushUndo();
+
+  if (tool === 'fill') { floodFill(p.x, p.y, currentColor); return; }
+
+  drawing = true; lastPt = p;
+  putPixel(p.x, p.y, activeColor());
+});
+
+board.addEventListener('pointermove', (e) => {
+  if (!drawing || !lastPt) return;
+  const p = getPos(e);
+  const cx = clamp(p.x, -1, W), cy = clamp(p.y, -1, H);
+  const color = activeColor();
+  bresenham(lastPt.x, lastPt.y, cx, cy, (x, y) => putPixel(x, y, color));
+  lastPt = { x: cx, y: cy };
+});
+
+function endStroke(e) {
+  if (!drawing) return;
+  drawing = false; lastPt = null;
+  if (e && e.pointerId !== undefined && board.hasPointerCapture(e.pointerId))
+    board.releasePointerCapture(e.pointerId);
+}
+board.addEventListener('pointerup', endStroke);
+board.addEventListener('pointercancel', endStroke);
+board.addEventListener('contextmenu', e => e.preventDefault());
+
+function pickColorAt(x, y) {
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  const d = ctx.getImageData(x, y, 1, 1).data;
+  const hex = '#' + [d[0],d[1],d[2]].map(v => v.toString(16).padStart(2,'0')).join('');
+  selectColor(hex);
+  setTool('pencil');
+}
+
+/* ============================================================
+   ПАНОРАМА
+   ============================================================ */
+stage.addEventListener('pointerdown', (e) => {
+  const wantPan = (e.button === 1) || (e.button === 0 && spaceDown);
+  if (!wantPan) {
+    if (mode === 'mobile') panel.classList.remove('open');
+    return;
   }
+  e.preventDefault();
+  isPanning = true;
+  panStart = { x: e.clientX - panX, y: e.clientY - panY };
+  stage.setPointerCapture(e.pointerId);
+  updateCursor();
+});
+stage.addEventListener('pointermove', (e) => {
+  if (!isPanning || !panStart) return;
+  panX = e.clientX - panStart.x;
+  panY = e.clientY - panStart.y;
+  clampPan();
+  box.style.transform = `translate(${panX}px, ${panY}px)`;
+});
+function endPan(e) {
+  if (!isPanning) return;
+  isPanning = false; panStart = null;
+  if (e && e.pointerId !== undefined && stage.hasPointerCapture(e.pointerId))
+    stage.releasePointerCapture(e.pointerId);
+  updateCursor();
+}
+stage.addEventListener('pointerup', endPan);
+stage.addEventListener('pointercancel', endPan);
 
-  function buildPalette() {
+function updateCursor() {
+  if (isPanning) board.style.cursor = 'grabbing';
+  else if (spaceDown) board.style.cursor = 'grab';
+  else if (tool === 'picker') board.style.cursor = 'copy';
+  else board.style.cursor = 'crosshair';
+}
+
+stage.addEventListener('wheel', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  e.preventDefault();
+  setZoom(zoom * Math.exp(-e.deltaY * 0.0018), e.clientX, e.clientY);
+}, { passive: false });
+
+/* ============================================================
+   UI: ЦВЕТА
+   ============================================================ */
+function selectColor(hex) {
+  currentColor = hex;
+  chipEl.style.background = hex;
+  hexEl.textContent = hex;
+  document.querySelectorAll('.swatch').forEach(el =>
+    el.classList.toggle('active', el.dataset.color.toLowerCase() === hex.toLowerCase()));
+  if (tool === 'eraser') setTool('pencil');
+}
+
+function buildPalettes() {
+  [paletteEl, dockColorsEl].forEach(container => {
     const frag = document.createDocumentFragment();
     PALETTE.forEach(hex => {
       const b = document.createElement('button');
@@ -568,152 +911,263 @@
       b.addEventListener('click', () => selectColor(hex));
       frag.appendChild(b);
     });
-    paletteEl.appendChild(frag);
-  }
-
-  /* ======================== UI: ИНСТРУМЕНТЫ ======================== */
-  function setTool(t) {
-    tool = t;
-    toolsEl.querySelectorAll('button').forEach(b => {
-      b.classList.toggle('active', b.dataset.tool === t);
-    });
-    updateCursor();
-  }
-
-  toolsEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-tool]');
-    if (btn) setTool(btn.dataset.tool);
+    container.appendChild(frag);
   });
+}
 
-  /* ======================== UI: РАЗМЕРЫ ======================== */
-  function buildSizes() {
-    const frag = document.createDocumentFragment();
-    SIZES.forEach(n => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = n;
-      b.dataset.size = n;
-      b.addEventListener('click', () => setSize(n, n));
-      frag.appendChild(b);
+/* ============================================================
+   UI: ИНСТРУМЕНТЫ
+   ============================================================ */
+function setTool(t) {
+  tool = t;
+  toolsEl.querySelectorAll('button').forEach(b =>
+    b.classList.toggle('active', b.dataset.tool === t));
+  document.querySelectorAll('.dock-row button[data-tool]').forEach(b =>
+    b.classList.toggle('active', b.dataset.tool === t));
+  updateCursor();
+}
+toolsEl.addEventListener('click', e => {
+  const b = e.target.closest('button[data-tool]');
+  if (b) setTool(b.dataset.tool);
+});
+document.querySelector('.dock-row').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tool]');
+  if (b) setTool(b.dataset.tool);
+});
+
+/* ============================================================
+   UI: РАЗМЕРЫ
+   ============================================================ */
+function buildSizes() {
+  const frag = document.createDocumentFragment();
+  SIZES.forEach(n => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = n;
+    b.dataset.size = n;
+    b.addEventListener('click', () => {
+      setSize(n, n, {
+        keep: $('keepContent').checked,
+        stretch: $('stretchContent').checked
+      });
     });
-    sizesEl.appendChild(frag);
+    frag.appendChild(b);
+  });
+  sizesEl.appendChild(frag);
+}
+function markActiveSize() {
+  sizesEl.querySelectorAll('button').forEach(b =>
+    b.classList.toggle('active', Number(b.dataset.size) === W && W === H));
+}
+
+$('applySize').addEventListener('click', () => {
+  setSize(wInput.value, hInput.value, {
+    keep: $('keepContent').checked,
+    stretch: $('stretchContent').checked
+  });
+});
+[wInput, hInput].forEach(inp => inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('applySize').click();
+}));
+
+document.querySelectorAll('[data-scale]').forEach(b => {
+  b.addEventListener('click', () => scaleContent(parseFloat(b.dataset.scale)));
+});
+
+$('stretchContent').addEventListener('change', e => {
+  if (e.target.checked) $('keepContent').checked = true;
+});
+$('keepContent').addEventListener('change', e => {
+  if (!e.target.checked) $('stretchContent').checked = false;
+});
+
+/* ============================================================
+   ФАЙЛЫ: .paintingsave
+   ============================================================ */
+function exportSave() {
+  try {
+    const payload = {
+      format: 'paintingsave',
+      version: 1,
+      app: 'Супер Пеинт 1.0',
+      created: new Date().toISOString(),
+      width: W,
+      height: H,
+      data: board.toDataURL('image/png')
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    downloadBlob(blob, `superpaint_${W}x${H}.paintingsave`);
+    toast('Файл .paintingsave сохранён', 1800);
+  } catch (e) {
+    toast('Не удалось сохранить: ' + e.message, 4000);
   }
+}
 
-  function markActiveSize() {
-    sizesEl.querySelectorAll('button').forEach(b => {
-      b.classList.toggle('active', Number(b.dataset.size) === W && W === H);
-    });
-  }
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('не удалось прочитать изображение'));
+    img.src = src;
+  });
+}
 
-  function setSize(w, h) {
-    W = clamp(parseInt(w, 10) || 16, 1, 256);
-    H = clamp(parseInt(h, 10) || 16, 1, 256);
-
-    board.width = W;
-    board.height = H;
+async function loadSaveObject(obj) {
+  if (!obj || obj.format !== 'paintingsave') { toast('Это не файл .paintingsave'); return; }
+  if (!obj.data) { toast('Файл повреждён: нет данных'); return; }
+  try {
+    const img = await loadImage(obj.data);
+    const w = obj.width || img.naturalWidth;
+    const h = obj.height || img.naturalHeight;
+    setSize(w, h, { keep: false, quiet: true });
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-
-    undoStack.length = 0;
-    zoom = 1; panX = 0; panY = 0;
-
-    wInput.value = W;
-    hInput.value = H;
-    markActiveSize();
-    layout();
+    ctx.drawImage(img, 0, 0, W, H);
+    fitToScreen();
+    toast(`Загружено: ${W}×${H}`, 2000);
+  } catch (e) {
+    toast('Ошибка загрузки: ' + e.message, 3500);
   }
+}
 
-  document.getElementById('applySize').addEventListener('click', () => {
-    setSize(wInput.value, hInput.value);
-  });
-  [wInput, hInput].forEach(inp => {
-    inp.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') setSize(wInput.value, hInput.value);
-    });
-  });
+async function loadImageFile(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImage(url);
+    const w = img.naturalWidth, h = img.naturalHeight;
+    setSize(w, h, { keep: false, quiet: true });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0, W, H);
+    fitToScreen();
+    toast(`Картинка загружена: ${W}×${H}`, 2200);
+  } catch (e) {
+    toast('Не удалось открыть картинку');
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+}
 
-  /* ======================== UI: ЗУМ ======================== */
-  document.getElementById('zoomIn').addEventListener('click',  () => zoomFromCenter(1.5));
-  document.getElementById('zoomOut').addEventListener('click', () => zoomFromCenter(1 / 1.5));
-  document.getElementById('zoomFit').addEventListener('click', fitToScreen);
-
-  /* ======================== UI: ДЕЙСТВИЯ ======================== */
-  document.getElementById('undoBtn').addEventListener('click', undo);
-
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    pushUndo();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-  });
-
-  const gridBtn = document.getElementById('gridBtn');
-  gridBtn.addEventListener('click', () => {
-    showGrid = !showGrid;
-    gridBtn.classList.toggle('on', showGrid);
-    drawGrid();
-  });
-
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    const a = document.createElement('a');
-    a.download = `superpaint_${W}x${H}.png`;
-    a.href = board.toDataURL('image/png');
-    a.click();
-  });
-
-  /* ======================== ГОРЯЧИЕ КЛАВИШИ ======================== */
-  window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
-
-    if (e.code === 'Space' && !e.repeat) {
-      spaceDown = true;
-      e.preventDefault();
-      updateCursor();
-      return;
-    }
-
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-      e.preventDefault();
-      undo();
-      return;
-    }
-    if (e.ctrlKey || e.metaKey) return;
-
-    switch (e.key.toLowerCase()) {
-      case 'b': setTool('pencil'); break;
-      case 'e': setTool('eraser'); break;
-      case 'g': setTool('fill');   break;
-      case 'i': setTool('picker'); break;
-      case '0': fitToScreen();     break;
-      case '+':
-      case '=': zoomFromCenter(1.5); break;
-      case '-':
-      case '_': zoomFromCenter(1 / 1.5); break;
-    }
-  });
-
-  window.addEventListener('keyup', (e) => {
-    if (e.code === 'Space') {
-      spaceDown = false;
-      updateCursor();
-    }
-  });
-
-  /* ======================== РЕСАЙЗ ======================== */
-  if (window.ResizeObserver) {
-    new ResizeObserver(() => layout()).observe(stage);
+function importFile(file) {
+  if (!file) return;
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.paintingsave') || name.endsWith('.json')) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { loadSaveObject(JSON.parse(reader.result)); }
+      catch (e) { toast('Не удалось прочитать файл'); }
+    };
+    reader.onerror = () => toast('Ошибка чтения файла');
+    reader.readAsText(file);
+  } else if (file.type.startsWith('image/')) {
+    loadImageFile(file);
   } else {
-    window.addEventListener('resize', layout);
+    toast('Поддерживаются .paintingsave, .json и картинки');
   }
+}
 
-  /* ======================== СТАРТ ======================== */
-  buildPalette();
-  buildSizes();
-  selectColor('#000000');
-  setTool('pencil');
-  setSize(16, 16);
+$('exportSave').addEventListener('click', exportSave);
+$('importBtn').addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+$('openBtn').addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+fileInput.addEventListener('change', e => importFile(e.target.files[0]));
 
-  requestAnimationFrame(() => { layout(); });
+$('saveBtn').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.download = `superpaint_${W}x${H}.png`;
+  a.href = board.toDataURL('image/png');
+  a.click();
+});
+
+/* ============================================================
+   ПРОЧИЕ ДЕЙСТВИЯ
+   ============================================================ */
+$('undoBtn').addEventListener('click', undo);
+$('dockUndo').addEventListener('click', undo);
+
+$('clearBtn').addEventListener('click', () => {
+  pushUndo();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+});
+
+$('gridBtn').addEventListener('click', () => {
+  showGrid = !showGrid;
+  $('gridBtn').classList.toggle('on', showGrid);
+  drawGrid();
+});
+
+$('zoomIn').addEventListener('click', () => zoomFromCenter(1.5));
+$('zoomOut').addEventListener('click', () => zoomFromCenter(1/1.5));
+$('zoomFit').addEventListener('click', fitToScreen);
+$('mZoomIn').addEventListener('click', () => zoomFromCenter(1.5));
+$('mZoomOut').addEventListener('click', () => zoomFromCenter(1/1.5));
+$('mZoomFit').addEventListener('click', fitToScreen);
+
+$('dockMore').addEventListener('click', () => panel.classList.toggle('open'));
+document.querySelectorAll('#deviceToggle button').forEach(b => {
+  b.addEventListener('click', () => setMode(b.dataset.mode));
+});
+
+/* ============================================================
+   ГОРЯЧИЕ КЛАВИШИ
+   ============================================================ */
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+
+  if (e.code === 'Space' && !e.repeat) {
+    spaceDown = true; e.preventDefault(); updateCursor(); return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault(); undo(); return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault(); exportSave(); return;
+  }
+  if (e.ctrlKey || e.metaKey) return;
+
+  switch (e.key.toLowerCase()) {
+    case 'b': setTool('pencil'); break;
+    case 'e': setTool('eraser'); break;
+    case 'g': setTool('fill'); break;
+    case 'i': setTool('picker'); break;
+    case '0': fitToScreen(); break;
+    case '+': case '=': zoomFromCenter(1.5); break;
+    case '-': case '_': zoomFromCenter(1/1.5); break;
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code === 'Space') { spaceDown = false; updateCursor(); }
+});
+
+/* ============================================================
+   РЕСАЙЗ
+   ============================================================ */
+if (window.ResizeObserver) new ResizeObserver(() => layout()).observe(stage);
+else window.addEventListener('resize', layout);
+
+/* ============================================================
+   СТАРТ
+   ============================================================ */
+buildPalettes();
+buildSizes();
+selectColor('#000000');
+setTool('pencil');
+
+const initialMode = localStorage.getItem('sp-mode') ||
+  ((matchMedia('(pointer:coarse)').matches || innerWidth < 820) ? 'mobile' : 'desktop');
+setMode(initialMode, true);
+
+setSize(16, 16, { keep: false, quiet: true });
+
+$('limitHint').textContent =
+  `Максимум: сторона до ${MAX_SIDE} px, площадь до ~40 Мп ` +
+  `(напр. 4096×4096 или 8192×2048). 256000×256000 = ~262 ГБ памяти — невозможно физически.`;
+
+requestAnimationFrame(() => layout());
 
 })();
 </script>
