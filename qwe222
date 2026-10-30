@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Remote Desktop (no server)</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 20px; background: #111; color: #eee; }
+        .container { display: flex; gap: 40px; flex-wrap: wrap; }
+        .panel { flex: 1; min-width: 350px; background: #222; padding: 20px; border-radius: 12px; }
+        h2 { margin-top: 0; color: #4af; }
+        textarea { width: 100%; height: 120px; background: #000; color: #0f0; border: 1px solid #444; border-radius: 6px; font-family: monospace; font-size: 12px; }
+        button { background: #4af; color: #000; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; margin: 6px 4px 6px 0; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.secondary { background: #666; color: #fff; }
+        video { width: 100%; border: 2px solid #4af; border-radius: 8px; background: #000; margin-top: 12px; }
+        .status { margin: 10px 0; padding: 8px; border-radius: 6px; background: #333; font-size: 14px; }
+        .hint { font-size: 12px; color: #aaa; margin-top: 4px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>P2P Remote Desktop</h1>
+    <p class="hint">Без сервера. Соединение устанавливается вручную обменом SDP-строками.</p>
+
+    <div class="container">
+        <!-- ПАНЕЛЬ ХОСТА -->
+        <div class="panel" id="hostPanel">
+            <h2>🖥️ Хост (транслирует экран)</h2>
+            <button id="btnStartHost">1. Транслировать экран</button>
+            <div class="status" id="hostStatus">Ожидание...</div>
+
+            <label>Оффер (скопируйте и отправьте клиенту):</label>
+            <textarea id="offerArea" readonly placeholder="Здесь появится оффер..."></textarea>
+            <button class="secondary" id="btnCopyOffer">Копировать оффер</button>
+
+            <label style="margin-top:12px; display:block;">Вставьте ответ от клиента:</label>
+            <textarea id="answerInput" placeholder="Вставьте сюда ответ (answer) от клиента..."></textarea>
+            <button id="btnAcceptAnswer">2. Подтвердить ответ</button>
+
+            <video id="localVideo" autoplay muted playsinline class="hidden"></video>
+            <div class="hint">Локальный предпросмотр (не обязательно)</div>
+        </div>
+
+        <!-- ПАНЕЛЬ КЛИЕНТА -->
+        <div class="panel" id="clientPanel">
+            <h2>🎮 Клиент (управляет)</h2>
+            <label>Вставьте оффер от хоста:</label>
+            <textarea id="offerInput" placeholder="Вставьте сюда оффер (offer) от хоста..."></textarea>
+            <button id="btnAcceptOffer">1. Принять оффер</button>
+
+            <label style="margin-top:12px; display:block;">Ответ (скопируйте и отправьте хосту):</label>
+            <textarea id="answerArea" readonly placeholder="Здесь появится ответ..."></textarea>
+            <button class="secondary" id="btnCopyAnswer">Копировать ответ</button>
+
+            <div class="status" id="clientStatus">Ожидание оффера...</div>
+
+            <video id="remoteVideo" autoplay playsinline style="display:none;"></video>
+            <div class="hint">После подключения здесь появится экран хоста. Кликайте и печатайте прямо по видео.</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- ОБЩИЕ НАСТРОЙКИ ----------
+            const ICE_CONFIG = {
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // публичный STUN, не сервер приложений
+            };
+
+            // ---------- ЭЛЕМЕНТЫ ----------
+            const hostPanel = document.getElementById('hostPanel');
+            const clientPanel = document.getElementById('clientPanel');
+
+            // Хост
+            const btnStartHost = document.getElementById('btnStartHost');
+            const hostStatus = document.getElementById('hostStatus');
+            const offerArea = document.getElementById('offerArea');
+            const btnCopyOffer = document.getElementById('btnCopyOffer');
+            const answerInput = document.getElementById('answerInput');
+            const btnAcceptAnswer = document.getElementById('btnAcceptAnswer');
+            const localVideo = document.getElementById('localVideo');
+
+            // Клиент
+            const offerInput = document.getElementById('offerInput');
+            const btnAcceptOffer = document.getElementById('btnAcceptOffer');
+            const answerArea = document.getElementById('answerArea');
+            const btnCopyAnswer = document.getElementById('btnCopyAnswer');
+            const clientStatus = document.getElementById('clientStatus');
+            const remoteVideo = document.getElementById('remoteVideo');
+
+            // ---------- СОСТОЯНИЕ ----------
+            let hostPc = null;
+            let hostDc = null;
+            let clientPc = null;
+            let clientDc = null;
+            let capturedStream = null;
+
+            // ---------- ВСПОМОГАТЕЛЬНЫЕ ----------
+            function setStatus(el, text, isError = false) {
+                el.textContent = text;
+                el.style.background = isError ? '#522' : '#333';
+            }
+
+            async function copyToClipboard(textarea) {
+                try {
+                    await navigator.clipboard.writeText(textarea.value);
+                    alert('Скопировано в буфер обмена');
+                } catch {
+                    textarea.select();
+                    document.execCommand('copy');
+                    alert('Скопировано (fallback)');
+                }
+            }
+
+            // Ожидание завершения сбора ICE-кандидатов (упрощённо: ждём 1.5 сек)
+            function waitIceGathering(pc) {
+                return new Promise(resolve => {
+                    if (pc.iceGatheringState === 'complete') { resolve(); return; }
+                    const check = () => {
+                        if (pc.iceGatheringState === 'complete') {
+                            pc.removeEventListener('icegatheringstatechange', check);
+                            resolve();
+                        }
+                    };
+                    pc.addEventListener('icegatheringstatechange', check);
+                    // Fallback-таймаут, чтобы не ждать вечно, если кандидатов нет
+                    setTimeout(() => {
+                        pc.removeEventListener('icegatheringstatechange', check);
+                        resolve();
+                    }, 1500);
+                });
+            }
+
+            // ================= ХОСТ =================
+            btnStartHost.addEventListener('click', async () => {
+                try {
+                    setStatus(hostStatus, 'Запрос доступа к экрану...');
+                    capturedStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: 'always' },
+                        audio: false
+                    });
+
+                    localVideo.srcObject = capturedStream;
+                    localVideo.classList.remove('hidden');
+
+                    hostPc = new RTCPeerConnection(ICE_CONFIG);
+
+                    // Добавляем треки экрана
+                    capturedStream.getTracks().forEach(track => {
+                        hostPc.addTrack(track, capturedStream);
+                    });
+
+                    // Создаём DataChannel для команд управления
+                    hostDc = hostPc.createDataChannel('control', { ordered: true });
+                    hostDc.onopen = () => setStatus(hostStatus, 'DataChannel открыт. Ожидание команд...');
+                    hostDc.onmessage = (event) => {
+                        try {
+                            const cmd = JSON.parse(event.data);
+                            applyRemoteCommand(cmd);
+                        } catch (e) { /* ignore malformed */ }
+                    };
+
+                    // Создаём оффер
+                    const offer = await hostPc.createOffer();
+                    await hostPc.setLocalDescription(offer);
+                    await waitIceGathering(hostPc);
+
+                    const offerJson = JSON.stringify(hostPc.localDescription, null, 2);
+                    offerArea.value = offerJson;
+                    setStatus(hostStatus, 'Оффер готов. Скопируйте его и отправьте клиенту.');
+
+                    // Обработка входящего ответа
+                    btnAcceptAnswer.disabled = false;
+
+                } catch (err) {
+                    console.error(err);
+                    setStatus(hostStatus, 'Ошибка: ' + err.message, true);
+                }
+            });
+
+            btnCopyOffer.addEventListener('click', () => copyToClipboard(offerArea));
+
+            btnAcceptAnswer.addEventListener('click', async () => {
+                if (!hostPc || !answerInput.value.trim()) {
+                    alert('Вставьте ответ (answer) от клиента');
+                    return;
+                }
+                try {
+                    const answerDesc = JSON.parse(answerInput.value);
+                    await hostPc.setRemoteDescription(answerDesc);
+                    setStatus(hostStatus, 'Соединение установлено! Ожидание команд...');
+                    btnAcceptAnswer.disabled = true;
+                } catch (err) {
+                    console.error(err);
+                    setStatus(hostStatus, 'Ошибка при принятии ответа: ' + err.message, true);
+                }
+            });
+
+            // Функция применения команды на хосте
+            function applyRemoteCommand(cmd) {
+                const { type, x, y, key, code, button } = cmd;
+                // Координаты приходят в процентах от размера видео (0..1)
+                // Переводим в координаты окна браузера
+                const targetX = Math.round(x * window.innerWidth);
+                const targetY = Math.round(y * window.innerHeight);
+
+                const element = document.elementFromPoint(targetX, targetY);
+                if (!element) return;
+
+                try {
+                    if (type === 'mousemove') {
+                        element.dispatchEvent(new MouseEvent('mousemove', {
+                            clientX: targetX,
+                            clientY: targetY,
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        }));
+                    } else if (type === 'mousedown') {
+                        element.dispatchEvent(new MouseEvent('mousedown', {
+                            clientX: targetX,
+                            clientY: targetY,
+                            button: button || 0,
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        }));
+                    } else if (type === 'mouseup') {
+                        element.dispatchEvent(new MouseEvent('mouseup', {
+                            clientX: targetX,
+                            clientY: targetY,
+                            button: button || 0,
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        }));
+                    } else if (type === 'click') {
+                        element.dispatchEvent(new MouseEvent('click', {
+                            clientX: targetX,
+                            clientY: targetY,
+                            button: button || 0,
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        }));
+                    } else if (type === 'keydown') {
+                        element.dispatchEvent(new KeyboardEvent('keydown', {
+                            key: key,
+                            code: code,
+                            bubbles: true,
+                            cancelable: true
+                        }));
+                    } else if (type === 'keyup') {
+                        element.dispatchEvent(new KeyboardEvent('keyup', {
+                            key: key,
+                            code: code,
+                            bubbles: true,
+                            cancelable: true
+                        }));
+                    }
+                } catch (e) {
+                    console.warn('Не удалось применить команду:', e);
+                }
+            }
+
+            // ================= КЛИЕНТ =================
+            btnAcceptOffer.addEventListener('click', async () => {
+                if (!offerInput.value.trim()) {
+                    alert('Вставьте оффер от хоста');
+                    return;
+                }
+                try {
+                    const offerDesc = JSON.parse(offerInput.value);
+
+                    clientPc = new RTCPeerConnection(ICE_CONFIG);
+
+                    // Обработка входящего видео
+                    clientPc.ontrack = (event) => {
+                        remoteVideo.srcObject = event.streams[0];
+                        remoteVideo.style.display = 'block';
+                        setStatus(clientStatus, 'Видео получено. Можно управлять.');
+                    };
+
+                    // Обработка DataChannel (создаётся хостом)
+                    clientPc.ondatachannel = (event) => {
+                        clientDc = event.channel;
+                        clientDc.onopen = () => {
+                            setStatus(clientStatus, 'DataChannel открыт. Управление активно.');
+                        };
+                    };
+
+                    await clientPc.setRemoteDescription(offerDesc);
+                    const answer = await clientPc.createAnswer();
+                    await clientPc.setLocalDescription(answer);
+                    await waitIceGathering(clientPc);
+
+                    const answerJson = JSON.stringify(clientPc.localDescription, null, 2);
+                    answerArea.value = answerJson;
+                    setStatus(clientStatus, 'Ответ готов. Скопируйте его и отправьте хосту.');
+
+                    // Включаем отправку событий после подключения видео
+                    setupRemoteInput();
+
+                } catch (err) {
+                    console.error(err);
+                    setStatus(clientStatus, 'Ошибка: ' + err.message, true);
+                }
+            });
+
+            btnCopyAnswer.addEventListener('click', () => copyToClipboard(answerArea));
+
+            // Настройка отправки событий с видео-элемента клиента
+            function setupRemoteInput() {
+                // Используем remoteVideo как область ввода
+                // Координаты нормализуем (0..1) относительно размеров видео
+                function sendCmd(cmd) {
+                    if (clientDc && clientDc.readyState === 'open') {
+                        clientDc.send(JSON.stringify(cmd));
+                    }
+                }
+
+                remoteVideo.addEventListener('mousemove', (e) => {
+                    const rect = remoteVideo.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width;
+                    const y = (e.clientY - rect.top) / rect.height;
+                    sendCmd({ type: 'mousemove', x, y });
+                });
+
+                remoteVideo.addEventListener('mousedown', (e) => {
+                    const rect = remoteVideo.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width;
+                    const y = (e.clientY - rect.top) / rect.height;
+                    sendCmd({ type: 'mousedown', x, y, button: e.button });
+                });
+
+                remoteVideo.addEventListener('mouseup', (e) => {
+                    const rect = remoteVideo.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width;
+                    const y = (e.clientY - rect.top) / rect.height;
+                    sendCmd({ type: 'mouseup', x, y, button: e.button });
+                });
+
+                // Для клавиатуры нужно, чтобы видео имело фокус (tabindex)
+                remoteVideo.setAttribute('tabindex', '0');
+                remoteVideo.addEventListener('keydown', (e) => {
+                    e.preventDefault();
+                    sendCmd({ type: 'keydown', key: e.key, code: e.code });
+                });
+                remoteVideo.addEventListener('keyup', (e) => {
+                    e.preventDefault();
+                    sendCmd({ type: 'keyup', key: e.key, code: e.code });
+                });
+
+                // Клик по видео для фокуса
+                remoteVideo.addEventListener('click', () => remoteVideo.focus());
+            }
+
+        })();
+    </script>
+</body>
+</html>
