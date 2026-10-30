@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Супер Пеинт 2.0</title>
 <style>
+/* ============================================================
+   ТЕМЫ (10 штук: 5 ПК + 5 мобильных)
+   ============================================================ */
 :root { --radius:10px; --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 html[data-theme="d-dark"]{
   --bg:#0d0f12; --panel:#1b1e24; --panel2:#23272f; --border:#2a2f38; --input:#14161a;
@@ -57,37 +60,69 @@ html[data-theme="m-sand"]{
   --text:#3a332b; --muted:#95866f; --muted2:#b0a390; --accent:#0d9488; --accentText:#fff;
   --radius:18px; --stageBg: linear-gradient(180deg,#faf4ea,#e9dfcd);
 }
+
+/* ============================================================
+   БАЗА
+   ============================================================ */
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden;
-  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: background .2s ease, color .2s ease; }
+body {
+  font-family: var(--font);
+  background: var(--bg); color: var(--text);
+  overflow: hidden; -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s ease, color .2s ease;
+}
 .app { display: flex; height: 100vh; height: 100dvh; }
-.panel { width: 316px; flex: 0 0 316px; padding: 16px 16px 40px;
+
+/* ---------- Панель ---------- */
+.panel {
+  width: 316px; flex: 0 0 316px; padding: 16px 16px 40px;
   background: var(--panel); border-right: 1px solid var(--border);
-  overflow-y: auto; scrollbar-width: thin; }
+  overflow-y: auto; transition: background .2s, border-color .2s;
+  scrollbar-width: thin;
+}
 .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
 .panel h1 { font-size: 17px; margin: 0; font-weight: 700; letter-spacing: .3px; }
-.panel h1 span { font-size: 10px; background: var(--accent); color: var(--accentText);
-  padding: 2px 6px; border-radius: 5px; vertical-align: middle; margin-left: 4px; }
+.panel h1 span {
+  font-size: 10px; background: var(--accent); color: var(--accentText);
+  padding: 2px 6px; border-radius: 5px; vertical-align: middle; margin-left: 4px;
+}
 .device-toggle { display: flex; gap: 3px; background: var(--panel2); padding: 3px; border-radius: 9px; border: 1px solid var(--border); }
-.device-toggle button { font: inherit; font-size: 13px; line-height: 1; padding: 5px 8px; cursor: pointer;
-  background: transparent; border: 0; border-radius: 6px; color: var(--muted); }
+.device-toggle button {
+  font: inherit; font-size: 13px; line-height: 1; padding: 5px 8px; cursor: pointer;
+  background: transparent; border: 0; border-radius: 6px; color: var(--muted);
+}
 .device-toggle button.active { background: var(--accent); color: var(--accentText); }
+
 section { margin-bottom: 18px; }
-.label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+.label {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin-bottom: 8px; font-weight: 700;
+}
+
+/* ---------- Палитра ---------- */
 .palette { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
-.swatch { aspect-ratio: 1 / 1; width: 100%; padding: 0; border-radius: 4px;
+.swatch {
+  aspect-ratio: 1 / 1; width: 100%; padding: 0; border-radius: 4px;
   border: 2px solid rgba(128,128,128,.18); cursor: pointer;
-  transition: transform .08s, box-shadow .08s; }
+  transition: transform .08s, box-shadow .08s;
+}
 .swatch:hover { transform: scale(1.18); position: relative; z-index: 2; }
-.swatch.active { border-color: var(--text);
+.swatch.active {
+  border-color: var(--text);
   box-shadow: 0 0 0 2px var(--accent), 0 0 8px var(--accent);
-  transform: scale(1.12); position: relative; z-index: 3; }
-.current { display: flex; align-items: center; gap: 10px; margin-top: 10px;
-  background: var(--input); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); }
+  transform: scale(1.12); position: relative; z-index: 3;
+}
+.current {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  background: var(--input); padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border);
+}
 .current .chip { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border); }
 .current code { font-size: 13px; color: var(--muted); }
+
+/* ---------- Кнопки ---------- */
 .tools, .actions, .sizes, .custom, .zoom-controls, .file-row, .scale-row { display: grid; gap: 6px; }
 .tools { grid-template-columns: 1fr 1fr; }
 .actions { grid-template-columns: 1fr 1fr; }
@@ -95,71 +130,129 @@ section { margin-bottom: 18px; }
 .zoom-controls { grid-template-columns: 40px 1fr 40px 56px; align-items: center; }
 .file-row { grid-template-columns: 1fr 1fr; }
 .scale-row { grid-template-columns: repeat(4, 1fr); }
-button { font: inherit; font-size: 12.5px; color: var(--text);
+
+button {
+  font: inherit; font-size: 12.5px; color: var(--text);
   background: var(--panel2); border: 1px solid var(--border);
   border-radius: 8px; padding: 8px 6px; cursor: pointer;
-  transition: background .12s, border-color .12s, color .12s; }
+  transition: background .12s, border-color .12s, color .12s;
+}
 button:hover { border-color: var(--accent); }
 button:active { transform: translateY(1px); }
-button.active, button.on { background: var(--accent); border-color: var(--accent); color: var(--accentText); }
+button.active, button.on {
+  background: var(--accent); border-color: var(--accent); color: var(--accentText);
+}
 button:disabled { opacity: .45; cursor: not-allowed; }
+
 .sizes button { padding: 7px 0; }
 .custom { grid-template-columns: 1fr auto 1fr auto; align-items: center; }
-.custom input { width: 100%; min-width: 0; font: inherit; font-size: 13px;
+.custom input {
+  width: 100%; min-width: 0; font: inherit; font-size: 13px;
   background: var(--input); color: var(--text); border: 1px solid var(--border);
-  border-radius: 8px; padding: 7px 8px; text-align: center; }
+  border-radius: 8px; padding: 7px 8px; text-align: center;
+}
 .custom span { color: var(--muted); font-size: 12px; }
 .custom button { padding: 7px 11px; }
-#zoomDisplay { text-align: center; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.check { display: flex; align-items: center; gap: 7px; margin-top: 8px;
-  font-size: 12px; color: var(--muted); cursor: pointer; }
+
+#zoomDisplay {
+  text-align: center; font-size: 13px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  display: flex; align-items: center; gap: 7px; margin-top: 8px;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+}
 .check input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
 .hint { font-size: 11px; color: var(--muted2); line-height: 1.5; margin-top: 8px; }
 .hint b { color: var(--muted); font-weight: 600; }
+
+/* ---------- Темы ---------- */
 .themes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.theme-btn { display: flex; flex-direction: column; align-items: center; gap: 5px;
-  padding: 7px 2px 5px; font-size: 9px; color: var(--muted); border-radius: 9px; border-width: 2px; }
+.theme-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 7px 2px 5px; font-size: 9px; color: var(--muted);
+  border-radius: 9px; border-width: 2px;
+}
 .theme-btn .dot { width: 17px; height: 17px; border-radius: 50%; box-shadow: 0 0 0 2px var(--border); }
 .theme-btn.active { border-color: var(--accent); color: var(--text); }
-.stage { flex: 1; position: relative; display: flex; align-items: center; justify-content: center;
-  background: var(--stageBg); overflow: hidden; padding: 24px; transition: background .25s ease; }
-.canvas-box { position: relative; line-height: 0; flex-shrink: 0;
-  box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px var(--border); background: #fff; will-change: transform; }
-#mainCanvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges;
-  cursor: crosshair; touch-action: none; }
-.stage-tools { position: absolute; right: 10px; top: 10px; z-index: 6; display: none; flex-direction: column; gap: 6px; }
-.stage-tools button { width: 42px; height: 42px; border-radius: 13px; font-size: 17px;
-  background: var(--panel); box-shadow: 0 4px 14px rgba(0,0,0,.28); }
-.dock { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+
+/* ---------- Сцена ---------- */
+.stage {
+  flex: 1; position: relative; display: flex;
+  align-items: center; justify-content: center;
+  background: var(--stageBg); overflow: hidden; padding: 24px;
+  transition: background .25s ease;
+}
+.canvas-box {
+  position: relative; line-height: 0; flex-shrink: 0;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px var(--border);
+  background: #fff; will-change: transform;
+}
+#mainCanvas {
+  display: block; image-rendering: pixelated; image-rendering: crisp-edges;
+  cursor: crosshair; touch-action: none;
+}
+
+/* ---------- Мобильные инструменты ---------- */
+.stage-tools {
+  position: absolute; right: 10px; top: 10px; z-index: 6;
+  display: none; flex-direction: column; gap: 6px;
+}
+.stage-tools button {
+  width: 42px; height: 42px; border-radius: 13px; font-size: 17px;
+  background: var(--panel); box-shadow: 0 4px 14px rgba(0,0,0,.28);
+}
+
+/* ---------- Док ---------- */
+.dock {
+  display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
   flex-direction: column; gap: 7px;
   padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
   background: var(--panel); border-top: 1px solid var(--border);
-  box-shadow: 0 -8px 28px rgba(0,0,0,.32); }
+  box-shadow: 0 -8px 28px rgba(0,0,0,.32);
+}
 .dock-colors { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .dock-colors::-webkit-scrollbar { display: none; }
 .dock-colors .swatch { flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; }
 .dock-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .dock-row button { font-size: 18px; padding: 10px 0; border-radius: 13px; line-height: 1; }
 .dock-row button.active { background: var(--accent); border-color: var(--accent); color: var(--accentText); }
-.toast { position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
+
+/* ---------- Тосты ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px);
   background: var(--panel); color: var(--text);
   border: 1px solid var(--border); border-radius: 12px;
   padding: 11px 18px; font-size: 13px; max-width: min(92vw, 520px);
   box-shadow: 0 10px 34px rgba(0,0,0,.45);
-  opacity: 0; pointer-events: none; transition: .22s ease; z-index: 100; text-align: center; line-height: 1.4; }
+  opacity: 0; pointer-events: none; transition: .22s ease; z-index: 100; text-align: center;
+  line-height: 1.4;
+}
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 html.mobile .toast { bottom: 132px; }
+
+/* ============================================================
+   МОБИЛЬНЫЙ РЕЖИМ
+   ============================================================ */
 html.mobile .app { flex-direction: column; }
 html.mobile .stage { padding: 8px 8px 150px; }
-html.mobile .panel { position: fixed; inset: auto 0 0 0; width: 100%; max-width: 100%;
-  flex: none; max-height: 80vh; border-right: 0; border-top: 1px solid var(--border);
-  border-radius: 22px 22px 0 0; transform: translateY(103%);
+html.mobile .panel {
+  position: fixed; inset: auto 0 0 0; width: 100%; max-width: 100%;
+  flex: none; max-height: 80vh; border-right: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 22px 22px 0 0;
+  transform: translateY(103%);
   transition: transform .3s cubic-bezier(.2,.85,.25,1);
   z-index: 30; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px));
-  box-shadow: 0 -14px 44px rgba(0,0,0,.45); }
+  box-shadow: 0 -14px 44px rgba(0,0,0,.45);
+}
 html.mobile .panel.open { transform: translateY(0); }
-html.mobile .panel::before { content: ""; display: block; width: 42px; height: 4px; border-radius: 4px;
-  background: var(--border); margin: -6px auto 12px; }
+html.mobile .panel::before {
+  content: ""; display: block; width: 42px; height: 4px; border-radius: 4px;
+  background: var(--border); margin: -6px auto 12px;
+}
 html.mobile .dock { display: flex; }
 html.mobile .stage-tools { display: flex; }
 html.mobile .panel h1 { font-size: 16px; }
@@ -172,15 +265,20 @@ html.mobile .panel { overscroll-behavior: contain; }
     <div class="panel-head">
       <h1>Супер Пеинт <span>2.0</span></h1>
       <div class="device-toggle" id="deviceToggle">
-        <button data-mode="desktop">💻</button>
-        <button data-mode="mobile">📱</button>
+        <button data-mode="desktop" title="ПК">💻</button>
+        <button data-mode="mobile" title="Телефон">📱</button>
       </div>
     </div>
+
     <section>
       <div class="label">Палитра — 50 цветов</div>
       <div class="palette" id="palette"></div>
-      <div class="current"><div class="chip" id="currentChip"></div><code id="currentHex">#000000</code></div>
+      <div class="current">
+        <div class="chip" id="currentChip"></div>
+        <code id="currentHex">#000000</code>
+      </div>
     </section>
+
     <section>
       <div class="label">Инструмент</div>
       <div class="tools" id="tools">
@@ -190,6 +288,7 @@ html.mobile .panel { overscroll-behavior: contain; }
         <button data-tool="picker">💧 Пипетка</button>
       </div>
     </section>
+
     <section>
       <div class="label">Масштаб просмотра</div>
       <div class="zoom-controls">
@@ -200,6 +299,7 @@ html.mobile .panel { overscroll-behavior: contain; }
       </div>
       <div class="hint"><b>Колесо</b> — зум, <b>пробел+ЛКМ</b> / <b>средняя</b> — панорама.</div>
     </section>
+
     <section>
       <div class="label">Холст</div>
       <div class="sizes" id="sizes"></div>
@@ -219,6 +319,7 @@ html.mobile .panel { overscroll-behavior: contain; }
         <button data-scale="8">×8</button>
       </div>
     </section>
+
     <section>
       <div class="label">Файл</div>
       <div class="file-row">
@@ -230,32 +331,40 @@ html.mobile .panel { overscroll-behavior: contain; }
         <button id="openBtn">🖼 Открыть</button>
       </div>
     </section>
+
     <section>
       <div class="label" id="themeLabel">Интерфейс</div>
       <div class="themes" id="themes"></div>
     </section>
+
     <section class="actions">
       <button id="undoBtn">↶ Отменить</button>
       <button id="redoBtn">↷ Повторить</button>
       <button id="clearBtn">🗑 Очистить</button>
       <button id="gridBtn" class="on">▦ Сетка</button>
     </section>
+
     <section>
       <div class="label">Совместная работа</div>
       <button id="multiplayerBtn" style="width:100%">🌐 P2P Комната</button>
-      <div class="hint" id="mpHint">Введите одинаковый код комнаты на двух устройствах. Подключение через публичные BitTorrent-трекеры (бесплатно).</div>
+      <div class="hint" id="mpHint">Подключитесь к комнате, чтобы рисовать вместе.</div>
     </section>
+
     <div class="hint" id="limitHint"></div>
   </aside>
+
   <main class="stage" id="stage">
     <div class="stage-tools">
       <button id="mZoomIn">+</button>
       <button id="mZoomOut">−</button>
       <button id="mZoomFit">⤢</button>
     </div>
-    <div class="canvas-box" id="box"><canvas id="mainCanvas"></canvas></div>
+    <div class="canvas-box" id="box">
+      <canvas id="mainCanvas"></canvas>
+    </div>
   </main>
 </div>
+
 <div class="dock" id="dock">
   <div class="dock-colors" id="dockColors"></div>
   <div class="dock-row">
@@ -267,9 +376,13 @@ html.mobile .panel { overscroll-behavior: contain; }
     <button id="dockMore">⋯</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="fileInput" accept=".paintingsave,.zip,image/*" hidden>
 
+<!-- ============================================================
+     TRYSTERO (CDN, ES-модуль)
+     ============================================================ -->
 <script type="module">
 import { joinRoom } from 'https://cdn.jsdelivr.net/npm/trystero@latest/torrent.min.js';
 
@@ -278,64 +391,86 @@ import { joinRoom } from 'https://cdn.jsdelivr.net/npm/trystero@latest/torrent.m
    ============================================================ */
 const TILE = 256;
 const MAX_SIDE = 256000;
-const UNDO_BUDGET = 128 * 1024 * 1024;
+const UNDO_BUDGET = 128 * 1024 * 1024; // 128 МБ
 const MAX_UNDO_STEPS = 80;
 
 class TileStore {
   constructor() {
-    this.map = new Map();
+    this.map = new Map();          // "tx,ty" -> ImageData|null
     this.W = 16; this.H = 16;
-    this.cache = new Map();
+    this.cache = new Map();        // key -> {canvas, dirty}
     this.cacheLimit = 180;
     this.undoStack = [];
     this.redoStack = [];
     this.undoBytes = 0;
-    this.strokeOld = null;
+    this.strokeOld = null;         // Map для текущего штриха
   }
-  resize(w, h) {
+
+  resize(w, h, keep, stretch, snapshot) {
     this.W = w; this.H = h;
     this.map.clear(); this.cache.clear();
     this.undoStack.length = 0; this.redoStack.length = 0;
     this.undoBytes = 0; this.strokeOld = null;
   }
+
   worldToTile(x, y) { return [Math.floor(x / TILE), Math.floor(y / TILE)]; }
+  tileToWorld(tx, ty) { return [tx * TILE, ty * TILE]; }
   key(tx, ty) { return tx + ',' + ty; }
+
   getTile(tx, ty) {
     const k = this.key(tx, ty);
-    if (this.map.has(k)) { const v = this.map.get(k); if (v) return v; }
+    if (this.map.has(k)) {
+      const v = this.map.get(k);
+      if (v) return v;
+    }
     const img = new ImageData(TILE, TILE);
     const d = img.data;
     for (let i = 0; i < d.length; i += 4) { d[i]=255; d[i+1]=255; d[i+2]=255; d[i+3]=255; }
     return img;
   }
+
   setTile(tx, ty, imageData) {
     const k = this.key(tx, ty);
-    if (!imageData) { this.map.delete(k); this.cache.delete(k); return; }
+    if (!imageData) { this.map.set(k, null); this.markDirty(tx, ty); return; }
     let white = true;
     const d = imageData.data;
     for (let i = 0; i < d.length; i += 4) {
       if (d[i] !== 255 || d[i+1] !== 255 || d[i+2] !== 255 || d[i+3] !== 255) { white = false; break; }
     }
-    if (white) { this.map.delete(k); } else { this.map.set(k, imageData); }
-    this.cache.delete(k);
+    if (white) { this.map.delete(k); }
+    else { this.map.set(k, imageData); }
+    this.markDirty(tx, ty);
   }
+
+  markDirty(tx, ty) { this.cache.delete(this.key(tx, ty)); }
+
   getCachedCanvas(tx, ty) {
     const k = this.key(tx, ty);
     let c = this.cache.get(k);
     if (c) return c;
-    const img = this.map.get(k) || null;
-    if (!img && !this.map.has(k)) return null;
+    let img = this.map.get(k) || null;
+    if (!img) {
+      if (!this.map.has(k)) return null;
+      img = this.getTile(tx, ty);
+    }
     const canvas = (typeof OffscreenCanvas !== 'undefined')
       ? new OffscreenCanvas(TILE, TILE)
       : Object.assign(document.createElement('canvas'), { width: TILE, height: TILE });
     const ctx = canvas.getContext('2d');
-    if (ctx && img) ctx.putImageData(img, 0, 0);
+    if (ctx) { ctx.putImageData(img, 0, 0); }
     c = { canvas };
     this.cache.set(k, c);
-    if (this.cache.size > this.cacheLimit) this.cache.delete(this.cache.keys().next().value);
+    if (this.cache.size > this.cacheLimit) {
+      const first = this.cache.keys().next().value;
+      this.cache.delete(first);
+    }
     return c;
   }
-  beginStroke() { this.strokeOld = new Map(); }
+
+  // -------- UNDO --------
+  beginStroke() {
+    this.strokeOld = new Map();
+  }
   recordTile(tx, ty) {
     if (!this.strokeOld) return;
     const k = this.key(tx, ty);
@@ -347,24 +482,26 @@ class TileStore {
     if (!this.strokeOld || this.strokeOld.size === 0) { this.strokeOld = null; return; }
     const step = { tiles: new Map() };
     for (const [k, old] of this.strokeOld) {
+      const [tx, ty] = k.split(',').map(Number);
       const cur = this.map.get(k) || null;
       step.tiles.set(k, { old, cur });
     }
     this.undoStack.push(step);
     this.redoStack.length = 0;
     let bytes = 0;
-    for (const {old, cur} of step.tiles.values())
-      bytes += (old?old.data.byteLength:0) + (cur?cur.data.byteLength:0);
+    for (const {old, cur} of step.tiles.values()) {
+      bytes += (old ? old.data.byteLength : 0) + (cur ? cur.data.byteLength : 0);
+    }
     this.undoBytes += bytes;
     while ((this.undoBytes > UNDO_BUDGET || this.undoStack.length > MAX_UNDO_STEPS) && this.undoStack.length > 1) {
       const removed = this.undoStack.shift();
       let b = 0;
-      for (const {old, cur} of removed.tiles.values())
-        b += (old?old.data.byteLength:0) + (cur?cur.data.byteLength:0);
+      for (const {old, cur} of removed.tiles.values()) b += (old?old.data.byteLength:0)+(cur?cur.data.byteLength:0);
       this.undoBytes -= b;
     }
     this.strokeOld = null;
   }
+
   undo() {
     const step = this.undoStack.pop();
     if (!step) return false;
@@ -373,11 +510,12 @@ class TileStore {
       const [tx, ty] = k.split(',').map(Number);
       redoStep.tiles.set(k, { old: cur, cur: old });
       if (old) this.map.set(k, old); else this.map.delete(k);
-      this.cache.delete(k);
+      this.markDirty(tx, ty);
     }
     this.redoStack.push(redoStep);
     return true;
   }
+
   redo() {
     const step = this.redoStack.pop();
     if (!step) return false;
@@ -386,7 +524,7 @@ class TileStore {
       const [tx, ty] = k.split(',').map(Number);
       undoStep.tiles.set(k, { old: cur, cur: old });
       if (cur) this.map.set(k, cur); else this.map.delete(k);
-      this.cache.delete(k);
+      this.markDirty(tx, ty);
     }
     this.undoStack.push(undoStep);
     return true;
@@ -404,12 +542,11 @@ const Renderer = {
   render() {
     const dpr = window.devicePixelRatio || 1;
     const vw = window.innerWidth, vh = window.innerHeight;
-    if (mainCanvas.width !== vw*dpr) mainCanvas.width = vw * dpr;
-    if (mainCanvas.height !== vh*dpr) mainCanvas.height = vh * dpr;
-    mainCanvas.style.width = vw + 'px';
-    mainCanvas.style.height = vh + 'px';
+    mainCanvas.width = vw * dpr; mainCanvas.height = vh * dpr;
+    mainCanvas.style.width = vw + 'px'; mainCanvas.style.height = vh + 'px';
     mainCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     mainCtx.imageSmoothingEnabled = false;
+
     mainCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0d0f12';
     mainCtx.fillRect(0, 0, vw, vh);
 
@@ -417,15 +554,15 @@ const Renderer = {
     const z = this.zoom;
     const t0x = Math.floor((-this.panX) / (TILE * z));
     const t0y = Math.floor((-this.panY) / (TILE * z));
-    const t1x = Math.ceil((vw - this.panX) / (TILE * z));
-    const t1y = Math.ceil((vh - this.panY) / (TILE * z));
-    const maxTx = Math.ceil(store.W / TILE), maxTy = Math.ceil(store.H / TILE);
+    const t1x = Math.floor((vw - this.panX) / (TILE * z));
+    const t1y = Math.floor((vh - this.panY) / (TILE * z));
 
-    for (let ty = Math.max(0, t0y); ty <= Math.min(maxTy - 1, t1y); ty++) {
-      for (let tx = Math.max(0, t0x); tx <= Math.min(maxTx - 1, t1x); tx++) {
+    for (let ty = t0y; ty <= t1y; ty++) {
+      for (let tx = t0x; tx <= t1x; tx++) {
         const wx = tx * TILE * z + this.panX;
         const wy = ty * TILE * z + this.panY;
         const size = TILE * z;
+        if (wx > vw || wy > vh || wx + size < 0 || wy + size < 0) continue;
         const cached = store.getCachedCanvas(tx, ty);
         if (cached) mainCtx.drawImage(cached.canvas, wx, wy, size, size);
         else { mainCtx.fillStyle = '#fff'; mainCtx.fillRect(wx, wy, size, size); }
@@ -435,11 +572,11 @@ const Renderer = {
 };
 
 /* ============================================================
-   3. TOOLS
+   3. TOOLS (pencil, eraser, fill, picker)
    ============================================================ */
 const Tools = {
   putPixel(wx, wy, hex) {
-    if (wx < 0 || wy < 0 || wx >= App.store.W || wy >= App.store.H) return false;
+    if (wx < 0 || wy < 0 || wx >= App.store.W || wy >= App.store.H) return;
     const [tx, ty] = App.store.worldToTile(wx, wy);
     const lx = wx % TILE, ly = wy % TILE;
     const img = App.store.getTile(tx, ty);
@@ -448,15 +585,13 @@ const Tools = {
     const [r,g,b] = hexToRgb(hex);
     d[i]=r; d[i+1]=g; d[i+2]=b; d[i+3]=255;
     App.store.setTile(tx, ty, img);
-    return [tx, ty];
   },
-  line(x0, y0, x1, y1, hex, onTileTouched) {
+  line(x0, y0, x1, y1, hex) {
     let dx = Math.abs(x1-x0), sx = x0<x1?1:-1;
     let dy = -Math.abs(y1-y0), sy = y0<y1?1:-1;
     let err = dx + dy;
     for (;;) {
-      const t = this.putPixel(x0, y0, hex);
-      if (t && onTileTouched) onTileTouched(t[0], t[1]);
+      this.putPixel(x0, y0, hex);
       if (x0===x1 && y0===y1) break;
       const e2 = 2*err;
       if (e2 >= dy) { err += dy; x0 += sx; }
@@ -467,14 +602,15 @@ const Tools = {
     const store = App.store;
     if (sx<0 || sy<0 || sx>=store.W || sy>=store.H) return;
     const [stx, sty] = store.worldToTile(sx, sy);
-    const sd = store.getTile(stx, sty).data;
-    const si = ((sy%TILE)*TILE + (sx%TILE))*4;
+    const slx = sx % TILE, sly = sy % TILE;
+    const startImg = store.getTile(stx, sty);
+    const sd = startImg.data;
+    const si = (sly*TILE+slx)*4;
     const target = [sd[si], sd[si+1], sd[si+2]];
     const [nr,ng,nb] = hexToRgb(hex);
     if (target[0]===nr && target[1]===ng && target[2]===nb) return;
     const visited = new Set();
     const queue = [[sx, sy]];
-    const touched = new Set();
     while (queue.length) {
       const [x, y] = queue.pop();
       if (x<0 || y<0 || x>=store.W || y>=store.H) continue;
@@ -482,7 +618,7 @@ const Tools = {
       if (visited.has(vk)) continue;
       visited.add(vk);
       const [tx, ty] = store.worldToTile(x, y);
-      const lx = x%TILE, ly = y%TILE;
+      const lx = x % TILE, ly = y % TILE;
       const img = store.getTile(tx, ty);
       const d = img.data;
       const i = (ly*TILE+lx)*4;
@@ -490,24 +626,20 @@ const Tools = {
       store.recordTile(tx, ty);
       d[i]=nr; d[i+1]=ng; d[i+2]=nb; d[i+3]=255;
       store.setTile(tx, ty, img);
-      touched.add(tx+','+ty);
       queue.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
-    }
-    for (const k of touched) {
-      const [tx, ty] = k.split(',').map(Number);
-      Multiplayer.queueTile(tx, ty, store.getTile(tx, ty));
     }
   },
   pickColor(wx, wy) {
     const [tx, ty] = App.store.worldToTile(wx, wy);
     const img = App.store.getTile(tx, ty);
-    const i = ((wy%TILE)*TILE + (wx%TILE))*4;
+    const lx = wx % TILE, ly = wy % TILE;
+    const i = (ly*TILE+lx)*4;
     return '#' + [img.data[i], img.data[i+1], img.data[i+2]].map(v=>v.toString(16).padStart(2,'0')).join('');
   }
 };
 
 /* ============================================================
-   4. FILE I/O
+   4. FILE I/O (.paintingsave ZIP, PNG, изображения)
    ============================================================ */
 const FileIO = {
   async exportSave() {
@@ -519,7 +651,8 @@ const FileIO = {
       const canvas = (typeof OffscreenCanvas !== 'undefined')
         ? new OffscreenCanvas(TILE, TILE)
         : Object.assign(document.createElement('canvas'), { width: TILE, height: TILE });
-      canvas.getContext('2d').putImageData(img, 0, 0);
+      const ctx = canvas.getContext('2d');
+      ctx.putImageData(img, 0, 0);
       const blob = await canvasToBlob(canvas);
       tiles.push({ name: `tiles/${tx}_${ty}.png`, data: new Uint8Array(await blob.arrayBuffer()) });
     }
@@ -535,8 +668,9 @@ const FileIO = {
     ];
     const zipBlob = await createZip(files);
     downloadBlob(zipBlob, `superpaint_${store.W}x${store.H}.paintingsave`);
-    showToast('Сохранено: ' + tiles.length + ' тайлов', 2000);
+    showToast('Файл .paintingsave сохранён', 2000);
   },
+
   async makePreview() {
     const store = App.store;
     const size = 512;
@@ -546,19 +680,22 @@ const FileIO = {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
     const scale = Math.min(size / store.W, size / store.H);
-    for (const [k] of store.map) {
+    for (const [k, img] of store.map) {
+      if (!img) continue;
       const [tx, ty] = k.split(',').map(Number);
       const c = store.getCachedCanvas(tx, ty);
       if (c) ctx.drawImage(c.canvas, tx*TILE*scale, ty*TILE*scale, TILE*scale, TILE*scale);
     }
-    return await blobToDataURL(await canvasToBlob(canvas));
+    const blob = await canvasToBlob(canvas);
+    return await blobToDataURL(blob);
   },
+
   async importSave(file) {
     try {
       const zip = await readZip(file);
-      const mf = zip.get('manifest.json');
-      if (!mf) throw new Error('Нет manifest.json');
-      const manifest = JSON.parse(new TextDecoder().decode(mf));
+      const manifestFile = zip.get('manifest.json');
+      if (!manifestFile) throw new Error('Нет manifest.json');
+      const manifest = JSON.parse(new TextDecoder().decode(manifestFile));
       if (manifest.format !== 'paintingsave') throw new Error('Неверный формат');
       await App.setSize(manifest.width, manifest.height, false, false);
       const store = App.store;
@@ -567,13 +704,14 @@ const FileIO = {
         const m = name.match(/tiles\/(\d+)_(\d+)\.png/);
         if (!m) continue;
         const tx = +m[1], ty = +m[2];
-        const img = await createImageBitmap(new Blob([data], { type: 'image/png' }));
+        const blob = new Blob([data], { type: 'image/png' });
+        const img = await createImageBitmap(blob);
         const canvas = (typeof OffscreenCanvas !== 'undefined')
           ? new OffscreenCanvas(TILE, TILE)
           : Object.assign(document.createElement('canvas'), { width: TILE, height: TILE });
-        const cctx = canvas.getContext('2d');
-        cctx.drawImage(img, 0, 0);
-        store.setTile(tx, ty, cctx.getImageData(0, 0, TILE, TILE));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        store.setTile(tx, ty, ctx.getImageData(0, 0, TILE, TILE));
       }
       Renderer.render();
       showToast('Импорт завершён', 2000);
@@ -581,24 +719,30 @@ const FileIO = {
       showToast('Ошибка импорта: ' + e.message, 4000);
     }
   },
+
   async exportPNG() {
     const store = App.store;
     const canvas = document.createElement('canvas');
     canvas.width = store.W; canvas.height = store.H;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, store.W, store.H);
-    for (const [k] of store.map) {
+    for (const [k, img] of store.map) {
+      if (!img) continue;
       const [tx, ty] = k.split(',').map(Number);
       const c = store.getCachedCanvas(tx, ty);
       if (c) ctx.drawImage(c.canvas, tx*TILE, ty*TILE);
     }
     canvas.toBlob(blob => downloadBlob(blob, `superpaint_${store.W}x${store.H}.png`));
   },
+
   async loadImageFile(file) {
     const url = URL.createObjectURL(file);
     try {
       const img = await new Promise((res, rej) => {
-        const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url;
+        const i = new Image();
+        i.onload = () => res(i);
+        i.onerror = rej;
+        i.src = url;
       });
       await App.setSize(img.naturalWidth, img.naturalHeight, false, false);
       const store = App.store;
@@ -609,18 +753,21 @@ const FileIO = {
       tctx.drawImage(img, 0, 0);
       for (let ty = 0; ty < Math.ceil(store.H/TILE); ty++) {
         for (let tx = 0; tx < Math.ceil(store.W/TILE); tx++) {
-          store.setTile(tx, ty, tctx.getImageData(tx*TILE, ty*TILE, TILE, TILE));
+          const data = tctx.getImageData(tx*TILE, ty*TILE, TILE, TILE);
+          store.setTile(tx, ty, data);
         }
       }
       Renderer.render();
       showToast('Изображение загружено', 2000);
     } catch (e) {
-      showToast('Не удалось загрузить', 3000);
+      showToast('Не удалось загрузить изображение', 3000);
     } finally { setTimeout(() => URL.revokeObjectURL(url), 3000); }
   }
 };
 
-/* ---- ZIP helpers ---- */
+/* ============================================================
+   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ZIP / BLOB
+   ============================================================ */
 function canvasToBlob(canvas) {
   return new Promise(res => {
     if (canvas.convertToBlob) canvas.convertToBlob().then(res);
@@ -632,12 +779,14 @@ function blobToDataURL(blob) {
 }
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 async function createZip(files) {
   const encoder = new TextEncoder();
-  const chunks = [], central = [];
+  const chunks = [];
+  const central = [];
   let offset = 0;
   for (const f of files) {
     const nameBytes = encoder.encode(f.name);
@@ -646,27 +795,41 @@ async function createZip(files) {
     const useCompressed = compressed.length < f.data.length;
     const data = useCompressed ? compressed : f.data;
     const method = useCompressed ? 8 : 0;
+
     const local = new Uint8Array(30 + nameBytes.length + data.length);
     const dv = new DataView(local.buffer);
     dv.setUint32(0, 0x04034b50, true);
-    dv.setUint16(4, 20, true); dv.setUint16(6, 0, true);
-    dv.setUint16(8, method, true); dv.setUint16(10, 0, true); dv.setUint16(12, 0, true);
+    dv.setUint16(4, 20, true);
+    dv.setUint16(6, 0, true);
+    dv.setUint16(8, method, true);
+    dv.setUint16(10, 0, true);
+    dv.setUint16(12, 0, true);
     dv.setUint32(14, crc, true);
-    dv.setUint32(18, data.length, true); dv.setUint32(22, f.data.length, true);
-    dv.setUint16(26, nameBytes.length, true); dv.setUint16(28, 0, true);
-    local.set(nameBytes, 30); local.set(data, 30 + nameBytes.length);
+    dv.setUint32(18, data.length, true);
+    dv.setUint32(22, f.data.length, true);
+    dv.setUint16(26, nameBytes.length, true);
+    dv.setUint16(28, 0, true);
+    local.set(nameBytes, 30);
+    local.set(data, 30 + nameBytes.length);
     chunks.push(local);
+
     const cen = new Uint8Array(46 + nameBytes.length);
     const cdv = new DataView(cen.buffer);
     cdv.setUint32(0, 0x02014b50, true);
-    cdv.setUint16(4, 20, true); cdv.setUint16(6, 20, true);
-    cdv.setUint16(8, 0, true); cdv.setUint16(10, method, true);
-    cdv.setUint16(12, 0, true); cdv.setUint16(14, 0, true);
+    cdv.setUint16(4, 20, true);
+    cdv.setUint16(6, 20, true);
+    cdv.setUint16(8, 0, true);
+    cdv.setUint16(10, method, true);
+    cdv.setUint16(12, 0, true);
+    cdv.setUint16(14, 0, true);
     cdv.setUint32(16, crc, true);
-    cdv.setUint32(20, data.length, true); cdv.setUint32(24, f.data.length, true);
+    cdv.setUint32(20, data.length, true);
+    cdv.setUint32(24, f.data.length, true);
     cdv.setUint16(28, nameBytes.length, true);
-    cdv.setUint16(30, 0, true); cdv.setUint16(32, 0, true);
-    cdv.setUint16(34, 0, true); cdv.setUint16(36, 0, true);
+    cdv.setUint16(30, 0, true);
+    cdv.setUint16(32, 0, true);
+    cdv.setUint16(34, 0, true);
+    cdv.setUint16(36, 0, true);
     cdv.setUint32(38, 0, true);
     cdv.setUint32(42, offset, true);
     cen.set(nameBytes, 46);
@@ -678,7 +841,8 @@ async function createZip(files) {
   const edv = new DataView(end.buffer);
   edv.setUint32(0, 0x06054b50, true);
   edv.setUint16(4, 0, true); edv.setUint16(6, 0, true);
-  edv.setUint16(8, files.length, true); edv.setUint16(10, files.length, true);
+  edv.setUint16(8, files.length, true);
+  edv.setUint16(10, files.length, true);
   edv.setUint32(12, centralSize, true);
   edv.setUint32(16, offset, true);
   edv.setUint16(20, 0, true);
@@ -687,13 +851,17 @@ async function createZip(files) {
 async function deflateRaw(data) {
   if (typeof CompressionStream === 'undefined') return data;
   const cs = new CompressionStream('deflate-raw');
-  const w = cs.writable.getWriter(); w.write(data); w.close();
-  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+  const writer = cs.writable.getWriter();
+  writer.write(data); writer.close();
+  const buf = await new Response(cs.readable).arrayBuffer();
+  return new Uint8Array(buf);
 }
 async function inflateRaw(data) {
   const ds = new DecompressionStream('deflate-raw');
-  const w = ds.writable.getWriter(); w.write(data); w.close();
-  return new Uint8Array(await new Response(ds.readable).arrayBuffer());
+  const writer = ds.writable.getWriter();
+  writer.write(data); writer.close();
+  const buf = await new Response(ds.readable).arrayBuffer();
+  return new Uint8Array(buf);
 }
 function crc32(data) {
   let c, crc = 0xFFFFFFFF;
@@ -724,14 +892,15 @@ async function readZip(blob) {
     const name = new TextDecoder().decode(new Uint8Array(buf, pos + 46, nameLen));
     const method = dv.getUint16(pos + 10, true);
     const compSize = dv.getUint32(pos + 20, true);
+
     const lnLen = dv.getUint16(localOffset + 26, true);
     const leLen = dv.getUint16(localOffset + 28, true);
     const dataStart = localOffset + 30 + lnLen + leLen;
-    const raw = new Uint8Array(buf, dataStart, compSize);
+    let raw = new Uint8Array(buf, dataStart, compSize);
     let out;
     if (method === 8) out = await inflateRaw(raw);
     else if (method === 0) out = raw;
-    else throw new Error('Метод сжатия ' + method + ' не поддержан');
+    else throw new Error('Неподдерживаемый метод сжатия: ' + method);
     map.set(name, out);
     pos += 46 + nameLen + extraLen + commentLen;
   }
@@ -743,34 +912,13 @@ function hexToRgb(hex) {
 }
 
 /* ============================================================
-   5. MULTIPLAYER (исправленный)
+   5. MULTIPLAYER (Trystero)
    ============================================================ */
 const Multiplayer = {
-  room: null,
-  peers: new Map(),
-  sendTile: null, getTile: null,
-  sendCursor: null, getCursor: null,
-  sendSync: null, getSync: null,
+  room: null, peerId: null, peers: new Map(),
+  sendTile: null, getTile: null, sendCursor: null, getCursor: null,
   color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),
-  name: 'User-' + Math.floor(Math.random()*1000),
-  pending: new Map(),
-  batchTimer: null,
-
-  queueTile(tx, ty, img) {
-    if (!this.sendTile) return;
-    this.pending.set(tx+','+ty, { tx, ty, img });
-    if (!this.batchTimer) this.batchTimer = setTimeout(() => this.flush(), 25);
-  },
-  flush() {
-    this.batchTimer = null;
-    if (!this.sendTile || !this.pending.size) return;
-    const batch = [];
-    for (const { tx, ty, img } of this.pending.values()) {
-      batch.push({ tx, ty, data: img.data.buffer.slice(0) });
-    }
-    this.pending.clear();
-    try { this.sendTile({ type: 'batch', tiles: batch }); } catch(e) { console.warn('send batch failed', e); }
-  },
+  name: 'Пользователь-' + Math.floor(Math.random()*1000),
 
   async join(roomCode) {
     if (!roomCode) return;
@@ -778,82 +926,55 @@ const Multiplayer = {
       this.room = joinRoom({ appId: 'superpaint-v2' }, roomCode);
       [this.sendTile, this.getTile] = this.room.makeAction('tile');
       [this.sendCursor, this.getCursor] = this.room.makeAction('cursor');
-      [this.sendSync, this.getSync] = this.room.makeAction('sync');
 
       this.room.onPeerJoin(peer => {
-        this.peers.set(peer, { name: 'Peer-' + peer.slice(0,4), color: this.color });
-        showToast('Подключён: ' + peer.slice(0,6), 2000);
-        try { this.sendSync({ type: 'request' }, peer); } catch(e) {}
+        this.peers.set(peer, { name: 'Пир-' + peer.slice(0,4), color: this.color });
+        showToast('Подключён пир: ' + peer.slice(0,6), 2000);
+        this.sendTile({ type: 'sync-request' });
       });
-      this.room.onPeerLeave(peer => {
-        this.peers.delete(peer);
-        showToast('Отключён: ' + peer.slice(0,6), 1500);
-      });
+      this.room.onPeerLeave(peer => { this.peers.delete(peer); });
 
       this.getTile((data, peer) => {
         if (!data) return;
-        if (data.type === 'batch') {
-          for (const t of data.tiles) {
-            const img = new ImageData(new Uint8ClampedArray(t.data), TILE, TILE);
-            App.store.setTile(t.tx, t.ty, img);
-          }
-          Renderer.render();
-        }
-      });
-
-      this.getSync((data, peer) => {
-        if (!data) return;
-        if (data.type === 'request') {
-          const list = [];
-          for (const [k, img] of App.store.map) {
-            if (!img) continue;
-            const [tx, ty] = k.split(',').map(Number);
-            list.push({ tx, ty });
-          }
-          try { this.sendSync({ type: 'manifest', W: App.store.W, H: App.store.H, tiles: list }, peer); } catch(e) {}
-        }
-        else if (data.type === 'manifest') {
-          if (App.store.map.size === 0 && (data.W !== App.store.W || data.H !== App.store.H)) {
-            App.setSize(data.W, data.H, false, false);
-          }
-          for (const t of data.tiles) {
-            try { this.sendSync({ type: 'need', tx: t.tx, ty: t.ty }, peer); } catch(e) {}
-          }
-        }
-        else if (data.type === 'need') {
-          const img = App.store.map.get(data.tx + ',' + data.ty);
-          if (img) {
-            try { this.sendSync({ type: 'tile', tx: data.tx, ty: data.ty, data: img.data.buffer.slice(0) }, peer); } catch(e) {}
-          }
-        }
-        else if (data.type === 'tile') {
+        if (data.type === 'tile') {
           const img = new ImageData(new Uint8ClampedArray(data.data), TILE, TILE);
           App.store.setTile(data.tx, data.ty, img);
           Renderer.render();
         }
+        if (data.type === 'sync-request') {
+          for (const [k, img] of App.store.map) {
+            if (!img) continue;
+            const [tx, ty] = k.split(',').map(Number);
+            this.sendTile({ type: 'tile', tx, ty, data: img.data.buffer }, peer);
+          }
+        }
       });
 
       this.getCursor((data, peer) => {
-        const p = this.peers.get(peer);
-        if (p) { p.x = data.x; p.y = data.y; p.color = data.color; p.name = data.name; }
+        if (!this.peers.has(peer)) return;
+        this.peers.get(peer).x = data.x;
+        this.peers.get(peer).y = data.y;
       });
 
       setInterval(() => {
         if (this.sendCursor && App.mouseWorld) {
-          try { this.sendCursor({ x: App.mouseWorld.x, y: App.mouseWorld.y, color: this.color, name: this.name }); } catch(e) {}
+          this.sendCursor({ x: App.mouseWorld.x, y: App.mouseWorld.y, color: this.color, name: this.name });
         }
       }, 50);
-
-      showToast('Комната: ' + roomCode + ' — ждём участников...', 3500);
+      showToast('Комната: ' + roomCode, 3000);
     } catch (e) {
-      console.error(e);
-      showToast('Ошибка подключения: ' + e.message, 5000);
+      showToast('Не удалось подключиться: ' + e.message, 4000);
     }
+  },
+
+  sendTileChange(tx, ty, img) {
+    if (!this.sendTile) return;
+    this.sendTile({ type: 'tile', tx, ty, data: img.data.buffer });
   }
 };
 
 /* ============================================================
-   6. UI helpers
+   6. UI (палитра, темы, горячие клавиши)
    ============================================================ */
 const PALETTE = [
   '#000000','#333333','#666666','#999999','#cccccc','#ffffff','#7f0000','#b30000','#ff0000','#ff4d4d',
@@ -879,8 +1000,16 @@ const THEMES = {
   ]
 };
 
-let mode = 'desktop', themeId = 'd-dark', currentColor = '#000000', tool = 'pencil';
-let drawing = false, lastWorld = null, spaceDown = false, isPanning = false, panStart = null;
+let mode = 'desktop';
+let themeId = 'd-dark';
+let currentColor = '#000000';
+let tool = 'pencil';
+let showGrid = true;
+let drawing = false;
+let lastWorld = null;
+let spaceDown = false;
+let isPanning = false;
+let panStart = null;
 
 function showToast(msg, ms = 2600) {
   const el = document.getElementById('toast');
@@ -888,25 +1017,9 @@ function showToast(msg, ms = 2600) {
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), ms);
 }
-function selectColor(hex) {
-  currentColor = hex;
-  document.getElementById('currentChip').style.background = hex;
-  document.getElementById('currentHex').textContent = hex;
-  document.querySelectorAll('.swatch').forEach(el => el.classList.toggle('active', el.dataset.color === hex));
-}
-function setTool(t) {
-  tool = t;
-  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
-}
-function applyTheme(id) {
-  themeId = id;
-  document.documentElement.dataset.theme = id;
-  localStorage.setItem('sp-theme-' + mode, id);
-  App.buildThemes();
-}
 
 /* ============================================================
-   7. APP
+   7. APP (инициализация, связывание)
    ============================================================ */
 const App = {
   store: new TileStore(),
@@ -917,10 +1030,12 @@ const App = {
     await this.setSize(16, 16, false, false);
     this.bindEvents();
     this.loadMode();
+    this.startAutoSave();
     requestAnimationFrame(() => this.loop());
   },
 
   buildUI() {
+    // Палитра
     const palette = document.getElementById('palette');
     const dockColors = document.getElementById('dockColors');
     [palette, dockColors].forEach(c => {
@@ -931,6 +1046,7 @@ const App = {
         c.appendChild(b);
       });
     });
+    // Размеры
     const sizes = document.getElementById('sizes');
     [8,16,24,32,48].forEach(n => {
       const b = document.createElement('button');
@@ -938,6 +1054,7 @@ const App = {
       b.addEventListener('click', () => App.setSize(n, n, true, false));
       sizes.appendChild(b);
     });
+    // Темы
     this.buildThemes();
     selectColor('#000000');
   },
@@ -964,13 +1081,14 @@ const App = {
       snapshot.width = this.store.W; snapshot.height = this.store.H;
       const sctx = snapshot.getContext('2d');
       sctx.fillStyle = '#fff'; sctx.fillRect(0, 0, this.store.W, this.store.H);
-      for (const [k] of this.store.map) {
+      for (const [k, img] of this.store.map) {
+        if (!img) continue;
         const [tx, ty] = k.split(',').map(Number);
         const c = this.store.getCachedCanvas(tx, ty);
         if (c) sctx.drawImage(c.canvas, tx*TILE, ty*TILE);
       }
     }
-    this.store.resize(w, h);
+    this.store.resize(w, h, keep, stretch, snapshot);
     if (snapshot) {
       const tmp = document.createElement('canvas');
       tmp.width = w; tmp.height = h;
@@ -980,7 +1098,8 @@ const App = {
       else tctx.drawImage(snapshot, 0, 0);
       for (let ty = 0; ty < Math.ceil(h/TILE); ty++) {
         for (let tx = 0; tx < Math.ceil(w/TILE); tx++) {
-          this.store.setTile(tx, ty, tctx.getImageData(tx*TILE, ty*TILE, TILE, TILE));
+          const data = tctx.getImageData(tx*TILE, ty*TILE, TILE, TILE);
+          this.store.setTile(tx, ty, data);
         }
       }
     }
@@ -1003,18 +1122,10 @@ const App = {
       canvas.setPointerCapture(e.pointerId);
       e.preventDefault();
       App.store.beginStroke();
-      if (tool === 'fill') {
-        Tools.floodFill(wx, wy, currentColor);
-        App.store.endStroke();
-        return;
-      }
+      if (tool === 'fill') { Tools.floodFill(wx, wy, currentColor); App.store.endStroke(); return; }
       drawing = true; lastWorld = { x: wx, y: wy };
-      const color = tool === 'eraser' ? '#ffffff' : currentColor;
-      const t = Tools.putPixel(wx, wy, color);
-      if (t) {
-        App.store.recordTile(t[0], t[1]);
-        Multiplayer.queueTile(t[0], t[1], App.store.getTile(t[0], t[1]));
-      }
+      Tools.putPixel(wx, wy, tool === 'eraser' ? '#ffffff' : currentColor);
+      App.store.recordTile(...App.store.worldToTile(wx, wy));
     });
 
     canvas.addEventListener('pointermove', e => {
@@ -1024,25 +1135,21 @@ const App = {
       App.mouseWorld = { x: wx, y: wy };
       if (!drawing || !lastWorld) return;
       const color = tool === 'eraser' ? '#ffffff' : currentColor;
-      const touched = new Set();
-      Tools.line(lastWorld.x, lastWorld.y, wx, wy, color, (tx, ty) => touched.add(tx+','+ty));
-      for (const k of touched) {
-        const [tx, ty] = k.split(',').map(Number);
-        App.store.recordTile(tx, ty);
-        Multiplayer.queueTile(tx, ty, App.store.getTile(tx, ty));
-      }
+      Tools.line(lastWorld.x, lastWorld.y, wx, wy, color);
       lastWorld = { x: wx, y: wy };
+      Multiplayer.sendTileChange(...App.store.worldToTile(wx, wy), App.store.getTile(...App.store.worldToTile(wx, wy)));
     });
 
     const endStroke = () => {
       if (!drawing) return;
       drawing = false; lastWorld = null;
       App.store.endStroke();
-      Multiplayer.flush();
+      Multiplayer.sendTileChange(0,0,null); // сигнал обновления (упрощённо)
     };
     canvas.addEventListener('pointerup', endStroke);
     canvas.addEventListener('pointercancel', endStroke);
 
+    // Панорама
     canvas.addEventListener('pointerdown', e => {
       if (e.button === 1 || (e.button === 0 && spaceDown)) {
         isPanning = true;
@@ -1061,27 +1168,26 @@ const App = {
     canvas.addEventListener('pointerup', endPan);
     canvas.addEventListener('pointercancel', endPan);
 
+    // Зум
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
       const f = Math.exp(-e.deltaY * 0.0018);
-      const nz = Math.min(128, Math.max(0.01, Renderer.zoom * f));
+      const newZoom = Math.min(128, Math.max(0.01, Renderer.zoom * f));
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-      Renderer.panX = mx - (mx - Renderer.panX) * (nz / Renderer.zoom);
-      Renderer.panY = my - (my - Renderer.panY) * (nz / Renderer.zoom);
-      Renderer.zoom = nz;
-      document.getElementById('zoomDisplay').textContent = Math.round(nz * 100) + '%';
+      Renderer.panX = mx - (mx - Renderer.panX) * (newZoom / Renderer.zoom);
+      Renderer.panY = my - (my - Renderer.panY) * (newZoom / Renderer.zoom);
+      Renderer.zoom = newZoom;
+      document.getElementById('zoomDisplay').textContent = Math.round(Renderer.zoom * 100) + '%';
       Renderer.render();
     }, { passive: false });
 
+    // Клавиатура
     window.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT') return;
       if (e.code === 'Space') { spaceDown = true; e.preventDefault(); return; }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); App.store.undo(); Renderer.render(); return; }
-      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
-        e.preventDefault(); App.store.redo(); Renderer.render(); return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); FileIO.exportSave(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); App.store.redo(); Renderer.render(); return; }
       if (e.ctrlKey || e.metaKey) return;
       switch (e.key.toLowerCase()) {
         case 'b': setTool('pencil'); break;
@@ -1095,23 +1201,13 @@ const App = {
     });
     window.addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
 
+    // Кнопки
     document.getElementById('zoomIn').onclick = zoomIn;
     document.getElementById('zoomOut').onclick = zoomOut;
     document.getElementById('zoomFit').onclick = fitScreen;
-    document.getElementById('mZoomIn').onclick = zoomIn;
-    document.getElementById('mZoomOut').onclick = zoomOut;
-    document.getElementById('mZoomFit').onclick = fitScreen;
     document.getElementById('undoBtn').onclick = () => { App.store.undo(); Renderer.render(); };
     document.getElementById('redoBtn').onclick = () => { App.store.redo(); Renderer.render(); };
-    document.getElementById('dockUndo').onclick = () => { App.store.undo(); Renderer.render(); };
-    document.getElementById('clearBtn').onclick = () => {
-      if (!confirm('Очистить холст? Отменить будет нельзя.')) return;
-      App.store.resize(App.store.W, App.store.H);
-      Renderer.render();
-    };
-    document.getElementById('gridBtn').onclick = () => {
-      document.getElementById('gridBtn').classList.toggle('on');
-    };
+    document.getElementById('clearBtn').onclick = () => { App.store.resize(App.store.W, App.store.H, false, false); Renderer.render(); };
     document.getElementById('exportSave').onclick = () => FileIO.exportSave();
     document.getElementById('saveBtn').onclick = () => FileIO.exportPNG();
     document.getElementById('importBtn').onclick = () => document.getElementById('fileInput').click();
@@ -1134,10 +1230,9 @@ const App = {
     });
     document.querySelectorAll('#tools button[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
     document.querySelectorAll('.dock-row button[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
-    document.getElementById('dockMore').onclick = () => document.getElementById('panel').classList.toggle('open');
     document.getElementById('multiplayerBtn').onclick = () => {
-      const code = prompt('Код комнаты (одинаковый на всех устройствах):');
-      if (code) Multiplayer.join(code.trim());
+      const code = prompt('Код комнаты (любая строка):');
+      if (code) Multiplayer.join(code);
     };
     document.getElementById('deviceToggle').onclick = e => {
       const b = e.target.closest('button[data-mode]');
@@ -1152,8 +1247,8 @@ const App = {
     document.querySelectorAll('#deviceToggle button').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
     themeId = localStorage.getItem('sp-theme-' + m) || THEMES[m][0].id;
     applyTheme(themeId);
-    if (m === 'mobile') document.getElementById('panel').classList.add('open');
-    else document.getElementById('panel').classList.remove('open');
+    if (m !== 'mobile') document.getElementById('panel').classList.remove('open');
+    else document.getElementById('panel').classList.add('open');
   },
 
   loadMode() {
@@ -1162,12 +1257,43 @@ const App = {
     this.setMode(m);
   },
 
+  startAutoSave() {
+    setInterval(() => {
+      try {
+        const data = JSON.stringify({
+          W: this.store.W, H: this.store.H,
+          tiles: Array.from(this.store.map.entries()).map(([k, img]) => [k, img ? Array.from(img.data) : null])
+        });
+        localStorage.setItem('sp-autosave', data);
+      } catch (e) {}
+    }, 30000);
+  },
+
   loop() {
     Renderer.render();
     requestAnimationFrame(() => this.loop());
   }
 };
 
+/* ============================================================
+   ФУНКЦИИ UI
+   ============================================================ */
+function selectColor(hex) {
+  currentColor = hex;
+  document.getElementById('currentChip').style.background = hex;
+  document.getElementById('currentHex').textContent = hex;
+  document.querySelectorAll('.swatch').forEach(el => el.classList.toggle('active', el.dataset.color === hex));
+}
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
+}
+function applyTheme(id) {
+  themeId = id;
+  document.documentElement.dataset.theme = id;
+  localStorage.setItem('sp-theme-' + mode, id);
+  App.buildThemes();
+}
 function zoomIn() {
   Renderer.zoom = Math.min(128, Renderer.zoom * 1.5);
   document.getElementById('zoomDisplay').textContent = Math.round(Renderer.zoom * 100) + '%';
@@ -1187,15 +1313,12 @@ function fitScreen() {
   Renderer.render();
 }
 
-document.getElementById('limitHint').textContent =
-  'Холст может быть до ' + MAX_SIDE + '×' + MAX_SIDE + ' (практический предел браузера). ' +
-  'Каждый непустой тайл 256×256 занимает ~256 КБ в памяти.';
-
-window.addEventListener('resize', () => Renderer.render());
-
+/* ============================================================
+   СТАРТ
+   ============================================================ */
 App.init().then(() => {
   fitScreen();
-  showToast('Супер Пеинт 2.0 — готов', 2000);
+  showToast('Супер Пеинт 2.0 — тайловый холст готов', 2500);
 });
 </script>
 </body>
