@@ -1,75 +1,1152 @@
 // ==UserScript==
-// @name         Uchi.ru Solve One (S)
+// @name         Uchi.ru Auto Solver + Cosmetics (Full Fix)
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  Нажатие S — решает 1 задание на карточке Учи.ру
-// @match        https://uchi.ru/cards/*
+// @version      9.4
+// @description  Решатель, статистика, раздельная косметика, персистентность, хоткеи
+// @author       You
+// @match        https://uchi.ru/*
 // @grant        none
-// @run-at       document-end
+// @run-at       document-start
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    function isCardReady() {
-        return typeof Card !== 'undefined' && Card.Player && Card.Player.__score;
+    const SETTINGS_KEY = 'uchi_auto_settings_v9';
+    const DEFAULT_PERSISTENCE = {
+        menuVisible: 'restore',
+        infiniteOn: 'restore',
+        modeOn: 'restore',
+        pageBg: 'restore',
+        beads: 'restore',
+        nickname: 'restore',
+        avatar: 'restore',
+        menuBg: 'restore'
+    };
+    const DEFAULT_SETTINGS = {
+        modeOn: false,
+        infiniteOn: false,
+        count: '',
+        x: Math.max(20, window.innerWidth - 320),
+        y: 80,
+        width: null,
+        height: null,
+        menuVisible: true,
+
+        cosmeticsPageBgOn: true,
+        cosmeticsBeadsOn: true,
+        cosmeticsNicknameOn: true,
+        cosmeticsAvatarOn: true,
+        cosmeticsMenuBgOn: true,
+
+        bgImage: '',
+        beadImage: '',
+        customNickname: 'Хакер',
+        customAvatarImg: '',
+        pageBgImage: '',
+        pageBgColor: '',
+
+        hotkeyMenu: 'KeyH',
+        hotkeyBg: 'KeyB',
+        hotkeyBeads: 'KeyJ',
+        hotkeyIdentity: 'KeyN',
+        hotkeySolve1: 'KeyS',
+
+        statsSolved: 0,
+        statsBeads: 0,
+        statsEggs: 0,
+
+        persistence: {...DEFAULT_PERSISTENCE}
+    };
+
+    function loadSettings() {
+        try {
+            const raw = localStorage.getItem(SETTINGS_KEY);
+            return raw ? Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw)) : {...DEFAULT_SETTINGS};
+        } catch(e) { return {...DEFAULT_SETTINGS}; }
     }
 
-    function solveOne() {
-        if (!isCardReady()) {
-            console.log('[SolveOne] карточка не готова');
+    function migrateSettings(s) {
+        // v9.3 → v9.4: cosmeticsIdentityOn разделяем на ник + аватар
+        if (s.cosmeticsIdentityOn !== undefined && s.cosmeticsNicknameOn === undefined) {
+            s.cosmeticsNicknameOn = !!s.cosmeticsIdentityOn;
+            s.cosmeticsAvatarOn = !!s.cosmeticsIdentityOn;
+            delete s.cosmeticsIdentityOn;
+        }
+        // persistence дефолт
+        if (!s.persistence) s.persistence = {...DEFAULT_PERSISTENCE};
+        for (const k in DEFAULT_PERSISTENCE) {
+            if (s.persistence[k] === undefined) s.persistence[k] = DEFAULT_PERSISTENCE[k];
+        }
+        // остальные недостающие поля
+        for (const k in DEFAULT_SETTINGS) {
+            if (s[k] === undefined) s[k] = DEFAULT_SETTINGS[k];
+        }
+        return s;
+    }
+
+    function saveSettings(s) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+        catch(e) { console.warn('[UchiAuto] save fail:', e); }
+    }
+
+    let settings = migrateSettings(loadSettings());
+
+    // Применяем правила персистентности (только к текущему runtime-состоянию, без автосейва)
+    function applyPersistence() {
+        const p = settings.persistence || {};
+        const apply = (persistKey, settingKey) => {
+            const rule = p[persistKey] || 'restore';
+            if (rule === 'always_on')  settings[settingKey] = true;
+            else if (rule === 'always_off') settings[settingKey] = false;
+            // 'restore' → оставляем как загружено
+        };
+        apply('menuVisible', 'menuVisible');
+        apply('infiniteOn',  'infiniteOn');
+        apply('modeOn',      'modeOn');
+        apply('pageBg',      'cosmeticsPageBgOn');
+        apply('beads',       'cosmeticsBeadsOn');
+        apply('nickname',    'cosmeticsNicknameOn');
+        apply('avatar',      'cosmeticsAvatarOn');
+        apply('menuBg',      'cosmeticsMenuBgOn');
+    }
+
+    // ==================== Анти-мерцание ====================
+    function injectEarlyStyles() {
+        const style = document.createElement('style');
+        style.id = 'uchi-early-styles';
+        style.textContent = `
+            [data-testid="headbar-dropdown"] div[class*="name" i],
+            [data-testid="headbar-dropdown"] .sc-iJKPnr {
+                visibility: hidden !important; opacity: 0 !important;
+            }
+            [data-testid="headbar-dropdown"].uchi-name-ready div[class*="name" i],
+            [data-testid="headbar-dropdown"].uchi-name-ready .sc-iJKPnr {
+                visibility: visible !important; opacity: 1 !important;
+            }
+            html.uchi-replace-avatar [data-testid="headbar-dropdown"] [class*="avatar" i] svg,
+            html.uchi-replace-avatar [data-testid="headbar-dropdown"] [class*="avatar" i] img,
+            html.uchi-replace-avatar [data-testid="headbar-dropdown"] [class*="avatar__part" i],
+            html.uchi-replace-avatar [class*="sc-hiCkJs"] svg,
+            html.uchi-replace-avatar [class*="sc-hiCkJs"] img {
+                visibility: hidden !important;
+            }
+        `;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    injectEarlyStyles();
+
+    // ==================== Основные стили ====================
+    function injectStyles() {
+        if (document.getElementById('uchi-auto-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'uchi-auto-styles';
+        style.textContent = `
+            #uchi-auto-panel {
+                position: fixed; z-index: 999999;
+                width: 290px; min-width: 220px; min-height: 40px;
+                max-width: 95vw; max-height: 95vh; box-sizing: border-box;
+                display: flex; flex-direction: column;
+                background: #1e1e2e; color: #eee; border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+                font-family: system-ui, -apple-system, sans-serif; font-size: 13px;
+                overflow: hidden; user-select: none;
+                background-size: cover; background-position: center;
+            }
+            #uchi-auto-panel::before {
+                content: ''; position: absolute; inset: 0;
+                background: rgba(30,30,46,0.85); pointer-events: none;
+                border-radius: inherit;
+            }
+            #uchi-auto-panel > * { position: relative; z-index: 1; }
+
+            #uchi-auto-header {
+                flex: 0 0 auto; padding: 8px 12px; cursor: move;
+                display: flex; justify-content: space-between; align-items: center;
+                background: rgba(255,255,255,0.06);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            #uchi-auto-header b { font-weight: 600; letter-spacing: 0.3px; }
+            .uchi-minimize {
+                background: transparent; border: none; color: #eee; font-size: 18px;
+                cursor: pointer; padding: 0 6px; line-height: 1;
+                pointer-events: auto; z-index: 2;
+            }
+            .uchi-minimize:hover { color: #4caf50; }
+
+            #uchi-auto-body {
+                flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+                padding: 0 12px 10px 12px; display: flex; flex-direction: column; gap: 10px;
+            }
+
+            .uchi-tabs {
+                display: flex !important;
+                flex-shrink: 0 !important;
+                position: sticky !important;
+                top: 0 !important;
+                z-index: 20;
+                background: #252538 !important;
+                border-radius: 0 0 8px 8px;
+                margin: 0 -12px 4px -12px;
+                padding: 10px 8px 4px 8px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                overflow: hidden;
+                gap: 2px;
+            }
+            .uchi-tab {
+                display: block !important;
+                flex: 1;
+                flex-shrink: 0 !important;
+                text-align: center; padding: 6px 3px; cursor: pointer; font-size: 11px;
+                color: #aaa !important; transition: 0.2s; border: none; background: transparent !important; font-weight: 600;
+            }
+            .uchi-tab:hover { color: #fff !important; }
+            .uchi-tab.active { background: #4caf50 !important; color: white !important; border-radius: 6px; }
+
+            .uchi-tab-content { display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
+            .uchi-tab-content.hidden { display: none !important; }
+
+            .uchi-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+            .uchi-row-label { font-size: 12px; font-weight: 600; }
+
+            .uchi-switch {
+                position: relative; width: 42px; height: 22px; background: #444;
+                border-radius: 11px; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+            }
+            .uchi-switch.on { background: #4caf50; }
+            .uchi-switch::after {
+                content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+                background: #fff; border-radius: 50%; transition: transform 0.2s;
+            }
+            .uchi-switch.on::after { transform: translateX(20px); }
+
+            .uchi-block {
+                display: flex; flex-direction: column; gap: 6px;
+                padding: 8px; border-radius: 8px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+            }
+            .uchi-block.hidden { display: none !important; }
+
+            .uchi-solve-row { display: flex; align-items: center; gap: 6px; }
+            .uchi-bar-input {
+                width: 100%; padding: 5px 6px; border-radius: 5px;
+                border: 1px solid rgba(255,255,255,0.2);
+                background: rgba(0,0,0,0.35); color: #eee; font-size: 12px;
+                outline: none; box-sizing: border-box;
+            }
+            .uchi-bar-input:focus { border-color: #4caf50; }
+            .uchi-bar-label { font-size: 12px; opacity: 0.85; white-space: nowrap; }
+
+            .uchi-select {
+                padding: 4px 6px;
+                border-radius: 5px;
+                border: 1px solid rgba(255,255,255,0.2);
+                background: rgba(0,0,0,0.5);
+                color: #eee;
+                font-size: 11px;
+                outline: none;
+                cursor: pointer;
+                max-width: 150px;
+            }
+            .uchi-select:focus { border-color: #4caf50; }
+            .uchi-select option { background: #1e1e2e; color: #eee; }
+
+            .uchi-btn {
+                background: rgba(255,255,255,0.12); border: none; color: #eee;
+                padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+                transition: background 0.2s; white-space: nowrap;
+            }
+            .uchi-btn:hover { background: rgba(255,255,255,0.22); }
+            .uchi-btn:disabled { opacity: 0.5; cursor: default; }
+            .uchi-btn-primary { background: #4caf50; color: #fff; }
+            .uchi-btn-primary:hover { background: #45a049; }
+            .uchi-btn-primary:disabled { background: #4caf50; }
+
+            .uchi-status {
+                font-size: 11px; opacity: 0.75; min-height: 14px;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+
+            .uchi-section-title {
+                font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+                opacity: 0.55; margin-bottom: 2px;
+            }
+
+            #uchi-auto-panel.uchi-minimized { height: auto !important; min-height: 0 !important; }
+            #uchi-auto-panel.uchi-minimized #uchi-auto-body { display: none !important; }
+
+            #uchi-resize-grip {
+                position: absolute; bottom: 0; right: 0;
+                width: 18px; height: 18px; cursor: nwse-resize; z-index: 30;
+            }
+            #uchi-resize-grip::after {
+                content: ''; position: absolute; right: 3px; bottom: 3px;
+                width: 8px; height: 8px;
+                border-right: 2px solid rgba(255,255,255,0.55);
+                border-bottom: 2px solid rgba(255,255,255,0.55);
+                border-bottom-right-radius: 3px; transition: border-color 0.15s;
+            }
+            #uchi-resize-grip:hover::after { border-color: #4caf50; }
+            #uchi-auto-panel.uchi-minimized #uchi-resize-grip { display: none !important; }
+
+            .uchi-stat-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 2px; }
+            .uchi-stat-val { font-weight: 600; color: #4caf50; }
+
+            .hotkey-input {
+                width: 80px !important; text-align: center; cursor: pointer;
+                background: rgba(0,0,0,0.5) !important;
+            }
+            .hotkey-input:focus { background: rgba(76, 175, 80, 0.2) !important; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // ==================== Фон страницы ====================
+    function applyPageBg() {
+        let pageBgStyle = document.getElementById('uchi-page-bg-style');
+        if (!pageBgStyle) {
+            pageBgStyle = document.createElement('style');
+            pageBgStyle.id = 'uchi-page-bg-style';
+            document.head.appendChild(pageBgStyle);
+        }
+
+        if (!settings.cosmeticsPageBgOn || (!settings.pageBgImage && !settings.pageBgColor)) {
+            pageBgStyle.textContent = '';
             return;
         }
 
-        const isOld = typeof Card.Player._emitSignal === 'undefined';
-        const sendEvent = (name, data) => isOld
-            ? Card.Player.__score.tutor._sys_event(name, data)
-            : Card.Player._emitSignal(name, data);
-        const getScoreJSON = () => { const n = {}; Card.Player.__score.save(n); return n; };
+        const bgValue = settings.pageBgImage
+            ? `url("${settings.pageBgImage}") center/cover no-repeat fixed`
+            : settings.pageBgColor;
 
-        try {
-            // Сдвигаем счётчики (один шаг)
-            if (Card.Player.__score.current + 1 <= Card.Player.__score.total) {
-                Card.Player.__score.current++;
+        pageBgStyle.textContent = `
+            html, body { background-color: transparent !important; }
+            body > div:not(#uchi-auto-panel),
+            body > div:not(#uchi-auto-panel) > div,
+            body > div:not(#uchi-auto-panel) > div > div,
+            body > div:not(#uchi-auto-panel) > div > div > div,
+            body > div:not(#uchi-auto-panel) > div > div > div > div,
+            body > div:not(#uchi-auto-panel) > div > div > div > div > div {
+                background-color: transparent !important;
             }
-            if (Card.Player.__score._index + 2 <= Card.Player.__score.total) {
-                Card.Player.__score._index += 2;
-            } else {
-                Card.Player.__score._index--;
+            body::before {
+                content: "" !important;
+                position: fixed !important;
+                top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                background: ${bgValue} !important;
+                z-index: -1 !important;
+                pointer-events: none !important;
             }
+        `;
+    }
 
-            // Отправляем "успешное решение"
-            sendEvent('beads_exercise_finish_succ', {
-                amount: Card.Player.__score.current,
-                total: Card.Player.__score.total
-            });
+    // ==================== Замена бусин ====================
+    function applyBeadImage() {
+        let beadStyle = document.getElementById('uchi-bead-style');
+        if (!beadStyle) {
+            beadStyle = document.createElement('style');
+            beadStyle.id = 'uchi-bead-style';
+            document.head.appendChild(beadStyle);
+        }
 
-            // Сохраняем прогресс
-            if (isOld) sendEvent('$store', getScoreJSON());
-            else sendEvent('$store', { json: JSON.stringify(getScoreJSON()) });
+        if (!settings.cosmeticsBeadsOn || !settings.beadImage) {
+            beadStyle.textContent = '';
+            return;
+        }
 
-            // Если всё решено — финишируем урок
-            if (Card.Player.__score.current >= Card.Player.__score.total) {
-                sendEvent('$lesson_finish');
-                console.log('[SolveOne] карточка завершена');
-            } else {
-                console.log(`[SolveOne] ${Card.Player.__score.current}/${Card.Player.__score.total}`);
+        beadStyle.textContent = `
+            div[class*="__beads_"] {
+                background-image: url("${settings.beadImage}") !important;
+                background-size: contain !important;
+                background-repeat: no-repeat !important;
+                background-position: center !important;
+                color: transparent !important;
             }
-        } catch (e) {
-            console.error('[SolveOne]', e);
+            div[class*="__beads_"]::before, div[class*="__beads_"]::after { content: none !important; }
+            img[src*="bead"], img[src*="coin"], [class*="bead-icon"] img, [class*="coins"] img, [alt*="бусин"] {
+                content: url("${settings.beadImage}") !important;
+                object-fit: contain;
+            }
+        `;
+    }
+
+    // ==================== Фон меню ====================
+    function applyMenuBg() {
+        const panel = document.getElementById('uchi-auto-panel');
+        if (!panel) return;
+        if (settings.cosmeticsMenuBgOn && settings.bgImage) {
+            panel.style.backgroundImage = `url("${settings.bgImage}")`;
+        } else {
+            panel.style.backgroundImage = '';
         }
     }
 
+    // ==================== Аватарка и Ник ====================
+    function findAvatarContainers() {
+        const candidates = new Set();
+        document.querySelectorAll('[class*="avatar__part" i]').forEach(part => {
+            let container = part.parentElement;
+            let depth = 0;
+            while (container && container !== document.body && depth < 5) {
+                const rect = container.getBoundingClientRect();
+                if (rect.width >= 24 && rect.width <= 200 && Math.abs(rect.width - rect.height) < 20) {
+                    candidates.add(container); break;
+                }
+                container = container.parentElement; depth++;
+            }
+        });
+        document.querySelectorAll('[class*="avatar" i], [class*="profile-pic" i], [data-testid*="avatar" i]').forEach(el => {
+            if (/avatar__part/i.test(el.className || '')) return;
+            const rect = el.getBoundingClientRect();
+            if (rect.width >= 24 && rect.width <= 200 && Math.abs(rect.width - rect.height) < 20) candidates.add(el);
+        });
+        return Array.from(candidates);
+    }
+
+    function applyCustomAvatar(el, on) {
+        if (!el) return;
+        if (on && settings.customAvatarImg) {
+            const src = settings.customAvatarImg;
+            el.style.setProperty('background-image', `url("${src}")`, 'important');
+            el.style.setProperty('background-size', 'cover', 'important');
+            el.style.setProperty('background-position', 'center', 'important');
+            el.style.setProperty('background-repeat', 'no-repeat', 'important');
+            el.style.setProperty('border-radius', '50%', 'important');
+            el.style.setProperty('overflow', 'hidden', 'important');
+            el.querySelectorAll('*').forEach(child => child.style.setProperty('visibility', 'hidden', 'important'));
+        } else {
+            el.style.removeProperty('background-image');
+            el.style.removeProperty('background-size');
+            el.style.removeProperty('background-position');
+            el.style.removeProperty('background-repeat');
+            el.style.removeProperty('border-radius');
+            el.style.removeProperty('overflow');
+            el.querySelectorAll('*').forEach(child => child.style.removeProperty('visibility'));
+        }
+    }
+
+    function replaceTextInNode(node, fromText, toText) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (node.nodeValue.includes(fromText)) {
+                node.nodeValue = node.nodeValue.replace(new RegExp(fromText, 'g'), toText);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' && node.tagName !== 'TEXTAREA') {
+                for (let i = 0; i < node.childNodes.length; i++) replaceTextInNode(node.childNodes[i], fromText, toText);
+            }
+        }
+    }
+
+    function injectCosmetics() {
+        const dropdown = document.querySelector('[data-testid="headbar-dropdown"]');
+
+        if (dropdown && !window.__uchi_orig_name) {
+            const nameEl = dropdown.querySelector('.sc-iJKPnr, div[class*="name" i]');
+            if (nameEl && nameEl.textContent.trim() !== settings.customNickname) {
+                window.__uchi_orig_name = nameEl.textContent.trim();
+            }
+        }
+
+        // ---------- НИК ----------
+        if (!settings.cosmeticsNicknameOn) {
+            // Возвращаем оригинал, если он был заменён
+            if (window.__uchi_orig_name) {
+                replaceTextInNode(document.body, settings.customNickname, window.__uchi_orig_name);
+                document.querySelectorAll('div').forEach(el => {
+                    if (el.children.length === 0 && el.textContent.trim() === settings.customNickname) {
+                        el.textContent = window.__uchi_orig_name;
+                    }
+                });
+            }
+            // Всё равно показываем имя (убираем анти-мерцание)
+            if (dropdown && !dropdown.classList.contains('uchi-name-ready')) {
+                dropdown.classList.add('uchi-name-ready');
+            }
+        } else {
+            if (dropdown && settings.customNickname) {
+                const nameEls = dropdown.querySelectorAll('.sc-iJKPnr, div[class*="name" i]');
+                nameEls.forEach(el => {
+                    if (el.textContent.trim() !== settings.customNickname) el.textContent = settings.customNickname;
+                });
+                if (!dropdown.classList.contains('uchi-name-ready')) dropdown.classList.add('uchi-name-ready');
+            }
+            if (window.__uchi_orig_name && settings.customNickname) {
+                const firstName = window.__uchi_orig_name.split(' ')[0];
+                if (firstName && firstName.length > 1) {
+                    replaceTextInNode(document.body, firstName, settings.customNickname);
+                    document.querySelectorAll('div').forEach(el => {
+                        if (el.children.length === 0 && el.innerHTML.includes('<br>') && el.innerHTML.includes(firstName)) {
+                            el.innerHTML = settings.customNickname;
+                        }
+                    });
+                }
+            }
+        }
+
+        // ---------- АВАТАРКА ----------
+        if (settings.cosmeticsAvatarOn && settings.customAvatarImg) {
+            document.documentElement.classList.add('uchi-replace-avatar');
+            findAvatarContainers().forEach(el => applyCustomAvatar(el, true));
+        } else {
+            document.documentElement.classList.remove('uchi-replace-avatar');
+            findAvatarContainers().forEach(el => applyCustomAvatar(el, false));
+        }
+    }
+
+    let observerTimeout = null;
+    function startCosmeticObserver() {
+        if (!document.body) return;
+        const observer = new MutationObserver(() => {
+            if (observerTimeout) return;
+            observerTimeout = setTimeout(() => { injectCosmetics(); observerTimeout = null; }, 10);
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function handleImageUpload(file, maxSize, format, callback) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (Math.max(w, h) > maxSize) {
+                    const k = maxSize / Math.max(w, h);
+                    w = Math.round(w * k); h = Math.round(h * k);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                callback(canvas.toDataURL(format, 0.85));
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function getKeyDisplay(code) {
+        if (!code) return '';
+        if (code === 'Space') return 'Пробел';
+        if (code.startsWith('Key')) return code.replace('Key', '');
+        if (code.startsWith('Digit')) return code.replace('Digit', '');
+        return code;
+    }
+
+    function selOpt(key, val, label) {
+        return `<option value="${val}" ${settings.persistence[key] === val ? 'selected' : ''}>${label}</option>`;
+    }
+
+    // ==================== Панель ====================
+    function createPanel() {
+        if (document.getElementById('uchi-auto-panel')) return;
+
+        const panel = document.createElement('div');
+        panel.id = 'uchi-auto-panel';
+        panel.style.left = settings.x + 'px';
+        panel.style.top = Math.max(20, settings.y) + 'px';
+        if (settings.width)  panel.style.width  = settings.width  + 'px';
+        if (settings.height) panel.style.height = settings.height + 'px';
+        panel.style.display = settings.menuVisible ? 'flex' : 'none';
+
+        panel.innerHTML = `
+            <div id="uchi-auto-header">
+                <b>Uchi Auto v9.4</b>
+                <button class="uchi-minimize" title="Свернуть">−</button>
+            </div>
+
+            <div id="uchi-auto-body">
+                <div class="uchi-tabs">
+                    <button class="uchi-tab active" data-tab="solver">Решатель</button>
+                    <button class="uchi-tab" data-tab="cosmetics">Косметика</button>
+                    <button class="uchi-tab" data-tab="settings">Настройки</button>
+                </div>
+
+                <div id="tab-solver" class="uchi-tab-content">
+                    <div class="uchi-row">
+                        <span class="uchi-row-label">Режим по количеству</span>
+                        <div class="uchi-switch ${settings.modeOn ? 'on' : ''}" id="uchi-mode-toggle"></div>
+                    </div>
+                    <div id="uchi-infinite-block" class="uchi-block ${settings.modeOn ? 'hidden' : ''}">
+                        <div class="uchi-row">
+                            <span class="uchi-row-label">Бесконечное решение</span>
+                            <div class="uchi-switch ${settings.infiniteOn ? 'on' : ''}" id="uchi-infinite-toggle"></div>
+                        </div>
+                        <div class="uchi-status" id="uchi-infinite-status"></div>
+                    </div>
+                    <div id="uchi-solve-block" class="uchi-block ${settings.modeOn ? '' : 'hidden'}">
+                        <div class="uchi-solve-row">
+                            <input type="number" id="uchi-bar-count" class="uchi-bar-input" min="1" style="width: 64px;" placeholder="все" value="${escapeAttr(settings.count)}">
+                            <span class="uchi-bar-label">заданий</span>
+                            <button class="uchi-btn uchi-btn-primary" id="uchi-bar-do" style="margin-left:auto;">Сделать</button>
+                        </div>
+                        <button class="uchi-btn" id="uchi-bar-one" style="width: 100%; margin-top: 6px;">Сделать 1 задание</button>
+                        <div class="uchi-status" id="uchi-count-status"></div>
+                    </div>
+                    <div>
+                        <div class="uchi-section-title">Статистика</div>
+                        <div class="uchi-block" style="gap:4px; padding: 8px;">
+                            <div class="uchi-stat-row"><span>Решено заданий:</span><span class="uchi-stat-val" id="stat-solved">${settings.statsSolved}</span></div>
+                            <div class="uchi-stat-row"><span>Потрачено бусин:</span><span class="uchi-stat-val" id="stat-beads">${settings.statsBeads}</span></div>
+                            <div class="uchi-stat-row"><span>Получено яиц:</span>
+                                <div style="display:flex; align-items:center;">
+                                    <span class="uchi-stat-val" id="stat-eggs">${settings.statsEggs}</span>
+                                    <button class="uchi-btn" id="btn-add-egg" style="padding: 2px 6px; font-size:10px; margin-left:6px;">+1 🥚</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-cosmetics" class="uchi-tab-content hidden">
+                    <div>
+                        <div class="uchi-section-title">Включение косметики</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Фон страницы</span>
+                                <div class="uchi-switch ${settings.cosmeticsPageBgOn ? 'on' : ''}" id="toggle-pagebg"></div>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Иконка бусин</span>
+                                <div class="uchi-switch ${settings.cosmeticsBeadsOn ? 'on' : ''}" id="toggle-beads"></div>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Никнейм</span>
+                                <div class="uchi-switch ${settings.cosmeticsNicknameOn ? 'on' : ''}" id="toggle-nickname"></div>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Аватарка</span>
+                                <div class="uchi-switch ${settings.cosmeticsAvatarOn ? 'on' : ''}" id="toggle-avatar"></div>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Фон меню</span>
+                                <div class="uchi-switch ${settings.cosmeticsMenuBgOn ? 'on' : ''}" id="toggle-menubg"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="uchi-section-title">Хоткеи (нажми на поле)</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <div class="uchi-row"><span style="font-size:11px;">Меню</span><input type="text" class="uchi-bar-input hotkey-input" data-key="hotkeyMenu" readonly value="${getKeyDisplay(settings.hotkeyMenu)}"></div>
+                            <div class="uchi-row"><span style="font-size:11px;">Фон</span><input type="text" class="uchi-bar-input hotkey-input" data-key="hotkeyBg" readonly value="${getKeyDisplay(settings.hotkeyBg)}"></div>
+                            <div class="uchi-row"><span style="font-size:11px;">Бусины</span><input type="text" class="uchi-bar-input hotkey-input" data-key="hotkeyBeads" readonly value="${getKeyDisplay(settings.hotkeyBeads)}"></div>
+                            <div class="uchi-row"><span style="font-size:11px;">Анонимность</span><input type="text" class="uchi-bar-input hotkey-input" data-key="hotkeyIdentity" readonly value="${getKeyDisplay(settings.hotkeyIdentity)}"></div>
+                            <div class="uchi-row"><span style="font-size:11px;">Решить 1</span><input type="text" class="uchi-bar-input hotkey-input" data-key="hotkeySolve1" readonly value="${getKeyDisplay(settings.hotkeySolve1)}"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="uchi-section-title">Анонимность</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <span style="font-size:11px;">Никнейм</span>
+                            <div style="display:flex; gap:4px;">
+                                <input type="text" id="inp-nickname" class="uchi-bar-input" value="${escapeAttr(settings.customNickname)}">
+                                <button class="uchi-btn uchi-btn-primary" id="btn-save-nickname">OK</button>
+                            </div>
+                            <div class="uchi-row" style="margin-top:4px;">
+                                <span style="font-size:11px;">Аватарка</span>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="uchi-btn" id="btn-avatar-upload">Загрузить</button>
+                                    <button class="uchi-btn" id="btn-avatar-reset">Сброс</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="uchi-section-title">Фон страницы</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Цвет</span>
+                                <input type="color" id="inp-page-color" value="${settings.pageBgColor || '#ffffff'}" style="width: 40px; height: 24px; padding: 0; border: none; cursor: pointer;">
+                            </div>
+                            <div class="uchi-row" style="margin-top:4px;">
+                                <span style="font-size:11px;">Картинка</span>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="uchi-btn" id="btn-page-bg-upload">Загрузить</button>
+                                    <button class="uchi-btn" id="btn-page-bg-reset">Сброс</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="uchi-section-title">Оформление меню</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Фон меню</span>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="uchi-btn" id="btn-bg-menu">Загрузить</button>
+                                    <button class="uchi-btn" id="btn-bg-menu-reset">Сброс</button>
+                                </div>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Иконка бусин</span>
+                                <div style="display:flex;gap:4px;">
+                                    <button class="uchi-btn" id="btn-bg-bead">Загрузить</button>
+                                    <button class="uchi-btn" id="btn-bg-bead-reset">Сброс</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-settings" class="uchi-tab-content hidden">
+                    <div>
+                        <div class="uchi-section-title">Поведение при загрузке</div>
+                        <div class="uchi-block" style="gap:6px;">
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Меню (видимость)</span>
+                                <select class="uchi-select" data-persist="menuVisible">
+                                    ${selOpt('menuVisible','restore','Как при закрытии')}
+                                    ${selOpt('menuVisible','always_on','Всегда видно')}
+                                    ${selOpt('menuVisible','always_off','Всегда скрыто')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Бесконечное решение</span>
+                                <select class="uchi-select" data-persist="infiniteOn">
+                                    ${selOpt('infiniteOn','restore','Как при закрытии')}
+                                    ${selOpt('infiniteOn','always_on','Всегда вкл')}
+                                    ${selOpt('infiniteOn','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Режим по кол-ву</span>
+                                <select class="uchi-select" data-persist="modeOn">
+                                    ${selOpt('modeOn','restore','Как при закрытии')}
+                                    ${selOpt('modeOn','always_on','Всегда вкл')}
+                                    ${selOpt('modeOn','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Фон страницы</span>
+                                <select class="uchi-select" data-persist="pageBg">
+                                    ${selOpt('pageBg','restore','Как при закрытии')}
+                                    ${selOpt('pageBg','always_on','Всегда вкл')}
+                                    ${selOpt('pageBg','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Иконка бусин</span>
+                                <select class="uchi-select" data-persist="beads">
+                                    ${selOpt('beads','restore','Как при закрытии')}
+                                    ${selOpt('beads','always_on','Всегда вкл')}
+                                    ${selOpt('beads','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Никнейм</span>
+                                <select class="uchi-select" data-persist="nickname">
+                                    ${selOpt('nickname','restore','Как при закрытии')}
+                                    ${selOpt('nickname','always_on','Всегда вкл')}
+                                    ${selOpt('nickname','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Аватарка</span>
+                                <select class="uchi-select" data-persist="avatar">
+                                    ${selOpt('avatar','restore','Как при закрытии')}
+                                    ${selOpt('avatar','always_on','Всегда вкл')}
+                                    ${selOpt('avatar','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                            <div class="uchi-row">
+                                <span style="font-size:11px;">Фон меню</span>
+                                <select class="uchi-select" data-persist="menuBg">
+                                    ${selOpt('menuBg','restore','Как при закрытии')}
+                                    ${selOpt('menuBg','always_on','Всегда вкл')}
+                                    ${selOpt('menuBg','always_off','Всегда выкл')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="uchi-status" style="margin-top:4px;">«Как при закрытии» — запомнить последнее состояние. «Всегда вкл/выкл» — принудительно при каждой загрузке.</div>
+                    </div>
+                </div>
+
+                <input type="file" id="file-bg-menu" accept="image/*" style="display:none;">
+                <input type="file" id="file-bg-bead" accept="image/*" style="display:none;">
+                <input type="file" id="file-avatar" accept="image/*" style="display:none;">
+                <input type="file" id="file-page-bg" accept="image/*" style="display:none;">
+            </div>
+            <div id="uchi-resize-grip" title="Изменить размер"></div>
+        `;
+        document.body.appendChild(panel);
+
+        // Применяем фон меню после создания
+        applyMenuBg();
+
+        // Вкладки
+        const tabs = panel.querySelectorAll('.uchi-tab');
+        const tabContents = {
+            solver: document.getElementById('tab-solver'),
+            cosmetics: document.getElementById('tab-cosmetics'),
+            settings: document.getElementById('tab-settings')
+        };
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                Object.values(tabContents).forEach(c => c.classList.add('hidden'));
+                tabContents[tab.dataset.tab].classList.remove('hidden');
+            });
+        });
+
+        // Свернуть и перетаскивание
+        panel.addEventListener('click', (e) => {
+            if (e.target.closest('.uchi-minimize')) {
+                e.stopPropagation();
+                panel.classList.toggle('uchi-minimized');
+                panel.querySelector('.uchi-minimize').textContent = panel.classList.contains('uchi-minimized') ? '+' : '−';
+            }
+        });
+        const header = panel.querySelector('#uchi-auto-header');
+        let dragging = false, dragDx = 0, dragDy = 0;
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.uchi-minimize')) return;
+            if (e.button !== 0) return;
+            dragging = true;
+            const r = panel.getBoundingClientRect();
+            dragDx = e.clientX - r.left; dragDy = e.clientY - r.top;
+            e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            panel.style.left = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, e.clientX - dragDx)) + 'px';
+            panel.style.top = Math.max(0, Math.min(window.innerHeight - 30, e.clientY - dragDy)) + 'px';
+        });
+        window.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            const r = panel.getBoundingClientRect();
+            settings.x = r.left; settings.y = r.top; saveSettings(settings);
+        });
+
+        // Ресайз
+        const grip = panel.querySelector('#uchi-resize-grip');
+        let resizing = false, rsX = 0, rsY = 0, rsW = 0, rsH = 0;
+        grip.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            e.preventDefault(); e.stopPropagation();
+            resizing = true;
+            rsX = e.clientX; rsY = e.clientY; rsW = panel.offsetWidth; rsH = panel.offsetHeight;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!resizing) return;
+            panel.style.width = Math.max(220, Math.min(window.innerWidth - 20, rsW + (e.clientX - rsX))) + 'px';
+            panel.style.height = Math.max(60, Math.min(window.innerHeight - 20, rsH + (e.clientY - rsY))) + 'px';
+        });
+        window.addEventListener('mouseup', () => {
+            if (!resizing) return;
+            resizing = false;
+            settings.width = panel.offsetWidth; settings.height = panel.offsetHeight; saveSettings(settings);
+        });
+
+        // Тумблеры решателя
+        document.getElementById('uchi-mode-toggle').addEventListener('click', () => { settings.modeOn = !settings.modeOn; saveSettings(settings); stopSolver(); renderMode(); });
+        document.getElementById('uchi-infinite-toggle').addEventListener('click', () => { settings.infiniteOn = !settings.infiniteOn; saveSettings(settings); renderMode(); if (settings.infiniteOn) tryStartSolver(null); else stopSolver(); });
+
+        // Кнопки запуска
+        document.getElementById('uchi-bar-do').addEventListener('click', () => { const n = parseInt(document.getElementById('uchi-bar-count').value.trim(), 10); tryStartSolver((isNaN(n) || n <= 0) ? null : n); });
+        document.getElementById('uchi-bar-one').addEventListener('click', () => { tryStartSolver(1); });
+
+        document.getElementById('uchi-bar-count').addEventListener('input', (e) => { settings.count = e.target.value; saveSettings(settings); });
+        document.getElementById('btn-add-egg').addEventListener('click', (e) => { e.preventDefault(); settings.statsEggs++; saveSettings(settings); document.getElementById('stat-eggs').textContent = settings.statsEggs; });
+
+        // КОСМЕТИКА ТУМБЛЕРЫ
+        document.getElementById('toggle-pagebg').addEventListener('click', (e) => {
+            settings.cosmeticsPageBgOn = !settings.cosmeticsPageBgOn;
+            e.target.classList.toggle('on', settings.cosmeticsPageBgOn);
+            saveSettings(settings); applyPageBg();
+        });
+        document.getElementById('toggle-beads').addEventListener('click', (e) => {
+            settings.cosmeticsBeadsOn = !settings.cosmeticsBeadsOn;
+            e.target.classList.toggle('on', settings.cosmeticsBeadsOn);
+            saveSettings(settings); applyBeadImage();
+        });
+        document.getElementById('toggle-nickname').addEventListener('click', (e) => {
+            settings.cosmeticsNicknameOn = !settings.cosmeticsNicknameOn;
+            e.target.classList.toggle('on', settings.cosmeticsNicknameOn);
+            saveSettings(settings); injectCosmetics();
+        });
+        document.getElementById('toggle-avatar').addEventListener('click', (e) => {
+            settings.cosmeticsAvatarOn = !settings.cosmeticsAvatarOn;
+            e.target.classList.toggle('on', settings.cosmeticsAvatarOn);
+            saveSettings(settings); injectCosmetics();
+        });
+        document.getElementById('toggle-menubg').addEventListener('click', (e) => {
+            settings.cosmeticsMenuBgOn = !settings.cosmeticsMenuBgOn;
+            e.target.classList.toggle('on', settings.cosmeticsMenuBgOn);
+            saveSettings(settings); applyMenuBg();
+        });
+
+        // НАСТРОЙКА ХОТКЕЕВ (с blur-cleanup)
+        const hotkeyInputs = panel.querySelectorAll('.hotkey-input');
+        hotkeyInputs.forEach(input => {
+            input.addEventListener('click', function() {
+                const originalVal = this.value;
+                this.value = 'Нажми...';
+                this.style.color = '#4caf50';
+
+                const cleanup = () => {
+                    this.value = originalVal;
+                    this.style.color = '';
+                    document.removeEventListener('keydown', keydownHandler, true);
+                    this.removeEventListener('blur', cleanup);
+                };
+
+                const keydownHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (e.code === 'Escape') { cleanup(); return; }
+
+                    this.value = getKeyDisplay(e.code);
+                    this.style.color = '';
+                    settings[this.dataset.key] = e.code;
+                    saveSettings(settings);
+
+                    document.removeEventListener('keydown', keydownHandler, true);
+                    this.removeEventListener('blur', cleanup);
+                };
+
+                this.addEventListener('blur', cleanup);
+                document.addEventListener('keydown', keydownHandler, true);
+            });
+        });
+
+        // Ник
+        document.getElementById('btn-save-nickname').addEventListener('click', () => { settings.customNickname = document.getElementById('inp-nickname').value.trim(); saveSettings(settings); injectCosmetics(); });
+
+        // Аватарка
+        const fileAvatar = document.getElementById('file-avatar');
+        document.getElementById('btn-avatar-upload').addEventListener('click', () => fileAvatar.click());
+        fileAvatar.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            handleImageUpload(file, 256, 'image/png', (compressed) => { settings.customAvatarImg = compressed; saveSettings(settings); injectCosmetics(); });
+            fileAvatar.value = '';
+        });
+        document.getElementById('btn-avatar-reset').addEventListener('click', () => { settings.customAvatarImg = ''; saveSettings(settings); injectCosmetics(); });
+
+        // ФОН СТРАНИЦЫ (Цвет)
+        const colorInput = document.getElementById('inp-page-color');
+        colorInput.addEventListener('input', (e) => {
+            settings.pageBgColor = e.target.value;
+            settings.pageBgImage = '';
+            saveSettings(settings);
+            applyPageBg();
+        });
+
+        // ФОН СТРАНИЦЫ (Картинка)
+        const filePageBg = document.getElementById('file-page-bg');
+        document.getElementById('btn-page-bg-upload').addEventListener('click', () => filePageBg.click());
+        filePageBg.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            handleImageUpload(file, 1024, 'image/jpeg', (compressed) => {
+                settings.pageBgImage = compressed;
+                settings.pageBgColor = '';
+                saveSettings(settings);
+                applyPageBg();
+            });
+            filePageBg.value = '';
+        });
+        document.getElementById('btn-page-bg-reset').addEventListener('click', () => {
+            settings.pageBgImage = ''; settings.pageBgColor = ''; saveSettings(settings); applyPageBg();
+            document.getElementById('inp-page-color').value = '#ffffff';
+        });
+
+        // Фон меню
+        const fileMenuBg = document.getElementById('file-bg-menu');
+        document.getElementById('btn-bg-menu').addEventListener('click', () => fileMenuBg.click());
+        fileMenuBg.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            handleImageUpload(file, 512, 'image/jpeg', (compressed) => { settings.bgImage = compressed; saveSettings(settings); applyMenuBg(); });
+            fileMenuBg.value = '';
+        });
+        document.getElementById('btn-bg-menu-reset').addEventListener('click', () => { settings.bgImage = ''; saveSettings(settings); applyMenuBg(); });
+
+        // Иконка бусин
+        const fileBead = document.getElementById('file-bg-bead');
+        document.getElementById('btn-bg-bead').addEventListener('click', () => fileBead.click());
+        fileBead.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            handleImageUpload(file, 256, 'image/png', (compressed) => { settings.beadImage = compressed; saveSettings(settings); applyBeadImage(); });
+            fileBead.value = '';
+        });
+        document.getElementById('btn-bg-bead-reset').addEventListener('click', () => { settings.beadImage = ''; saveSettings(settings); applyBeadImage(); });
+
+        // НАСТРОЙКИ ПЕРСИСТЕНТНОСТИ
+        panel.querySelectorAll('.uchi-select[data-persist]').forEach(sel => {
+            sel.addEventListener('change', () => {
+                settings.persistence[sel.dataset.persist] = sel.value;
+                applyPersistence();
+                saveSettings(settings);
+                // Мгновенное применение
+                renderMode();
+                applyPageBg();
+                applyBeadImage();
+                applyMenuBg();
+                injectCosmetics();
+                const p = document.getElementById('uchi-auto-panel');
+                if (p) p.style.display = settings.menuVisible ? 'flex' : 'none';
+                // Синхронизируем тумблеры в Косметике
+                ['toggle-pagebg','toggle-beads','toggle-nickname','toggle-avatar','toggle-menubg'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const key = {
+                        'toggle-pagebg':'cosmeticsPageBgOn',
+                        'toggle-beads':'cosmeticsBeadsOn',
+                        'toggle-nickname':'cosmeticsNicknameOn',
+                        'toggle-avatar':'cosmeticsAvatarOn',
+                        'toggle-menubg':'cosmeticsMenuBgOn'
+                    }[id];
+                    el.classList.toggle('on', !!settings[key]);
+                });
+            });
+        });
+
+        renderMode();
+    }
+
+    // ==================== Режимы и решатель ====================
+    function renderMode() {
+        const modeToggle = document.getElementById('uchi-mode-toggle');
+        if (!modeToggle) return;
+        modeToggle.classList.toggle('on', settings.modeOn);
+        document.getElementById('uchi-infinite-toggle').classList.toggle('on', settings.infiniteOn);
+        document.getElementById('uchi-infinite-block').classList.toggle('hidden', settings.modeOn);
+        document.getElementById('uchi-solve-block').classList.toggle('hidden', !settings.modeOn);
+        updateStatus();
+    }
+    function escapeAttr(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;'); }
+
+    let solverRunning = false, solverTimer = null, solverLimit = null, solverSolved = 0;
+    function stopSolver() { solverRunning = false; if (solverTimer) clearTimeout(solverTimer); updateStatus(); }
+    function tryStartSolver(limit) {
+        if (!isCardPage()) { updateStatus(); return; }
+        stopSolver();
+        solverLimit = (typeof limit === 'number' && limit > 0) ? limit : null;
+        solverSolved = 0;
+        solveCards();
+    }
+    function solveCards() {
+        if (solverRunning || !isCardPage() || !isCardReady()) {
+            if (isCardPage() && !isCardReady()) solverTimer = setTimeout(solveCards, 300);
+            return;
+        }
+        const isOld = typeof Card.Player._emitSignal === 'undefined';
+        const sendEvent = (name, data) => isOld ? Card.Player.__score.tutor._sys_event(name, data) : Card.Player._emitSignal(name, data);
+        const getScoreJSON = () => { const n = {}; Card.Player.__score.save(n); return n; };
+        const solveCurrent = () => {
+            if (Card.Player.__score.current + 1 <= Card.Player.__score.total) Card.Player.__score.current++;
+            if (Card.Player.__score._index + 2 <= Card.Player.__score.total) Card.Player.__score._index += 2;
+            else Card.Player.__score._index--;
+            sendEvent('beads_exercise_finish_succ', { amount: Card.Player.__score.current, total: Card.Player.__score.total });
+            if (isOld) sendEvent('$store', getScoreJSON()); else sendEvent('$store', { json: JSON.stringify(getScoreJSON()) });
+        };
+        const reportSolve = () => sendEvent('$lesson_finish');
+
+        solverRunning = true; updateStatus();
+        const step = () => {
+            try {
+                if (!solverRunning || !isCardPage()) { solverRunning = false; updateStatus(); return; }
+                if (solverLimit !== null && solverSolved >= solverLimit) { solverRunning = false; updateStatus(); return; }
+                solveCurrent(); solverSolved++;
+                settings.statsSolved++; settings.statsBeads++;
+                saveSettings(settings);
+                const elSolved = document.getElementById('stat-solved'), elBeads = document.getElementById('stat-beads');
+                if (elSolved) elSolved.textContent = settings.statsSolved;
+                if (elBeads) elBeads.textContent = settings.statsBeads;
+                updateStatus();
+                if (Card.Player.__score.current >= Card.Player.__score.total) { reportSolve(); solverRunning = false; updateStatus(); return; }
+                solverTimer = setTimeout(step, 100);
+            } catch(e) { console.error('[UchiAuto]', e); solverRunning = false; updateStatus(); }
+        };
+        step();
+    }
+    function updateStatus() {
+        const infEl = document.getElementById('uchi-infinite-status'), cntEl = document.getElementById('uchi-count-status'), btn = document.getElementById('uchi-bar-do'), btn1 = document.getElementById('uchi-bar-one');
+        if (btn) btn.disabled = solverRunning;
+        if (btn1) btn1.disabled = solverRunning;
+        if (!isCardPage()) { if (infEl) infEl.textContent = 'не карточка'; if (cntEl) cntEl.textContent = 'не карточка'; return; }
+        if (!isCardReady()) { if (infEl) infEl.textContent = 'ждём карточку…'; if (cntEl) cntEl.textContent = 'ждём карточку…'; return; }
+        const total = Card.Player.__score.total, cur = Card.Player.__score.current;
+        if (infEl) infEl.textContent = !settings.infiniteOn ? '' : (solverRunning ? `решаем (всего ${cur}/${total})` : `готово (${cur}/${total})`);
+        if (cntEl) cntEl.textContent = (solverRunning && settings.modeOn) ? `решаем: ${solverSolved} / лимит ${solverLimit || '∞'} (${cur}/${total})` : `готово (${cur}/${total}) — введите N`;
+    }
+    function isCardPage() { return location.pathname.startsWith('/cards/'); }
+    function isCardReady() { return typeof Card !== 'undefined' && Card.Player && Card.Player.__score; }
+
+    // ==================== Глобальные хоткеи ====================
     window.addEventListener('keydown', (e) => {
         const active = document.activeElement;
         const tag = active ? active.tagName : '';
         if (tag === 'INPUT' || tag === 'TEXTAREA' || (active && active.isContentEditable)) return;
 
-        if (e.code === 'KeyS') {
+        if (e.code === settings.hotkeyMenu) {
             e.preventDefault();
-            solveOne();
+            const panel = document.getElementById('uchi-auto-panel');
+            if (!panel) return;
+            settings.menuVisible = !settings.menuVisible; saveSettings(settings);
+            panel.style.display = settings.menuVisible ? 'flex' : 'none';
         }
-    }, true);
+        else if (e.code === settings.hotkeyBg) {
+            e.preventDefault();
+            settings.cosmeticsPageBgOn = !settings.cosmeticsPageBgOn;
+            saveSettings(settings); applyPageBg();
+            const t = document.getElementById('toggle-pagebg');
+            if (t) t.classList.toggle('on', settings.cosmeticsPageBgOn);
+        }
+        else if (e.code === settings.hotkeyBeads) {
+            e.preventDefault();
+            settings.cosmeticsBeadsOn = !settings.cosmeticsBeadsOn;
+            saveSettings(settings); applyBeadImage();
+            const t = document.getElementById('toggle-beads');
+            if (t) t.classList.toggle('on', settings.cosmeticsBeadsOn);
+        }
+        else if (e.code === settings.hotkeyIdentity) {
+            e.preventDefault();
+            // хоткей "Анонимность" переключает оба сразу (ник + аватар)
+            const newVal = !(settings.cosmeticsNicknameOn && settings.cosmeticsAvatarOn);
+            settings.cosmeticsNicknameOn = newVal;
+            settings.cosmeticsAvatarOn = newVal;
+            saveSettings(settings); injectCosmetics();
+            const tn = document.getElementById('toggle-nickname');
+            const ta = document.getElementById('toggle-avatar');
+            if (tn) tn.classList.toggle('on', newVal);
+            if (ta) ta.classList.toggle('on', newVal);
+        }
+        else if (e.code === settings.hotkeySolve1) {
+            e.preventDefault();
+            tryStartSolver(1);
+        }
+    });
 
-    console.log('[SolveOne] загружено. Нажми S на карточке.');
+    // Навигация
+    let lastPath = location.pathname;
+    setInterval(() => {
+        if (location.pathname !== lastPath) { lastPath = location.pathname; stopSolver(); }
+        if (!document.getElementById('uchi-auto-panel') && document.body) createPanel();
+        if (solverRunning) updateStatus();
+    }, 800);
+
+    // Запуск
+    function init() {
+        applyPersistence();     // сначала применяем правила персистентности
+        injectStyles();
+        applyBeadImage();
+        applyPageBg();
+        createPanel();          // внутри вызовет applyMenuBg
+        injectCosmetics();
+        startCosmeticObserver();
+        console.log('[UchiAuto] v9.4 загружена. Персистентность + раздельные тумблеры.');
+    }
+
+    if (document.body) init();
+    else window.addEventListener('DOMContentLoaded', init);
 })();
