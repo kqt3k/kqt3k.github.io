@@ -1,0 +1,75 @@
+// ==UserScript==
+// @name         Uchi.ru Solve One (S)
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Нажатие S — решает 1 задание на карточке Учи.ру
+// @match        https://uchi.ru/cards/*
+// @grant        none
+// @run-at       document-end
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    function isCardReady() {
+        return typeof Card !== 'undefined' && Card.Player && Card.Player.__score;
+    }
+
+    function solveOne() {
+        if (!isCardReady()) {
+            console.log('[SolveOne] карточка не готова');
+            return;
+        }
+
+        const isOld = typeof Card.Player._emitSignal === 'undefined';
+        const sendEvent = (name, data) => isOld
+            ? Card.Player.__score.tutor._sys_event(name, data)
+            : Card.Player._emitSignal(name, data);
+        const getScoreJSON = () => { const n = {}; Card.Player.__score.save(n); return n; };
+
+        try {
+            // Сдвигаем счётчики (один шаг)
+            if (Card.Player.__score.current + 1 <= Card.Player.__score.total) {
+                Card.Player.__score.current++;
+            }
+            if (Card.Player.__score._index + 2 <= Card.Player.__score.total) {
+                Card.Player.__score._index += 2;
+            } else {
+                Card.Player.__score._index--;
+            }
+
+            // Отправляем "успешное решение"
+            sendEvent('beads_exercise_finish_succ', {
+                amount: Card.Player.__score.current,
+                total: Card.Player.__score.total
+            });
+
+            // Сохраняем прогресс
+            if (isOld) sendEvent('$store', getScoreJSON());
+            else sendEvent('$store', { json: JSON.stringify(getScoreJSON()) });
+
+            // Если всё решено — финишируем урок
+            if (Card.Player.__score.current >= Card.Player.__score.total) {
+                sendEvent('$lesson_finish');
+                console.log('[SolveOne] карточка завершена');
+            } else {
+                console.log(`[SolveOne] ${Card.Player.__score.current}/${Card.Player.__score.total}`);
+            }
+        } catch (e) {
+            console.error('[SolveOne]', e);
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        const tag = active ? active.tagName : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || (active && active.isContentEditable)) return;
+
+        if (e.code === 'KeyS') {
+            e.preventDefault();
+            solveOne();
+        }
+    }, true);
+
+    console.log('[SolveOne] загружено. Нажми S на карточке.');
+})();
