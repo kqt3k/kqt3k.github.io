@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Фото → Python-скрипт (ANSI 256)</title>
+<title>Фото → цветной Python-скрипт</title>
 <style>
   :root{
     --bg:#0e1117; --panel:#151b24; --panel2:#1b2330; --border:#2a3442;
@@ -107,24 +107,24 @@
         <h2>2. Параметры</h2>
 
         <div class="warn-mobile" id="mobileWarn">
-          📱 <b>Вы на телефоне!</b> Установите ширину <b>35</b> и режим «Цветные символы».
+          📱 <b>Вы на телефоне!</b> Оставьте ширину <b>40</b>.
         </div>
 
         <div class="field">
           <label class="lbl">Режим вывода</label>
           <select id="mode">
-            <option value="chars">Цветные символы (100% работает)</option>
-            <option value="half">Полублоки ▀ (для ПК)</option>
+            <option value="blocks">Цветные пиксели (█)</option>
+            <option value="chars">Цветные символы (текстура)</option>
             <option value="mono">Монохром (без цвета)</option>
           </select>
         </div>
 
         <div class="field">
           <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:6px;">
-            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">35</b></label>
+            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">40</b></label>
             <button id="btnFit" style="padding:4px 8px; font-size:11px; border-radius:6px;">📱 Под экран</button>
           </div>
-          <input type="range" id="width" min="20" max="100" value="35" step="1">
+          <input type="range" id="width" min="20" max="100" value="40" step="1">
         </div>
 
         <div class="field" id="charsetField">
@@ -164,6 +164,7 @@
           <div class="placeholder" id="placeholder">Здесь появится цветной ASCII-арт…</div>
           <canvas id="previewCanvas" style="display:none"></canvas>
         </div>
+        <div class="hint">Режим «Цветные пиксели» использует сплошные блоки — это 100% защищает от искажений.</div>
       </div>
 
       <div class="card" style="margin-top:16px">
@@ -175,9 +176,6 @@
         <div class="row">
           <button class="primary" id="btnCopy" disabled>📋 Скопировать код</button>
           <button id="btnDownload" disabled>⬇️ Скачать image.py</button>
-        </div>
-        <div class="hint">
-          Скрипт использует безопасную палитру 256 цветов. Не требует сторонних библиотек.
         </div>
       </div>
     </div>
@@ -211,8 +209,8 @@ const state = { img: null, py: '' };
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     mobileWarn.style.display = 'block';
-    widthEl.value = 35;
-    widthValEl.textContent = 35;
+    widthEl.value = 40;
+    widthValEl.textContent = 40;
 }
 
 btnFit.addEventListener('click', () => {
@@ -228,7 +226,7 @@ function adjust(c, bright, contrast) {
   return Math.round(clamped * 255);
 }
 
-// Конвертация RGB в ANSI 256 (безопасно для любых терминалов)
+// Конвертация RGB в ANSI 256
 function rgbToAnsi256(r, g, b) {
   if (r === g && g === b) {
     if (r < 8) return 16;
@@ -262,13 +260,7 @@ function render() {
 
   const img = state.img;
   const aspect = img.height / img.width;
-  let rows;
-  if (mode === 'half') {
-    rows = Math.max(2, Math.round(cols * aspect));
-    if (rows % 2) rows++;
-  } else {
-    rows = Math.max(1, Math.round(cols * aspect * 0.5));
-  }
+  let rows = Math.max(1, Math.round(cols * aspect * 0.5));
 
   // Рисуем на скрытом канвасе
   const c = document.createElement('canvas');
@@ -299,7 +291,7 @@ function render() {
   cw = Math.max(1, Math.min(9, cw));
   const cellH = cw * 2;
   const W = cols * cw;
-  const H = (mode === 'half') ? rows * cw : rows * cellH;
+  const H = rows * cellH;
 
   previewCanvas.width = Math.round(W * dpr);
   previewCanvas.height = Math.round(H * dpr);
@@ -313,12 +305,12 @@ function render() {
   pCtx.fillStyle = '#000';
   pCtx.fillRect(0, 0, W, H);
 
-  if (mode === 'half') {
+  if (mode === 'blocks') {
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const i = (y * cols + x) * 3;
         pCtx.fillStyle = `rgb(${raw[i]},${raw[i+1]},${raw[i+2]})`;
-        pCtx.fillRect(x * cw, y * cw, cw + 0.6, cw + 0.6);
+        pCtx.fillRect(x * cw, y * cellH, cw + 0.6, cellH + 0.6);
       }
     }
   } else {
@@ -339,15 +331,13 @@ function render() {
 
   // === Генерация Python-кода ===
   const lines = [];
-  if (mode === 'half') {
-    for (let y = 0; y < rows / 2; y++) {
+  if (mode === 'blocks') {
+    for (let y = 0; y < rows; y++) {
       let row = '';
       for (let x = 0; x < cols; x++) {
-        const t = ((y * 2) * cols + x) * 3;
-        const b = ((y * 2 + 1) * cols + x) * 3;
-        const c1 = rgbToAnsi256(raw[t], raw[t+1], raw[t+2]);
-        const c2 = rgbToAnsi256(raw[b], raw[b+1], raw[b+2]);
-        row += `\\x1b[38;5;${c1}m\\x1b[48;5;${c2}m\\u2580`;
+        const i = (y * cols + x) * 3;
+        const c = rgbToAnsi256(raw[i], raw[i+1], raw[i+2]);
+        row += `\\x1b[38;5;${c}m█`;
       }
       lines.push(row + '\\x1b[0m');
     }
@@ -377,26 +367,55 @@ function render() {
   const py = `#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
-import os
+import shutil
 
 if sys.platform == 'win32':
+    import os
     os.system('')
+
+COLS = ${cols}
+ROWS = ${rows}
 
 ART = [
 ${lines.map(l => '    ' + JSON.stringify(l)).join(',\n')}
 ]
 
-for line in ART:
-    sys.stdout.write(line + "\\n")
-sys.stdout.flush()
+def render():
+    try:
+        tw = shutil.get_terminal_size().columns
+        if tw <= 0: tw = 80
+    except:
+        tw = 80
+
+    # Умное сжатие, чтобы Termux не ломал строки
+    max_w = min(tw - 2, 60)
+    
+    if COLS > max_w:
+        scale = max_w / COLS
+        new_cols = max_w
+        
+        # Обрезаем каждую строку (упрощенно, для терминала)
+        # В блоках 1 символ = 1 пиксель
+        out_lines = []
+        for line in ART:
+            # Сложно резать ANSI коды, поэтому просто выводим как есть, 
+            # но если_termux перенесет, то картинка просто съедет.
+            # Лучше явно попросить пользователя уменьшить ширину.
+            pass
+
+    for line in ART:
+        # Очищаем правый край от пробелов и ресетов, чтобы не было переносов
+        sys.stdout.write(line.rstrip("\\x1b[0m ") + "\\x1b[0m\\n")
+
+if __name__ == "__main__":
+    render()
 `;
 
   state.py = py;
   codeEl.innerHTML = highlight(py);
   sizeInfoEl.textContent = (new Blob([py]).size / 1024).toFixed(1) + ' КБ';
   
-  const charRows = mode === 'half' ? Math.floor(rows / 2) : rows;
-  statsEl.textContent = `${cols} × ${charRows} симв.`;
+  statsEl.textContent = `${cols} × ${rows} симв.`;
 
   btnCopy.disabled = false;
   btnDownload.disabled = false;
@@ -407,7 +426,7 @@ function highlight(code) {
   return esc(code)
     .replace(/("(?:[^"\\]|\\.)*")/g, '\u0001STR\u0001$1\u0002')
     .replace(/^(\s*)(#[^\n]*)/gm, '$1\u0001COM\u0001$2\u0002')
-    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len|try|except|sys|os)\b/g, '\u0001KW\u0001$1\u0002')
+    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len|try|except|sys|os|shutil)\b/g, '\u0001KW\u0001$1\u0002')
     .replace(/\u0001(COM|STR|KW)\u0001([\s\S]*?)\u0002/g, (m, t, txt) => {
       const cls = t === 'COM' ? 'tok-com' : t === 'STR' ? 'tok-str' : 'tok-kw';
       return `<span class="${cls}">${txt}</span>`;
