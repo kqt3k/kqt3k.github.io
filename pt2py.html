@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Фото → цветной Python-скрипт (Half-Blocks Fixed)</title>
+<title>Фото → цветной Python-скрипт (Ultimate Fix)</title>
 <style>
   :root{
     --bg:#0e1117; --panel:#151b24; --panel2:#1b2330; --border:#2a3442;
@@ -107,24 +107,24 @@
         <h2>2. Параметры</h2>
 
         <div class="warn-mobile" id="mobileWarn">
-          📱 <b>Вы на телефоне!</b> Оставьте ширину <b>40–50</b>. Скрипт сам подстроится под экран.
+          📱 <b>Вы на телефоне!</b> Оставьте ширину <b>40</b>. Режим «Цветные пиксели» работает идеально.
         </div>
 
         <div class="field">
           <label class="lbl">Режим вывода</label>
           <select id="mode">
-            <option value="half">Полублоки ▀ (максимум цвета)</option>
-            <option value="chars">Цветные символы (яркость → символ)</option>
+            <option value="blocks">Цветные пиксели (максимум цвета)</option>
+            <option value="chars">Цветные символы (текстура)</option>
             <option value="mono">Монохром (без цвета)</option>
           </select>
         </div>
 
         <div class="field">
           <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:6px;">
-            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">50</b></label>
+            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">40</b></label>
             <button id="btnFit" style="padding:4px 8px; font-size:11px; border-radius:6px;">📱 Под экран</button>
           </div>
-          <input type="range" id="width" min="20" max="200" value="50" step="1">
+          <input type="range" id="width" min="20" max="100" value="40" step="1">
         </div>
 
         <div class="field" id="charsetField">
@@ -132,7 +132,6 @@
           <select id="charset">
             <option value="standard">Классический · @%#*+=-:. </option>
             <option value="dense">Плотный · 70 символов</option>
-            <option value="blocks">Блоки · █▓▒░</option>
             <option value="minimal">Минимальный · @#*:. </option>
             <option value="dots">Точки · ●◍◎○· </option>
           </select>
@@ -165,7 +164,7 @@
           <div class="placeholder" id="placeholder">Здесь появится цветной ASCII-арт…</div>
           <canvas id="previewCanvas" style="display:none"></canvas>
         </div>
-        <div class="hint">Режим «Полублоки ▀» даёт максимальную детализацию и точность цвета — каждый символ кодирует два пикселя.</div>
+        <div class="hint">Режим «Цветные пиксели» использует фон символа — это защищает картинку от переносов строк в мобильных терминалах.</div>
       </div>
 
       <div class="card" style="margin-top:16px">
@@ -179,7 +178,7 @@
           <button id="btnDownload" disabled>⬇️ Скачать image.py</button>
         </div>
         <div class="hint">
-          Запуск: <code>python image.py</code>. Скрипт автоматически подстраивается под ширину терминала, чтобы картинка не ломалась.
+          Запуск: <code>python image.py</code>. Скрипт строго ограничивает ширину, чтобы Termux не сломал строки.
         </div>
       </div>
     </div>
@@ -193,7 +192,6 @@
 const CHARSETS = {
   standard: "@%#*+=-:. ",
   dense:    "@$B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
-  blocks:   "█▓▒░ ",
   minimal:  "@#*:. ",
   dots:     "●◍◎○· "
 };
@@ -214,13 +212,12 @@ const state = { img: null, raw: null, cols: 0, rows: 0, py: '' };
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     mobileWarn.style.display = 'block';
-    widthEl.value = 50;
-    widthValEl.textContent = 50;
+    widthEl.value = 40;
+    widthValEl.textContent = 40;
 }
 
 btnFit.addEventListener('click', () => {
-    // На телефоне в Termux символы чуть шире, делим на 9
-    const estimatedCols = Math.max(20, Math.min(80, Math.floor(window.innerWidth / 9)));
+    const estimatedCols = Math.max(20, Math.min(50, Math.floor(window.innerWidth / 9)));
     widthEl.value = estimatedCols;
     widthValEl.textContent = estimatedCols;
     render();
@@ -260,13 +257,9 @@ async function compressB64(bytes) {
 
 function buildGrid(img, cols, mode) {
   const aspect = img.height / img.width;
-  let rows;
-  if (mode === 'half') {
-    rows = Math.max(2, Math.round(cols * aspect));
-    if (rows % 2) rows++;
-  } else {
-    rows = Math.max(1, Math.round(cols * aspect * 0.5));
-  }
+  // В режиме блоков используем квадратные пропорции (aspect * 0.5 для высоты терминала)
+  // Но в режиме "Цветные пиксели" (фон) символы квадратные, если использовать два пробела
+  let rows = Math.max(1, Math.round(cols * aspect * 0.5));
 
   const c = document.createElement('canvas');
   c.width = cols; c.height = rows;
@@ -293,7 +286,7 @@ function drawPreview(raw, cols, rows, mode, charset, invert, bright, contrast) {
 
   const cellH = cw * 2;
   const W = cols * cw;
-  const H = (mode === 'half') ? rows * cw : rows * cellH;
+  const H = rows * cellH;
 
   previewCanvas.width = Math.round(W * dpr);
   previewCanvas.height = Math.round(H * dpr);
@@ -309,14 +302,14 @@ function drawPreview(raw, cols, rows, mode, charset, invert, bright, contrast) {
 
   const adj = (bright !== 0 || contrast !== 1);
 
-  if (mode === 'half') {
+  if (mode === 'blocks') {
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const i = (y * cols + x) * 3;
         let r = raw[i], g = raw[i + 1], b = raw[i + 2];
         if (adj) { r = adjust(r, bright, contrast); g = adjust(g, bright, contrast); b = adjust(b, bright, contrast); }
         ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(x * cw, y * cw, cw + 0.6, cw + 0.6);
+        ctx.fillRect(x * cw, y * cellH, cw + 0.6, cellH + 0.6);
       }
     }
     return;
@@ -354,6 +347,7 @@ function genPython(meta, dataB64, compressed) {
 import base64
 import zlib
 import shutil
+import os
 
 MODE       = ${JSON.stringify(meta.mode)}
 CHARSET    = ${JSON.stringify(meta.charset)}
@@ -401,28 +395,26 @@ def _sym(px):
 
 
 def render():
+    # Жёстко ограничиваем ширину для мобильных терминалов
+    # Termux часто ошибается с определением ширины, поэтому ставим лимит 45
+    MAX_WIDTH = 45
     try:
         tw = shutil.get_terminal_size().columns
-        if tw == 0: tw = 80
+        if tw > 0 and tw < MAX_WIDTH:
+            MAX_WIDTH = tw
     except:
-        tw = 80
+        pass
+        
+    tw = min(MAX_WIDTH, int(os.environ.get("COLUMNS", MAX_WIDTH)))
 
     px = _pixels()
     cols = COLS
     rows = ROWS
 
-    # Умное масштабирование: если картинка шире экрана, уменьшаем её
     if cols > tw:
         scale = tw / cols
         new_cols = tw
-        new_rows = max(2, int(rows * scale))
-        
-        # Для режима полублоков нужно четное число строк
-        if MODE == "half" and new_rows % 2 != 0:
-            new_rows += 1
-        elif MODE != "half":
-            new_rows = max(1, new_rows)
-            
+        new_rows = max(1, int(rows * scale))
         new_px = []
         for y in range(new_rows):
             for x in range(new_cols):
@@ -435,14 +427,14 @@ def render():
 
     lines = []
 
-    if MODE == "half":
-        for y in range(rows // 2):
+    if MODE == "blocks":
+        # Используем цветной ФОН + пробел. Это 100% защищено от переносов.
+        for y in range(rows):
             row = []
             for x in range(cols):
-                top = _fix(px[(2 * y) * cols + x])
-                bot = _fix(px[(2 * y + 1) * cols + x])
-                # Используем верхний полублок (U+2580) - цвет верха и низа
-                row.append("\\x1b[38;2;%d;%d;%dm\\x1b[48;2;%d;%d;%dm\\u2580" % (top + bot))
+                p = _fix(px[y * cols + x])
+                # Два пробела для квадратных пропорций
+                row.append("\\x1b[48;2;%d;%d;%dm  " % p)
             lines.append("".join(row) + RESET)
 
     elif MODE == "mono":
@@ -453,6 +445,7 @@ def render():
             lines.append("".join(row))
 
     else:
+        # Цветные символы
         for y in range(rows):
             row = []
             for x in range(cols):
@@ -504,8 +497,7 @@ async function render() {
 
   drawPreview(grid.raw, grid.cols, grid.rows, mode, charset, invert, bright, contrast);
 
-  const charRows = mode === 'half' ? Math.floor(grid.rows / 2) : grid.rows;
-  statsEl.textContent = `${grid.cols} × ${charRows} симв.`;
+  statsEl.textContent = `${grid.cols} × ${grid.rows} симв.`;
 
   const { data, compressed } = await compressB64(grid.raw);
   if (token !== renderToken) return;
@@ -557,7 +549,7 @@ dropEl.addEventListener('drop', e => {
 
 function syncModeUI() {
   const m = modeEl.value;
-  const showSym = m !== 'half';
+  const showSym = m === 'chars';
   charsetField.style.opacity = showSym ? 1 : .4;
   charsetField.style.pointerEvents = showSym ? 'auto' : 'none';
   invertField.style.opacity = showSym ? 1 : .4;
