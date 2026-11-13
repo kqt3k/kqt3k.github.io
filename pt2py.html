@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Фото → цветной Python-скрипт (Mobile Fix)</title>
+<title>Фото → цветной Python-скрипт (Half-Blocks Fixed)</title>
 <style>
   :root{
     --bg:#0e1117; --panel:#151b24; --panel2:#1b2330; --border:#2a3442;
@@ -107,24 +107,24 @@
         <h2>2. Параметры</h2>
 
         <div class="warn-mobile" id="mobileWarn">
-          📱 <b>Вы на телефоне!</b> Установите ширину <b>35–45</b>, иначе терминал сломает картинку переносами строк.
+          📱 <b>Вы на телефоне!</b> Оставьте ширину <b>40–50</b>. Скрипт сам подстроится под экран.
         </div>
 
         <div class="field">
           <label class="lbl">Режим вывода</label>
           <select id="mode">
+            <option value="half">Полублоки ▀ (максимум цвета)</option>
             <option value="chars">Цветные символы (яркость → символ)</option>
-            <option value="half">Полублоки ▀ — максимум цвета</option>
             <option value="mono">Монохром (без цвета)</option>
           </select>
         </div>
 
         <div class="field">
           <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:6px;">
-            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">40</b></label>
+            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">50</b></label>
             <button id="btnFit" style="padding:4px 8px; font-size:11px; border-radius:6px;">📱 Под экран</button>
           </div>
-          <input type="range" id="width" min="20" max="200" value="40" step="1">
+          <input type="range" id="width" min="20" max="200" value="50" step="1">
         </div>
 
         <div class="field" id="charsetField">
@@ -179,7 +179,7 @@
           <button id="btnDownload" disabled>⬇️ Скачать image.py</button>
         </div>
         <div class="hint">
-          Запуск: <code>python image.py</code>. Нужен терминал с поддержкой 24-битного цвета.
+          Запуск: <code>python image.py</code>. Скрипт автоматически подстраивается под ширину терминала, чтобы картинка не ломалась.
         </div>
       </div>
     </div>
@@ -212,16 +212,15 @@ const btnCopy = $('btnCopy'), btnDownload = $('btnDownload'), toastEl = $('toast
 
 const state = { img: null, raw: null, cols: 0, rows: 0, py: '' };
 
-// Авто-настройка для мобильных
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     mobileWarn.style.display = 'block';
-    widthEl.value = 40;
-    widthValEl.textContent = 40;
+    widthEl.value = 50;
+    widthValEl.textContent = 50;
 }
 
 btnFit.addEventListener('click', () => {
-    // Примерная ширина символа на телефоне ~8-9px
-    const estimatedCols = Math.max(20, Math.min(60, Math.floor(window.innerWidth / 9)));
+    // На телефоне в Termux символы чуть шире, делим на 9
+    const estimatedCols = Math.max(20, Math.min(80, Math.floor(window.innerWidth / 9)));
     widthEl.value = estimatedCols;
     widthValEl.textContent = estimatedCols;
     render();
@@ -402,38 +401,62 @@ def _sym(px):
 
 
 def render():
-    # Защита от переноса строк на узких экранах
-    tw = shutil.get_terminal_size().columns
-    if COLS > tw:
-        print(f"\\x1b[33m⚠️ Внимание: Ширина арта ({COLS}) больше ширины терминала ({tw}).")
-        print(f"Изображение будет сломано переносами.")
-        print(f"Сгенерируйте скрипт с шириной <= {tw} в веб-интерфейсе.\\x1b[0m\\n")
-        return
+    try:
+        tw = shutil.get_terminal_size().columns
+        if tw == 0: tw = 80
+    except:
+        tw = 80
 
     px = _pixels()
+    cols = COLS
+    rows = ROWS
+
+    # Умное масштабирование: если картинка шире экрана, уменьшаем её
+    if cols > tw:
+        scale = tw / cols
+        new_cols = tw
+        new_rows = max(2, int(rows * scale))
+        
+        # Для режима полублоков нужно четное число строк
+        if MODE == "half" and new_rows % 2 != 0:
+            new_rows += 1
+        elif MODE != "half":
+            new_rows = max(1, new_rows)
+            
+        new_px = []
+        for y in range(new_rows):
+            for x in range(new_cols):
+                ox = min(int(x / scale), cols - 1)
+                oy = min(int(y / scale), rows - 1)
+                new_px.append(px[oy * cols + ox])
+        px = new_px
+        cols = new_cols
+        rows = new_rows
+
     lines = []
 
     if MODE == "half":
-        for y in range(ROWS // 2):
+        for y in range(rows // 2):
             row = []
-            for x in range(COLS):
-                top = _fix(px[(2 * y) * COLS + x])
-                bot = _fix(px[(2 * y + 1) * COLS + x])
+            for x in range(cols):
+                top = _fix(px[(2 * y) * cols + x])
+                bot = _fix(px[(2 * y + 1) * cols + x])
+                # Используем верхний полублок (U+2580) - цвет верха и низа
                 row.append("\\x1b[38;2;%d;%d;%dm\\x1b[48;2;%d;%d;%dm\\u2580" % (top + bot))
             lines.append("".join(row) + RESET)
 
     elif MODE == "mono":
-        for y in range(ROWS):
+        for y in range(rows):
             row = []
-            for x in range(COLS):
-                row.append(_sym(_fix(px[y * COLS + x])))
+            for x in range(cols):
+                row.append(_sym(_fix(px[y * cols + x])))
             lines.append("".join(row))
 
     else:
-        for y in range(ROWS):
+        for y in range(rows):
             row = []
-            for x in range(COLS):
-                p = _fix(px[y * COLS + x])
+            for x in range(cols):
+                p = _fix(px[y * cols + x])
                 row.append("\\x1b[38;2;%d;%d;%dm%s" % (p + (_sym(p),)))
             lines.append("".join(row) + RESET)
 
@@ -450,7 +473,7 @@ function highlight(code) {
   return esc(code)
     .replace(/("(?:[^"\\]|\\.)*")/g, '\u0001STR\u0001$1\u0002')
     .replace(/^(\s*)(#[^\n]*)/gm, '$1\u0001COM\u0001$2\u0002')
-    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len)\b/g, '\u0001KW\u0001$1\u0002')
+    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len|try|except)\b/g, '\u0001KW\u0001$1\u0002')
     .replace(/\b(\d+\.?\d*)\b/g, '\u0001NUM\u0001$1\u0002')
     .replace(/\u0001(COM|STR|KW|NUM)\u0001([\s\S]*?)\u0002/g, (m, t, txt) => {
       const cls = t === 'COM' ? 'tok-com' : t === 'STR' ? 'tok-str' : t === 'KW' ? 'tok-kw' : 'tok-num';
