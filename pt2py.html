@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Фото → цветной Python-скрипт</title>
+<title>Фото → цветной Python-скрипт (Mobile Fix)</title>
 <style>
   :root{
     --bg:#0e1117; --panel:#151b24; --panel2:#1b2330; --border:#2a3442;
@@ -78,6 +78,7 @@
   .toast.show{opacity:1; transform:translate(-50%,0)}
   .hint{font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5}
   code{font-family:var(--mono); font-size:12px; color:var(--accent2)}
+  .warn-mobile{background:#ff7b7233; border:1px solid #ff7b72; color:#ffb3ad; padding:10px; border-radius:8px; font-size:13px; margin-bottom:12px; display:none;}
 </style>
 </head>
 <body>
@@ -105,6 +106,10 @@
       <div class="card" style="margin-top:16px">
         <h2>2. Параметры</h2>
 
+        <div class="warn-mobile" id="mobileWarn">
+          📱 <b>Вы на телефоне!</b> Установите ширину <b>35–45</b>, иначе терминал сломает картинку переносами строк.
+        </div>
+
         <div class="field">
           <label class="lbl">Режим вывода</label>
           <select id="mode">
@@ -115,8 +120,11 @@
         </div>
 
         <div class="field">
-          <label class="lbl">Ширина (символов) <b id="widthVal">100</b></label>
-          <input type="range" id="width" min="20" max="220" value="100" step="1">
+          <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:6px;">
+            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">40</b></label>
+            <button id="btnFit" style="padding:4px 8px; font-size:11px; border-radius:6px;">📱 Под экран</button>
+          </div>
+          <input type="range" id="width" min="20" max="200" value="40" step="1">
         </div>
 
         <div class="field" id="charsetField">
@@ -171,8 +179,7 @@
           <button id="btnDownload" disabled>⬇️ Скачать image.py</button>
         </div>
         <div class="hint">
-          Запуск: <code>python image.py</code>. Нужен терминал с поддержкой 24-битного цвета
-          (Windows Terminal, iTerm2, GNOME Terminal, VS Code — подходят).
+          Запуск: <code>python image.py</code>. Нужен терминал с поддержкой 24-битного цвета.
         </div>
       </div>
     </div>
@@ -183,7 +190,6 @@
 <div class="toast" id="toast">Скопировано!</div>
 
 <script>
-/* =================== Наборы символов =================== */
 const CHARSETS = {
   standard: "@%#*+=-:. ",
   dense:    "@$B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
@@ -195,6 +201,7 @@ const CHARSETS = {
 const $ = id => document.getElementById(id);
 const dropEl = $('drop'), fileEl = $('fileInput'), thumbEl = $('thumb');
 const modeEl = $('mode'), widthEl = $('width'), widthValEl = $('widthVal');
+const btnFit = $('btnFit'), mobileWarn = $('mobileWarn');
 const charsetEl = $('charset'), charsetField = $('charsetField');
 const brightEl = $('bright'), brightValEl = $('brightVal');
 const contrastEl = $('contrast'), contrastValEl = $('contrastVal');
@@ -203,17 +210,28 @@ const previewBox = $('previewBox'), previewCanvas = $('previewCanvas'), placehol
 const statsEl = $('stats'), codeEl = $('code'), sizeInfoEl = $('sizeInfo');
 const btnCopy = $('btnCopy'), btnDownload = $('btnDownload'), toastEl = $('toast');
 
-/* =================== Состояние =================== */
 const state = { img: null, raw: null, cols: 0, rows: 0, py: '' };
 
-/* =================== Утилиты =================== */
-const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+// Авто-настройка для мобильных
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    mobileWarn.style.display = 'block';
+    widthEl.value = 40;
+    widthValEl.textContent = 40;
+}
 
+btnFit.addEventListener('click', () => {
+    // Примерная ширина символа на телефоне ~8-9px
+    const estimatedCols = Math.max(20, Math.min(60, Math.floor(window.innerWidth / 9)));
+    widthEl.value = estimatedCols;
+    widthValEl.textContent = estimatedCols;
+    render();
+});
+
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
 function adjust(c, bright, contrast) {
   const v = clamp01((c / 255 - 0.5) * contrast + 0.5 + bright);
   return Math.round(v * 255);
 }
-
 function symFor(r, g, b, charset, invert) {
   let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   if (invert) lum = 1 - lum;
@@ -221,7 +239,6 @@ function symFor(r, g, b, charset, invert) {
   if (i < 0) i = 0; else if (i > charset.length - 1) i = charset.length - 1;
   return charset[i];
 }
-
 function toBase64(bytes) {
   let bin = '';
   const CH = 0x8000;
@@ -230,11 +247,8 @@ function toBase64(bytes) {
   }
   return btoa(bin);
 }
-
 async function compressB64(bytes) {
-  if (typeof CompressionStream === 'undefined') {
-    return { data: toBase64(bytes), compressed: false };
-  }
+  if (typeof CompressionStream === 'undefined') return { data: toBase64(bytes), compressed: false };
   try {
     const cs = new CompressionStream('deflate');
     const stream = new Blob([bytes]).stream().pipeThrough(cs);
@@ -245,7 +259,6 @@ async function compressB64(bytes) {
   }
 }
 
-/* =================== Пиксельная сетка =================== */
 function buildGrid(img, cols, mode) {
   const aspect = img.height / img.width;
   let rows;
@@ -273,7 +286,6 @@ function buildGrid(img, cols, mode) {
   return { raw, cols, rows };
 }
 
-/* =================== Отрисовка предпросмотра =================== */
 function drawPreview(raw, cols, rows, mode, charset, invert, bright, contrast) {
   const dpr = window.devicePixelRatio || 1;
   const avail = Math.max(120, previewBox.clientWidth - 24);
@@ -328,7 +340,6 @@ function drawPreview(raw, cols, rows, mode, charset, invert, bright, contrast) {
   }
 }
 
-/* =================== Генерация Python =================== */
 function genPython(meta, dataB64, compressed) {
   const chunks = [];
   for (let i = 0; i < dataB64.length; i += 120) {
@@ -340,10 +351,10 @@ function genPython(meta, dataB64, compressed) {
 """Цветной ASCII-арт из фотографии.
 
 Запуск:  python image.py
-Нужен терминал с поддержкой 24-битного цвета (TrueColor).
 """
 import base64
 import zlib
+import shutil
 
 MODE       = ${JSON.stringify(meta.mode)}
 CHARSET    = ${JSON.stringify(meta.charset)}
@@ -391,6 +402,14 @@ def _sym(px):
 
 
 def render():
+    # Защита от переноса строк на узких экранах
+    tw = shutil.get_terminal_size().columns
+    if COLS > tw:
+        print(f"\\x1b[33m⚠️ Внимание: Ширина арта ({COLS}) больше ширины терминала ({tw}).")
+        print(f"Изображение будет сломано переносами.")
+        print(f"Сгенерируйте скрипт с шириной <= {tw} в веб-интерфейсе.\\x1b[0m\\n")
+        return
+
     px = _pixels()
     lines = []
 
@@ -426,7 +445,6 @@ if __name__ == "__main__":
 `;
 }
 
-/* =================== Подсветка =================== */
 function highlight(code) {
   const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return esc(code)
@@ -440,9 +458,7 @@ function highlight(code) {
     });
 }
 
-/* =================== Главный рендер =================== */
 let renderToken = 0;
-
 async function render() {
   if (!state.img) return;
   const token = ++renderToken;
@@ -484,7 +500,6 @@ async function render() {
   btnDownload.disabled = false;
 }
 
-/* =================== Загрузка файла =================== */
 function loadFile(file) {
   if (!file || !file.type.startsWith('image/')) return;
   const reader = new FileReader();
@@ -517,7 +532,6 @@ dropEl.addEventListener('drop', e => {
   if (f) loadFile(f);
 });
 
-/* =================== Контролы =================== */
 function syncModeUI() {
   const m = modeEl.value;
   const showSym = m !== 'half';
@@ -539,7 +553,6 @@ modeEl.addEventListener('change', () => { syncModeUI(); scheduleRender(); });
   el.addEventListener('change', scheduleRender);
 });
 
-/* =================== Кнопки =================== */
 btnCopy.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(state.py);
@@ -571,7 +584,6 @@ function toast(msg) {
   toast._t = setTimeout(() => toastEl.classList.remove('show'), 1800);
 }
 
-/* =================== Ресайз =================== */
 let rz;
 window.addEventListener('resize', () => {
   clearTimeout(rz);
