@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Фото → цветной Python-скрипт (Ultimate Fix)</title>
+<title>Фото → Python-скрипт (ANSI 256)</title>
 <style>
   :root{
     --bg:#0e1117; --panel:#151b24; --panel2:#1b2330; --border:#2a3442;
@@ -107,24 +107,24 @@
         <h2>2. Параметры</h2>
 
         <div class="warn-mobile" id="mobileWarn">
-          📱 <b>Вы на телефоне!</b> Оставьте ширину <b>40</b>. Режим «Цветные пиксели» работает идеально.
+          📱 <b>Вы на телефоне!</b> Установите ширину <b>35</b> и режим «Цветные символы».
         </div>
 
         <div class="field">
           <label class="lbl">Режим вывода</label>
           <select id="mode">
-            <option value="blocks">Цветные пиксели (максимум цвета)</option>
-            <option value="chars">Цветные символы (текстура)</option>
+            <option value="chars">Цветные символы (100% работает)</option>
+            <option value="half">Полублоки ▀ (для ПК)</option>
             <option value="mono">Монохром (без цвета)</option>
           </select>
         </div>
 
         <div class="field">
           <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:6px;">
-            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">40</b></label>
+            <label class="lbl" style="margin:0;">Ширина (символов) <b id="widthVal">35</b></label>
             <button id="btnFit" style="padding:4px 8px; font-size:11px; border-radius:6px;">📱 Под экран</button>
           </div>
-          <input type="range" id="width" min="20" max="100" value="40" step="1">
+          <input type="range" id="width" min="20" max="100" value="35" step="1">
         </div>
 
         <div class="field" id="charsetField">
@@ -164,7 +164,6 @@
           <div class="placeholder" id="placeholder">Здесь появится цветной ASCII-арт…</div>
           <canvas id="previewCanvas" style="display:none"></canvas>
         </div>
-        <div class="hint">Режим «Цветные пиксели» использует фон символа — это защищает картинку от переносов строк в мобильных терминалах.</div>
       </div>
 
       <div class="card" style="margin-top:16px">
@@ -178,7 +177,7 @@
           <button id="btnDownload" disabled>⬇️ Скачать image.py</button>
         </div>
         <div class="hint">
-          Запуск: <code>python image.py</code>. Скрипт строго ограничивает ширину, чтобы Termux не сломал строки.
+          Скрипт использует безопасную палитру 256 цветов. Не требует сторонних библиотек.
         </div>
       </div>
     </div>
@@ -208,26 +207,37 @@ const previewBox = $('previewBox'), previewCanvas = $('previewCanvas'), placehol
 const statsEl = $('stats'), codeEl = $('code'), sizeInfoEl = $('sizeInfo');
 const btnCopy = $('btnCopy'), btnDownload = $('btnDownload'), toastEl = $('toast');
 
-const state = { img: null, raw: null, cols: 0, rows: 0, py: '' };
+const state = { img: null, py: '' };
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
     mobileWarn.style.display = 'block';
-    widthEl.value = 40;
-    widthValEl.textContent = 40;
+    widthEl.value = 35;
+    widthValEl.textContent = 35;
 }
 
 btnFit.addEventListener('click', () => {
-    const estimatedCols = Math.max(20, Math.min(50, Math.floor(window.innerWidth / 9)));
+    const estimatedCols = Math.max(20, Math.min(50, Math.floor(window.innerWidth / 10)));
     widthEl.value = estimatedCols;
     widthValEl.textContent = estimatedCols;
     render();
 });
 
-const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
 function adjust(c, bright, contrast) {
-  const v = clamp01((c / 255 - 0.5) * contrast + 0.5 + bright);
-  return Math.round(v * 255);
+  const v = ((c / 255 - 0.5) * contrast + 0.5 + bright);
+  const clamped = v < 0 ? 0 : v > 1 ? 1 : v;
+  return Math.round(clamped * 255);
 }
+
+// Конвертация RGB в ANSI 256 (безопасно для любых терминалов)
+function rgbToAnsi256(r, g, b) {
+  if (r === g && g === b) {
+    if (r < 8) return 16;
+    if (r > 248) return 231;
+    return Math.round(((r - 8) / 247) * 24) + 232;
+  }
+  return 16 + (36 * Math.round(r / 255 * 5)) + (6 * Math.round(g / 255 * 5)) + Math.round(b / 255 * 5);
+}
+
 function symFor(r, g, b, charset, invert) {
   let lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   if (invert) lum = 1 - lum;
@@ -235,249 +245,9 @@ function symFor(r, g, b, charset, invert) {
   if (i < 0) i = 0; else if (i > charset.length - 1) i = charset.length - 1;
   return charset[i];
 }
-function toBase64(bytes) {
-  let bin = '';
-  const CH = 0x8000;
-  for (let i = 0; i < bytes.length; i += CH) {
-    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
-  }
-  return btoa(bin);
-}
-async function compressB64(bytes) {
-  if (typeof CompressionStream === 'undefined') return { data: toBase64(bytes), compressed: false };
-  try {
-    const cs = new CompressionStream('deflate');
-    const stream = new Blob([bytes]).stream().pipeThrough(cs);
-    const buf = await new Response(stream).arrayBuffer();
-    return { data: toBase64(new Uint8Array(buf)), compressed: true };
-  } catch (e) {
-    return { data: toBase64(bytes), compressed: false };
-  }
-}
 
-function buildGrid(img, cols, mode) {
-  const aspect = img.height / img.width;
-  // В режиме блоков используем квадратные пропорции (aspect * 0.5 для высоты терминала)
-  // Но в режиме "Цветные пиксели" (фон) символы квадратные, если использовать два пробела
-  let rows = Math.max(1, Math.round(cols * aspect * 0.5));
-
-  const c = document.createElement('canvas');
-  c.width = cols; c.height = rows;
-  const ctx = c.getContext('2d', { willReadFrequently: true });
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, cols, rows);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(img, 0, 0, cols, rows);
-
-  const d = ctx.getImageData(0, 0, cols, rows).data;
-  const raw = new Uint8Array(cols * rows * 3);
-  for (let i = 0, j = 0; i < d.length; i += 4, j += 3) {
-    raw[j] = d[i]; raw[j + 1] = d[i + 1]; raw[j + 2] = d[i + 2];
-  }
-  return { raw, cols, rows };
-}
-
-function drawPreview(raw, cols, rows, mode, charset, invert, bright, contrast) {
-  const dpr = window.devicePixelRatio || 1;
-  const avail = Math.max(120, previewBox.clientWidth - 24);
-  let cw = Math.floor(avail / cols);
-  cw = Math.max(1, Math.min(9, cw));
-
-  const cellH = cw * 2;
-  const W = cols * cw;
-  const H = rows * cellH;
-
-  previewCanvas.width = Math.round(W * dpr);
-  previewCanvas.height = Math.round(H * dpr);
-  previewCanvas.style.width = W + 'px';
-  previewCanvas.style.height = H + 'px';
-  previewCanvas.style.display = 'block';
-  placeholder.style.display = 'none';
-
-  const ctx = previewCanvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, W, H);
-
-  const adj = (bright !== 0 || contrast !== 1);
-
-  if (mode === 'blocks') {
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const i = (y * cols + x) * 3;
-        let r = raw[i], g = raw[i + 1], b = raw[i + 2];
-        if (adj) { r = adjust(r, bright, contrast); g = adjust(g, bright, contrast); b = adjust(b, bright, contrast); }
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(x * cw, y * cellH, cw + 0.6, cellH + 0.6);
-      }
-    }
-    return;
-  }
-
-  const fs = Math.max(3, Math.round(cw * 1.65));
-  ctx.font = `bold ${fs}px ui-monospace, Menlo, Consolas, monospace`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const i = (y * cols + x) * 3;
-      let r = raw[i], g = raw[i + 1], b = raw[i + 2];
-      if (adj) { r = adjust(r, bright, contrast); g = adjust(g, bright, contrast); b = adjust(b, bright, contrast); }
-      const ch = symFor(r, g, b, charset, invert);
-      ctx.fillStyle = mode === 'mono' ? '#d8dee9' : `rgb(${r},${g},${b})`;
-      ctx.fillText(ch, x * cw + cw / 2, y * cellH + cellH / 2);
-    }
-  }
-}
-
-function genPython(meta, dataB64, compressed) {
-  const chunks = [];
-  for (let i = 0; i < dataB64.length; i += 120) {
-    chunks.push('    ' + JSON.stringify(dataB64.slice(i, i + 120)));
-  }
-
-  return `#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""Цветной ASCII-арт из фотографии.
-
-Запуск:  python image.py
-"""
-import base64
-import zlib
-import shutil
-import os
-
-MODE       = ${JSON.stringify(meta.mode)}
-CHARSET    = ${JSON.stringify(meta.charset)}
-INVERT     = ${meta.invert ? 'True' : 'False'}
-BRIGHT     = ${meta.bright.toFixed(3)}
-CONTRAST   = ${meta.contrast.toFixed(3)}
-COLS       = ${meta.cols}
-ROWS       = ${meta.rows}
-COMPRESSED = ${compressed ? 'True' : 'False'}
-
-DATA = (
-${chunks.join('\n')}
-)
-
-RESET = "\\x1b[0m"
-
-
-def _raw():
-    b = base64.b64decode(DATA)
-    return zlib.decompress(b) if COMPRESSED else b
-
-
-def _pixels():
-    raw = _raw()
-    return [(raw[i], raw[i + 1], raw[i + 2]) for i in range(0, len(raw), 3)]
-
-
-def _fix(px):
-    if BRIGHT == 0.0 and CONTRAST == 1.0:
-        return px
-    out = []
-    for c in px:
-        v = (c / 255.0 - 0.5) * CONTRAST + 0.5 + BRIGHT
-        v = 0.0 if v < 0.0 else (1.0 if v > 1.0 else v)
-        out.append(int(v * 255 + 0.5))
-    return tuple(out)
-
-
-def _sym(px):
-    lum = (0.299 * px[0] + 0.587 * px[1] + 0.114 * px[2]) / 255.0
-    if INVERT:
-        lum = 1.0 - lum
-    i = int(lum * (len(CHARSET) - 1))
-    return CHARSET[i]
-
-
-def render():
-    # Жёстко ограничиваем ширину для мобильных терминалов
-    # Termux часто ошибается с определением ширины, поэтому ставим лимит 45
-    MAX_WIDTH = 45
-    try:
-        tw = shutil.get_terminal_size().columns
-        if tw > 0 and tw < MAX_WIDTH:
-            MAX_WIDTH = tw
-    except:
-        pass
-        
-    tw = min(MAX_WIDTH, int(os.environ.get("COLUMNS", MAX_WIDTH)))
-
-    px = _pixels()
-    cols = COLS
-    rows = ROWS
-
-    if cols > tw:
-        scale = tw / cols
-        new_cols = tw
-        new_rows = max(1, int(rows * scale))
-        new_px = []
-        for y in range(new_rows):
-            for x in range(new_cols):
-                ox = min(int(x / scale), cols - 1)
-                oy = min(int(y / scale), rows - 1)
-                new_px.append(px[oy * cols + ox])
-        px = new_px
-        cols = new_cols
-        rows = new_rows
-
-    lines = []
-
-    if MODE == "blocks":
-        # Используем цветной ФОН + пробел. Это 100% защищено от переносов.
-        for y in range(rows):
-            row = []
-            for x in range(cols):
-                p = _fix(px[y * cols + x])
-                # Два пробела для квадратных пропорций
-                row.append("\\x1b[48;2;%d;%d;%dm  " % p)
-            lines.append("".join(row) + RESET)
-
-    elif MODE == "mono":
-        for y in range(rows):
-            row = []
-            for x in range(cols):
-                row.append(_sym(_fix(px[y * cols + x])))
-            lines.append("".join(row))
-
-    else:
-        # Цветные символы
-        for y in range(rows):
-            row = []
-            for x in range(cols):
-                p = _fix(px[y * cols + x])
-                row.append("\\x1b[38;2;%d;%d;%dm%s" % (p + (_sym(p),)))
-            lines.append("".join(row) + RESET)
-
-    return "\\n".join(lines)
-
-
-if __name__ == "__main__":
-    print(render())
-`;
-}
-
-function highlight(code) {
-  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return esc(code)
-    .replace(/("(?:[^"\\]|\\.)*")/g, '\u0001STR\u0001$1\u0002')
-    .replace(/^(\s*)(#[^\n]*)/gm, '$1\u0001COM\u0001$2\u0002')
-    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len|try|except)\b/g, '\u0001KW\u0001$1\u0002')
-    .replace(/\b(\d+\.?\d*)\b/g, '\u0001NUM\u0001$1\u0002')
-    .replace(/\u0001(COM|STR|KW|NUM)\u0001([\s\S]*?)\u0002/g, (m, t, txt) => {
-      const cls = t === 'COM' ? 'tok-com' : t === 'STR' ? 'tok-str' : t === 'KW' ? 'tok-kw' : 'tok-num';
-      return `<span class="${cls}">${txt}</span>`;
-    });
-}
-
-let renderToken = 0;
-async function render() {
+function render() {
   if (!state.img) return;
-  const token = ++renderToken;
 
   const cols = +widthEl.value;
   const mode = modeEl.value;
@@ -490,29 +260,158 @@ async function render() {
   brightValEl.textContent = brightEl.value;
   contrastValEl.textContent = contrast.toFixed(2);
 
-  const grid = buildGrid(state.img, cols, mode);
-  state.raw = grid.raw;
-  state.cols = grid.cols;
-  state.rows = grid.rows;
+  const img = state.img;
+  const aspect = img.height / img.width;
+  let rows;
+  if (mode === 'half') {
+    rows = Math.max(2, Math.round(cols * aspect));
+    if (rows % 2) rows++;
+  } else {
+    rows = Math.max(1, Math.round(cols * aspect * 0.5));
+  }
 
-  drawPreview(grid.raw, grid.cols, grid.rows, mode, charset, invert, bright, contrast);
+  // Рисуем на скрытом канвасе
+  const c = document.createElement('canvas');
+  c.width = cols; c.height = rows;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, cols, rows);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, cols, rows);
 
-  statsEl.textContent = `${grid.cols} × ${grid.rows} симв.`;
+  const d = ctx.getImageData(0, 0, cols, rows).data;
+  const raw = new Uint8Array(cols * rows * 3);
+  for (let i = 0, j = 0; i < d.length; i += 4, j += 3) {
+    let r = d[i], g = d[i + 1], b = d[i + 2];
+    if (bright !== 0 || contrast !== 1) {
+      r = adjust(r, bright, contrast);
+      g = adjust(g, bright, contrast);
+      b = adjust(b, bright, contrast);
+    }
+    raw[j] = r; raw[j + 1] = g; raw[j + 2] = b;
+  }
 
-  const { data, compressed } = await compressB64(grid.raw);
-  if (token !== renderToken) return;
+  // === Отрисовка предпросмотра на сайте ===
+  const dpr = window.devicePixelRatio || 1;
+  const avail = Math.max(120, previewBox.clientWidth - 24);
+  let cw = Math.floor(avail / cols);
+  cw = Math.max(1, Math.min(9, cw));
+  const cellH = cw * 2;
+  const W = cols * cw;
+  const H = (mode === 'half') ? rows * cw : rows * cellH;
 
-  const py = genPython({
-    mode, charset, invert, bright, contrast,
-    cols: grid.cols, rows: grid.rows
-  }, data, compressed);
+  previewCanvas.width = Math.round(W * dpr);
+  previewCanvas.height = Math.round(H * dpr);
+  previewCanvas.style.width = W + 'px';
+  previewCanvas.style.height = H + 'px';
+  previewCanvas.style.display = 'block';
+  placeholder.style.display = 'none';
+
+  const pCtx = previewCanvas.getContext('2d');
+  pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  pCtx.fillStyle = '#000';
+  pCtx.fillRect(0, 0, W, H);
+
+  if (mode === 'half') {
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 3;
+        pCtx.fillStyle = `rgb(${raw[i]},${raw[i+1]},${raw[i+2]})`;
+        pCtx.fillRect(x * cw, y * cw, cw + 0.6, cw + 0.6);
+      }
+    }
+  } else {
+    const fs = Math.max(3, Math.round(cw * 1.65));
+    pCtx.font = `bold ${fs}px ui-monospace, Menlo, Consolas, monospace`;
+    pCtx.textAlign = 'center';
+    pCtx.textBaseline = 'middle';
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 3;
+        const r = raw[i], g = raw[i+1], b = raw[i+2];
+        const ch = symFor(r, g, b, charset, invert);
+        pCtx.fillStyle = mode === 'mono' ? '#d8dee9' : `rgb(${r},${g},${b})`;
+        pCtx.fillText(ch, x * cw + cw / 2, y * cellH + cellH / 2);
+      }
+    }
+  }
+
+  // === Генерация Python-кода ===
+  const lines = [];
+  if (mode === 'half') {
+    for (let y = 0; y < rows / 2; y++) {
+      let row = '';
+      for (let x = 0; x < cols; x++) {
+        const t = ((y * 2) * cols + x) * 3;
+        const b = ((y * 2 + 1) * cols + x) * 3;
+        const c1 = rgbToAnsi256(raw[t], raw[t+1], raw[t+2]);
+        const c2 = rgbToAnsi256(raw[b], raw[b+1], raw[b+2]);
+        row += `\\x1b[38;5;${c1}m\\x1b[48;5;${c2}m\\u2580`;
+      }
+      lines.push(row + '\\x1b[0m');
+    }
+  } else if (mode === 'mono') {
+    for (let y = 0; y < rows; y++) {
+      let row = '';
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 3;
+        row += symFor(raw[i], raw[i+1], raw[i+2], charset, invert);
+      }
+      lines.push(row);
+    }
+  } else {
+    for (let y = 0; y < rows; y++) {
+      let row = '';
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 3;
+        const r = raw[i], g = raw[i+1], b = raw[i+2];
+        const c = rgbToAnsi256(r, g, b);
+        const ch = symFor(r, g, b, charset, invert);
+        row += `\\x1b[38;5;${c}m${ch}`;
+      }
+      lines.push(row + '\\x1b[0m');
+    }
+  }
+
+  const py = `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import sys
+import os
+
+if sys.platform == 'win32':
+    os.system('')
+
+ART = [
+${lines.map(l => '    ' + JSON.stringify(l)).join(',\n')}
+]
+
+for line in ART:
+    sys.stdout.write(line + "\\n")
+sys.stdout.flush()
+`;
 
   state.py = py;
   codeEl.innerHTML = highlight(py);
   sizeInfoEl.textContent = (new Blob([py]).size / 1024).toFixed(1) + ' КБ';
+  
+  const charRows = mode === 'half' ? Math.floor(rows / 2) : rows;
+  statsEl.textContent = `${cols} × ${charRows} симв.`;
 
   btnCopy.disabled = false;
   btnDownload.disabled = false;
+}
+
+function highlight(code) {
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc(code)
+    .replace(/("(?:[^"\\]|\\.)*")/g, '\u0001STR\u0001$1\u0002')
+    .replace(/^(\s*)(#[^\n]*)/gm, '$1\u0001COM\u0001$2\u0002')
+    .replace(/\b(if|else|elif|for|in|import|from|def|return|True|False|None|print|range|len|try|except|sys|os)\b/g, '\u0001KW\u0001$1\u0002')
+    .replace(/\u0001(COM|STR|KW)\u0001([\s\S]*?)\u0002/g, (m, t, txt) => {
+      const cls = t === 'COM' ? 'tok-com' : t === 'STR' ? 'tok-str' : 'tok-kw';
+      return `<span class="${cls}">${txt}</span>`;
+    });
 }
 
 function loadFile(file) {
@@ -536,12 +435,8 @@ function loadFile(file) {
 dropEl.addEventListener('click', () => fileEl.click());
 fileEl.addEventListener('change', e => loadFile(e.target.files[0]));
 
-['dragenter', 'dragover'].forEach(ev =>
-  dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('over'); })
-);
-['dragleave', 'drop'].forEach(ev =>
-  dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('over'); })
-);
+['dragenter', 'dragover'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('over'); }));
 dropEl.addEventListener('drop', e => {
   const f = e.dataTransfer.files && e.dataTransfer.files[0];
   if (f) loadFile(f);
@@ -569,15 +464,10 @@ modeEl.addEventListener('change', () => { syncModeUI(); scheduleRender(); });
 });
 
 btnCopy.addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(state.py);
-  } catch {
+  try { await navigator.clipboard.writeText(state.py); } catch {
     const ta = document.createElement('textarea');
-    ta.value = state.py;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
+    ta.value = state.py; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
   }
   toast('Код скопирован!');
 });
@@ -598,12 +488,6 @@ function toast(msg) {
   clearTimeout(toast._t);
   toast._t = setTimeout(() => toastEl.classList.remove('show'), 1800);
 }
-
-let rz;
-window.addEventListener('resize', () => {
-  clearTimeout(rz);
-  rz = setTimeout(() => { if (state.img) scheduleRender(); }, 180);
-});
 
 syncModeUI();
 </script>
