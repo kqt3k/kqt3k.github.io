@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ц</title>
+    <title>Ц — ХАОС</title>
     <style>
         body {
             margin: 0;
@@ -13,24 +13,67 @@
             justify-content: center;
             font-family: sans-serif;
             overflow: hidden;
+            background-color: #ffffff;
         }
+
         #big-c {
-            /* Делаем букву почти во весь экран */
             font-size: 75vmin; 
             line-height: 1;
             cursor: pointer;
             user-select: none;
-            transition: transform 0.1s ease;
+            transition: transform 0.05s ease;
         }
-        /* Небольшой эффект нажатия для приятного отклика */
+
         #big-c:active {
-            transform: scale(0.92);
+            transform: scale(0.9);
+        }
+
+        /* Класс для активации безумия */
+        body.chaos {
+            animation: 
+                shake 0.08s infinite linear, 
+                rainbow-bg 0.3s infinite linear;
+        }
+
+        body.chaos #big-c {
+            animation: rainbow-text 0.3s infinite linear;
+        }
+
+        /* Анимация тряски */
+        @keyframes shake {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(-15px, 15px) rotate(-3deg); }
+            50%  { transform: translate(15px, -15px) rotate(3deg); }
+            75%  { transform: translate(-15px, -15px) rotate(-2deg); }
+            100% { transform: translate(15px, 15px) rotate(2deg); }
+        }
+
+        /* Радужный фон */
+        @keyframes rainbow-bg {
+            0%   { background-color: #ff0000; }
+            16%  { background-color: #ff7f00; }
+            33%  { background-color: #ffff00; }
+            50%  { background-color: #00ff00; }
+            66%  { background-color: #0000ff; }
+            83%  { background-color: #4b0082; }
+            100% { background-color: #9400d3; }
+        }
+
+        /* Радужная буква (со сдвигом цветов, чтобы не сливалась с фоном) */
+        @keyframes rainbow-text {
+            0%   { color: #00ffff; }
+            16%  { color: #0080ff; }
+            33%  { color: #0000ff; }
+            50%  { color: #ff00ff; }
+            66%  { color: #ffff00; }
+            83%  { color: #00ff00; }
+            100% { color: #ffffff; }
         }
     </style>
 </head>
 <body>
 
-    <div id="big-c" title="Нажми на меня">Ц</div>
+    <div id="big-c" title="НАЖМИ">Ц</div>
 
     <audio id="sound" src="https://myinstants.com" preload="auto"></audio>
 
@@ -39,9 +82,26 @@
         const sound = document.getElementById('sound');
 
         letter.addEventListener('click', () => {
-            // Сбрасываем время на начало, чтобы звук можно было спамить быстрыми нажатиями
-            sound.currentTime = 0; 
+            // 1. Запуск звука
+            sound.currentTime = 0;
             sound.play();
+
+            // 2. Включаем тряску и радугу
+            document.body.classList.add('chaos');
+
+            // 3. Вибрация (если устройство и браузер поддерживают)
+            if (navigator.vibrate) {
+                // Паттерн: 200мс вибро, 50мс пауза, 300мс вибро, 50мс пауза, 400мс вибро
+                navigator.vibrate([200, 50, 300, 50, 400, 50, 500]);
+            }
+        });
+
+        // Когда звук закончится — возвращаем всё в спокойное состояние
+        sound.addEventListener('ended', () => {
+            document.body.classList.remove('chaos');
+            if (navigator.vibrate) {
+                navigator.vibrate(0); // Останавливаем вибрацию
+            }
         });
     </script>
 
