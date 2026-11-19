@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>updM3G — Мессенджер (msgmsg-4)</title>
+<title>updMsG — Мессенджер (msgmsg-4)</title>
 <script>
 const cdnParts = ["https:", "", "cdn.jsdelivr.net", "npm", "firebase@10.12.2"];
 ["firebase-app-compat.js", "firebase-auth-compat.js"].forEach(file => {
@@ -19,20 +19,20 @@ body[data-theme="gold"]{--bg:#141005;--sb:#1f1808;--ch:#171206;--cd:#2b210b;--hv
 body[data-theme="bday"]{--bg:#1a0814;--sb:#260c1d;--ch:#1c0916;--cd:#38122b;--hv:#4d193b;--ac:#ff4081;--out:#ad1457;--in:#301025;--tx:#fff0f6;--mt:#f48fb1;--bd:#6a1b4d}
 body[data-theme="winter"]{--bg:#07131f;--sb:#0c1e30;--ch:#091726;--cd:#132c45;--hv:#1a3c5e;--ac:#38bdf8;--out:#0284c7;--in:#10253b;--tx:#f0f9ff;--mt:#7dd3fc;--bd:#1e4976}
 body[data-theme="halloween"]{--bg:#120902;--sb:#1c0e04;--ch:#140a03;--cd:#2b1606;--hv:#3d1f09;--ac:#ff6d00;--out:#bf360c;--in:#241205;--tx:#fff3e0;--mt:#ffab40;--bd:#5d2b0a}
-body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden;transition:background .3s}
-.sb{width:350px;background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
-.sb-h{padding:14px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden}
+#sb{width:350px!important;min-width:350px;background:var(--sb);border-right:1px solid var(--bd);display:flex!important;flex-direction:column!important;flex-shrink:0}
+.sb-h{padding:14px;border-bottom:1px solid var(--bd);display:flex!important;flex-direction:column!important;gap:8px;width:100%}
+.row{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%}
 .logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--ac),#8c52ff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff}
 .coin-pill{background:rgba(241,196,15,.15);color:var(--gd);border:1px solid rgba(241,196,15,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
 .stix-pill{background:rgba(0,210,211,.15);color:var(--cy);border:1px solid rgba(0,210,211,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
-.prof{background:var(--cd);border:1px solid var(--bd);padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px}
+.prof{background:var(--cd);border:1px solid var(--bd);padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px;width:100%}
 .btn{background:var(--ac);color:#fff;border:none;padding:8px 10px;border-radius:9px;font-weight:600;font-size:12px;cursor:pointer}
 .btn-g{background:linear-gradient(135deg,#f39c12,#f1c40f);color:#000;font-weight:800}
 .btn-c{background:linear-gradient(135deg,#00a8ff,#00d2d3);color:#000;font-weight:800}
 .btn-d{background:#ff4757;color:#fff}
-.list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
-.item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;cursor:pointer}
+#clist{flex:1;overflow-y:auto;padding:8px;display:flex!important;flex-direction:column!important;gap:4px;width:100%}
+.item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;cursor:pointer;width:100%}
 .item:hover{background:var(--hv)}.item.act{background:var(--cd);border:1px solid var(--bd)}
 .av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer}
 .av img{width:100%;height:100%;object-fit:cover;display:block}
@@ -69,7 +69,7 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 .acard{background:var(--cd);border:1px solid var(--bd);padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--on);color:#000;font-weight:700;padding:8px 16px;border-radius:10px;font-size:13px;display:none;z-index:200}
 .bk{display:none;background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer}
-@media(max-width:768px){.sb{width:100%;position:absolute;inset:0;z-index:20}.sb.hide{transform:translateX(-100%)}.bk{display:block}}
+@media(max-width:768px){#sb{width:100%!important;min-width:100%!important;position:absolute;inset:0;z-index:20}#sb.hide{transform:translateX(-100%)}.bk{display:block}}
 </style>
 </head>
       <div style="display:flex;align-items:center;gap:7px;font-weight:800"><div class="logo">MSG</div>msgmsg-4</div>
