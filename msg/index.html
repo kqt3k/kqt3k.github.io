@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>MSG(msgmsg-4)</title>
 <script>
-["firebase-app-compat.js", "firebase-auth-compat.js"].forEach(f => {
-  document.write('<script src="https://jsdelivr.net' + f + '"><\/script>');
+const cdnParts = ["https:", "", "cdn.jsdelivr.net", "npm", "firebase@10.12.2"];
+["firebase-app-compat.js", "firebase-auth-compat.js"].forEach(file => {
+  const url = cdnParts.concat(file).join("/");
+  document.write('<script src="' + url + '"><\/script>');
 });
 </script>
 <style>
