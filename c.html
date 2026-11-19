@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ц — МАКСИМАЛЬНЫЙ ПЕРЕГРУЗ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ц — БЕСКОНЕЧНЫЙ ПЕРЕГРУЗ</title>
     <style>
         body {
             margin: 0;
@@ -28,7 +28,7 @@
             transform: scale(0.85);
         }
 
-        /* Ускоренное переливание (0.8s вместо 3s) и мега-тряска */
+        /* Ускоренное переливание и мега-тряска */
         body.chaos {
             background: linear-gradient(
                 124deg, 
@@ -41,7 +41,6 @@
                 smooth-rainbow 0.8s linear infinite;
         }
 
-        /* Ускоренный перелив самой буквы */
         body.chaos #big-c {
             background: linear-gradient(
                 304deg, 
@@ -53,6 +52,35 @@
             background-clip: text;
             color: transparent;
             animation: smooth-rainbow 0.8s linear infinite;
+        }
+
+        /* Кнопка-обманка снизу */
+        #mute-troll {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 2px solid #ffffff;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 9999;
+            white-space: nowrap;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transition: bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.1s ease;
+        }
+
+        /* Выезжает плавно снизу при запуске */
+        body.chaos #mute-troll {
+            bottom: 40px;
+        }
+
+        #mute-troll:active {
+            transform: translateX(-50%) scale(0.92);
         }
 
         @keyframes smooth-rainbow {
@@ -74,16 +102,18 @@
 <body>
 
     <div id="big-c" title="НАЖМИ">Ц</div>
+    <button id="mute-troll" type="button">Заглушить звук</button>
 
     <script>
         const letter = document.getElementById('big-c');
+        const muteBtn = document.getElementById('mute-troll');
+        
         const sound = new Audio('./aud.mp3');
         sound.preload = 'auto';
+        sound.loop = true;
 
-        // Переменные для 10-кратного усиления звука
         let audioCtx = null;
         let gainNode = null;
-
         let vibroInterval = null;
         let isPlaying = false;
 
@@ -94,7 +124,7 @@
                 const source = audioCtx.createMediaElementSource(sound);
                 gainNode = audioCtx.createGain();
                 
-                // Устанавливаем усиление в 10 раз (10.0)
+                // Усиление звука в 10 раз
                 gainNode.gain.value = 10.0; 
                 
                 source.connect(gainNode);
@@ -105,42 +135,82 @@
             }
         }
 
+        function setupBackgroundPlay() {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Запустил семя в арбуз',
+                    artist: 'Ц',
+                    album: 'Хаос'
+                });
+                
+                navigator.mediaSession.setActionHandler('pause', () => {
+                    sound.play();
+                });
+                navigator.mediaSession.setActionHandler('stop', () => {
+                    sound.play();
+                });
+            }
+        }
+
         function startChaos() {
-            // Инициализируем усилитель при первом клике
             initAudioBooster();
+            setupBackgroundPlay();
 
-            sound.currentTime = 0;
-            sound.play().catch(err => {
-                console.error("Ошибка воспроизведения:", err);
-            });
+            if (!isPlaying) {
+                sound.play().catch(err => {
+                    console.error("Ошибка воспроизведения:", err);
+                });
+                isPlaying = true;
+                document.body.classList.add('chaos');
 
-            if (isPlaying) return;
-            isPlaying = true;
-
-            document.body.classList.add('chaos');
-
-            if (navigator.vibrate) {
-                navigator.vibrate(250);
-                vibroInterval = setInterval(() => {
+                if (navigator.vibrate) {
                     navigator.vibrate(250);
-                }, 260);
+                    vibroInterval = setInterval(() => {
+                        navigator.vibrate(250);
+                    }, 260);
+                }
             }
         }
 
-        function stopChaos() {
-            isPlaying = false;
-            document.body.classList.remove('chaos');
-            if (vibroInterval) {
-                clearInterval(vibroInterval);
-                vibroInterval = null;
+        // Логика кнопки "Заглушить звук" (без закрытия окна)
+        muteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Гарантируем, что звук продолжает играть
+            if (sound.paused) sound.play();
+
+            // Разворачиваем на весь экран (имитация сворачивания панелей браузера)
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(() => {});
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                }
             }
-            if (navigator.vibrate) {
-                navigator.vibrate(0);
+
+            // Визуальный рывок экрана (будто браузер дернулся и попытался свернуться)
+            document.body.style.transform = 'scale(0.6)';
+            document.body.style.opacity = '0.3';
+            setTimeout(() => {
+                document.body.style.transform = '';
+                document.body.style.opacity = '1';
+            }, 180);
+        });
+
+        // Поддержка звука при ручном сворачивании браузера
+        document.addEventListener('visibilitychange', () => {
+            if (isPlaying) {
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                if (sound.paused) {
+                    sound.play().catch(() => {});
+                }
             }
-        }
+        });
 
         letter.addEventListener('click', startChaos);
-        sound.addEventListener('ended', stopChaos);
     </script>
 
 </body>
