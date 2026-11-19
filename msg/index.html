@@ -195,7 +195,7 @@ const P = "msgmsg-4";
 const firebaseConfig = {
   apiKey: "AIzaSyAxklr89xat11VhHriMXmsbOJadWdkZ8L0",
   authDomain: P + ".firebaseapp.com",
-  databaseURL: "https://" + P + "://firebaseio.com",
+  databaseURL: "https://" + P + "-default-rtdb.firebaseio.com",
   projectId: P,
   storageBucket: P + ".firebasestorage.app",
   messagingSenderId: "55140283377",
@@ -203,8 +203,8 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const FB_URL = "https://" + P + "://firebaseio.com";
-const TITIK_AVA = "https://i.oneme.ru/i?r=B1NHQN0Qr3SEKX3_pN3PSSI72NlvNhoM5dg9JIS2thJ-xc5DJGPC6mEF8gW57RR2VCfd90aI7lFwmPJXNqWYikaORBLZVhlSmt1gwhGxY6lksgqr&fn=sqr_96;
+const FB_URL = "https://" + P + "-default-rtdb.firebaseio.com";
+const TITIK_AVA = ["https://i.oneme.ru/i?r=B1NHQN0Qr3SEKX3_pN3PSSI72NlvNhoM5dg9JIS2thJ-xc5DJGPC6mEF8gW57RR2VCfd90aI7lFwmPJXNqWYikaORBLZVhlSmt1gwhGxY6lksgqr", "fn=sqr_96"].join("&");
 const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
