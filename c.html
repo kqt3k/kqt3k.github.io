@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ц — ПЛАВНЫЙ ХАОС</title>
+    <title>Ц — МАКСИМАЛЬНЫЙ ПЕРЕГРУЗ</title>
     <style>
         body {
             margin: 0;
@@ -28,7 +28,7 @@
             transform: scale(0.85);
         }
 
-        /* Режим плавного переливания и сильной тряски */
+        /* Ускоренное переливание (0.8s вместо 3s) и мега-тряска */
         body.chaos {
             background: linear-gradient(
                 124deg, 
@@ -38,10 +38,10 @@
             background-size: 800% 800%;
             animation: 
                 mega-shake 0.05s infinite linear, 
-                smooth-rainbow 3s ease infinite;
+                smooth-rainbow 0.8s linear infinite;
         }
 
-        /* Плавный перелив самой буквы (инвертированный градиент для контраста) */
+        /* Ускоренный перелив самой буквы */
         body.chaos #big-c {
             background: linear-gradient(
                 304deg, 
@@ -52,17 +52,15 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: smooth-rainbow 3s ease infinite;
+            animation: smooth-rainbow 0.8s linear infinite;
         }
 
-        /* Движение градиента для плавного перелива */
         @keyframes smooth-rainbow {
             0%   { background-position: 0% 50%; }
             50%  { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* Экстремальная тряска экрана */
         @keyframes mega-shake {
             0%   { transform: translate(0, 0) rotate(0deg) scale(1.1); }
             20%  { transform: translate(-45px, 35px) rotate(-8deg) scale(1.15); }
@@ -82,10 +80,35 @@
         const sound = new Audio('./aud.mp3');
         sound.preload = 'auto';
 
+        // Переменные для 10-кратного усиления звука
+        let audioCtx = null;
+        let gainNode = null;
+
         let vibroInterval = null;
         let isPlaying = false;
 
+        function initAudioBooster() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                const source = audioCtx.createMediaElementSource(sound);
+                gainNode = audioCtx.createGain();
+                
+                // Устанавливаем усиление в 10 раз (10.0)
+                gainNode.gain.value = 10.0; 
+                
+                source.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function startChaos() {
+            // Инициализируем усилитель при первом клике
+            initAudioBooster();
+
             sound.currentTime = 0;
             sound.play().catch(err => {
                 console.error("Ошибка воспроизведения:", err);
