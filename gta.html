@@ -1,0 +1,367 @@
+html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiquidBlox 27 — Wiki-Accurate SBTD, NDS & MM2</title>
+    <style>
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.36);
+            --glass-highlight: rgba(255, 255, 255, 0.75);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.84);
+            --accent-green: #30d158;
+            --accent-gold: #ffd60a;
+            --accent-cyan: #00e5ff;
+            --accent-red: #ff453a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #04060e;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            position: relative;
+        }
+
+        #glCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            display: block;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1160px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .liquid-glass {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.16) 0%,
+                rgba(255, 255, 255, 0.04) 50%,
+                rgba(255, 255, 255, 0.12) 100%
+            );
+            backdrop-filter: blur(28px) saturate(190%) contrast(110%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(110%);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 28px 55px -15px rgba(0, 0, 0, 0.65),
+                inset 0 1.5px 1.5px var(--glass-highlight),
+                inset 0 -1.5px 3px rgba(255, 255, 255, 0.12),
+                inset 1.5px 0 2px rgba(120, 220, 255, 0.25),
+                inset -1.5px 0 2px rgba(255, 120, 220, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 22px;
+            border-radius: 999px !important;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-orb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #00e5ff 55%, #7b2cbf 100%);
+            box-shadow: 0 0 14px #00e5ff;
+        }
+
+        .status-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot-green {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 860px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .stat-card {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .daily-income {
+            font-size: clamp(1.4rem, 2.9vw, 2.2rem);
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(90deg, #fff6b7 0%, #ffd60a 45%, #30d158 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .online-number {
+            font-size: clamp(1.15rem, 2.2vw, 1.8rem);
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            background: linear-gradient(90deg, #ffffff 0%, #80f5ff 50%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            word-break: break-all;
+        }
+
+        .badge-live {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 214, 10, 0.2);
+            border: 1px solid rgba(255, 214, 10, 0.55);
+            color: #ffe97d;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .guarantees {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .guarantee-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(48, 209, 88, 0.18);
+            border: 1px solid rgba(48, 209, 88, 0.55);
+            color: #b8ffca;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .glass-btn {
+            padding: 9px 16px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.12) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #fff;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1.5px 1px rgba(255, 255, 255, 0.85);
+            transition: all 0.2s ease;
+        }
+
+        .glass-btn:hover { transform: scale(1.04); }
+        .glass-btn:active { transform: scale(0.96); }
+
+        .glass-btn.active-tab {
+            background: rgba(0, 229, 255, 0.35);
+            border-color: #70f3ff;
+            box-shadow: 0 0 22px rgba(0, 229, 255, 0.4), inset 0 1px 1px #fff;
+        }
+
+        .arcade-arena {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .game-tabs, .sub-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 780px;
+        }
+
+        .tower-card {
+            padding: 7px 12px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .tower-card.selected {
+            background: rgba(255, 214, 10, 0.3);
+            border-color: #ffd60a;
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .game-hud {
+            width: 100%;
+            max-width: 780px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.38);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            font-weight: 700;
+            font-size: 0.88rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            max-width: 780px;
+            height: 410px;
+            border-radius: 24px;
+            background: rgba(5, 10, 24, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            box-shadow: inset 0 0 35px rgba(0, 229, 255, 0.14);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .game-hint {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            text-align: center;
+            line-height: 1.4;
+            max-width: 780px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="glCanvas"></canvas>
+
+    <div class="container">
+        <nav class="liquid-glass">
+            <div class="logo">
+                <div class="logo-orb"></div>
+                <span>LiquidBlox 27 • Wiki Edition</span>
+            </div>
+            <div class="status-pills">
+                <div class="pill"><span class="dot-green"></span> 0 читеров</div>
+                <div class="pill"><span class="dot-green"></span> 0 багов</div>
+                <div class="pill">📖 SBTD • NDS • MM2</div>
+            </div>
+            <button class="glass-btn" style="padding: 7px 15px; font-size: 0.82rem;" onclick="cyclePalette()">
+                Сменить свет
+            </button>
+        </nav>
+
+        <section class="dashboard-grid">
+            <div class="stat-card liquid-glass">
+                <div class="stat-label" style="color: var(--accent-gold);">
+                    <span>💰 Доход сайта в день</span>
+                    <span class="badge-live">+501 543 ₽ / сек</span>
+                </div>
+43 333 322 776 ₽ / день
+
+Заработано за сессию: 0 ₽
+
+🌍 Игроков онлайн
+● 120 FPS
+
+68 676 868 654 443 222 223 3333
+
+🛡️ QuantumGuard: 0 читеров
+✨ Чистый код: 0 багов
+
+🧤 Slap Battles TD
+🌪️ Natural Disaster Survival
+🔪 Murder Mystery 2
+🤍 Default (50 🧤)
+👥 Replica Спавнер (110 🧤)
+🗿 Moai Ловушки (160 🧤)
+🔥 OVERKILL (260 🧤)
+🖤 Bob (420 🧤)
+⏩ 1x
+☢️ Nuke (350 🧤)
+🎈 Green Balloon
+🍎 Red Apple (+40 HP)
+Slap Battles Tower Defense
+Слэпы: 150 🧤 | Волна: 1 | База: 100%
+Рестарт
+Slap → Place → Upgrade! Кликай по врагам на тропе (+5 🧤), ставь башни рядом с дорогой и кликай на них для прокачки до Lvl 3!
+
+attribute vec2 a_position;
+void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
+precision highp float;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform vec2 u_mouse;
+uniform float u_palette;
+float smin(float a, float b, float k) {
+float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+return mix(b, a, h) - k * h * (1.0 - h);
+}
