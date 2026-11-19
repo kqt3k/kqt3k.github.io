@@ -191,20 +191,20 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
   </div>
 </div>
 <script>
+const P = "msgmsg-4";
 const firebaseConfig = {
   apiKey: "AIzaSyAxklr89xat11VhHriMXmsbOJadWdkZ8L0",
-  authDomain: "://firebaseapp.com",
-  databaseURL: "https://firebaseio.com",
-  projectId: "msgmsg-4",
-  storageBucket: "msgmsg-4.firebasestorage.app",
+  authDomain: P + ".firebaseapp.com",
+  databaseURL: "https://" + P + "://firebaseio.com",
+  projectId: P,
+  storageBucket: P + ".firebasestorage.app",
   messagingSenderId: "55140283377",
   appId: "1:55140283377:web:208454f981e881b38a4a50"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-
-const FB_URL = "https://firebaseio.com";
-const TITIK_AVA = "https://oneme.ru";
+const FB_URL = "https://" + P + "://firebaseio.com";
+const TITIK_AVA = "https://i.oneme.ru/i?r=B1NHQN0Qr3SEKX3_pN3PSSI72NlvNhoM5dg9JIS2thJ-xc5DJGPC6mEF8gW57RR2VCfd90aI7lFwmPJXNqWYikaORBLZVhlSmt1gwhGxY6lksgqr&fn=sqr_96;
 const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
