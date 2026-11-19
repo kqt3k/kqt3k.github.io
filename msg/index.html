@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MSG — Мессенджер (msgmsg-4)</title>
+<title>M43SG — Мессенджер (msgmsg-4)</title>
 <script>
 const cdnParts = ["https:", "", "cdn.jsdelivr.net", "npm", "firebase@10.12.2"];
 ["firebase-app-compat.js", "firebase-auth-compat.js"].forEach(file => {
@@ -832,5 +832,15 @@ function pGSS(id,n){const g=games[id];if(!g||g.ok||g.tr.includes(n))return;g.tr.
   setInterval(()=>{ if(!document.hidden) pullDB(); }, 4000);
 })();
 </script>
+<style>
+body { display: flex !important; flex-direction: row !important; height: 100vh !important; overflow: hidden !important; }
+aside#sb { width: 350px !important; min-width: 350px !important; max-width: 350px !important; display: flex !important; flex-direction: column !important; flex-shrink: 0 !important; }
+aside#sb .sb-h { display: flex !important; flex-direction: column !important; gap: 8px !important; padding: 14px !important; width: 100% !important; }
+aside#sb .sb-h > .row, aside#sb .sb-h > .prof { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; }
+aside#sb #clist { display: flex !important; flex-direction: column !important; flex: 1 !important; overflow-y: auto !important; width: 100% !important; }
+main.main { flex: 1 !important; display: flex !important; flex-direction: column !important; min-width: 0 !important; }
+div.mod { display: none !important; }
+div.mod.open { display: flex !important; }
+</style>
 </body>
 </html>
