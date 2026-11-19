@@ -78,27 +78,24 @@
 
     <script>
         const letter = document.getElementById('big-c');
-        // Создаем аудио напрямую в JS — так надежнее обходить блокировки
-        const sound = new Audio('https://myinstants.com');
-        sound.crossOrigin = "anonymous";
+        // Подключаем локальный файл aud.mp3 из той же папки
+        const sound = new Audio('./aud.mp3');
+        sound.preload = 'auto';
 
         let vibroInterval = null;
         let isPlaying = false;
 
         function startChaos() {
-            // Запускаем звук (каждый клик начинает заново)
             sound.currentTime = 0;
             sound.play().catch(err => {
-                alert("Браузер заблокировал звук или нет интернета: " + err.message);
+                console.error("Ошибка воспроизведения:", err);
             });
 
             if (isPlaying) return;
             isPlaying = true;
 
-            // Включаем анимации
             document.body.classList.add('chaos');
 
-            // Бесконечная вибрация через цикл, пока играет звук
             if (navigator.vibrate) {
                 navigator.vibrate(250);
                 vibroInterval = setInterval(() => {
@@ -121,10 +118,6 @@
 
         letter.addEventListener('click', startChaos);
         sound.addEventListener('ended', stopChaos);
-        // На случай ошибки загрузки аудио — отключаем тряску через 3 секунды
-        sound.addEventListener('error', () => {
-            setTimeout(stopChaos, 3000);
-        });
     </script>
 
 </body>
