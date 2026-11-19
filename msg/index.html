@@ -3,22 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>333MSG(msgmsg-4)</title>
+<title>updMSG — Мессенджер (msgmsg-4)</title>
 <script>
 const cdnParts = ["https:", "", "cdn.jsdelivr.net", "npm", "firebase@10.12.2"];
 ["firebase-app-compat.js", "firebase-auth-compat.js"].forEach(file => {
-  const url = cdnParts.concat(file).join("/");
-  document.write('<script src="' + url + '"><\/script>');
+  document.write('<script src="' + cdnParts.concat(file).join("/") + '"><\/script>');
 });
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
 :root{--bg:#0b0e17;--sb:#111625;--ch:#0d111d;--cd:#182035;--hv:#1e2842;--ac:#4c82fb;--out:#2b5298;--in:#192136;--tx:#f0f4fc;--mt:#8896b3;--bd:#1f2942;--on:#2ed573;--gd:#f1c40f;--cy:#00d2d3}
-body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden}
+body[data-theme="matrix"]{--bg:#020a04;--sb:#051409;--ch:#030d06;--cd:#0a2412;--hv:#10361b;--ac:#00e676;--out:#006937;--in:#091f10;--tx:#d8ffe4;--mt:#66b282;--bd:#123d1f}
+body[data-theme="cyber"]{--bg:#12041c;--sb:#1b0729;--ch:#14051f;--cd:#280c3d;--hv:#371254;--ac:#ff007f;--out:#7b1fa2;--in:#230936;--tx:#fce4ec;--mt:#b388ff;--bd:#4a148c}
+body[data-theme="gold"]{--bg:#141005;--sb:#1f1808;--ch:#171206;--cd:#2b210b;--hv:#3b2d0f;--ac:#f1c40f;--out:#8c6d1f;--in:#261d0a;--tx:#fff8e1;--mt:#d4af37;--bd:#5c4714}
+body[data-theme="bday"]{--bg:#1a0814;--sb:#260c1d;--ch:#1c0916;--cd:#38122b;--hv:#4d193b;--ac:#ff4081;--out:#ad1457;--in:#301025;--tx:#fff0f6;--mt:#f48fb1;--bd:#6a1b4d}
+body[data-theme="winter"]{--bg:#07131f;--sb:#0c1e30;--ch:#091726;--cd:#132c45;--hv:#1a3c5e;--ac:#38bdf8;--out:#0284c7;--in:#10253b;--tx:#f0f9ff;--mt:#7dd3fc;--bd:#1e4976}
+body[data-theme="halloween"]{--bg:#120902;--sb:#1c0e04;--ch:#140a03;--cd:#2b1606;--hv:#3d1f09;--ac:#ff6d00;--out:#bf360c;--in:#241205;--tx:#fff3e0;--mt:#ffab40;--bd:#5d2b0a}
+body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden;transition:background .3s}
 .sb{width:350px;background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
 .sb-h{padding:14px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#4c82fb,#8c52ff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--ac),#8c52ff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff}
 .coin-pill{background:rgba(241,196,15,.15);color:var(--gd);border:1px solid rgba(241,196,15,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
 .stix-pill{background:rgba(0,210,211,.15);color:var(--cy);border:1px solid rgba(0,210,211,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
 .prof{background:var(--cd);border:1px solid var(--bd);padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px}
@@ -28,63 +33,60 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 .btn-d{background:#ff4757;color:#fff}
 .list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
 .item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;cursor:pointer}
-.item:hover{background:var(--hv)}.item.act{background:#253354}
-.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden}
+.item:hover{background:var(--hv)}.item.act{background:var(--cd);border:1px solid var(--bd)}
+.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer}
 .av img{width:100%;height:100%;object-fit:cover;display:block}
-.av-sm{width:26px;height:26px;font-size:11px}
+.av-sm{width:26px;height:26px;font-size:11px}.av-lg{width:68px;height:68px;font-size:24px;margin:0 auto}
 .info{flex:1;min-width:0}.nm{font-weight:600;font-size:14px;display:flex;align-items:center;gap:5px}.pr{font-size:12px;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tag{font-size:10px;padding:1px 6px;border-radius:6px;background:#263559;color:#8ab4ff}
+.tag{font-size:10px;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.1);color:var(--ac)}
 .tag-s{background:rgba(241,196,15,.2);color:var(--gd);border:1px solid rgba(241,196,15,.4)}
-.main{flex:1;display:flex;flex-direction:column;background:radial-gradient(circle at top right,#141d36,var(--ch) 60%);min-width:0}
-.ch-h{height:60px;padding:0 16px;border-bottom:1px solid var(--bd);background:rgba(17,22,37,.9);display:flex;align-items:center;justify-content:space-between}
+.main{flex:1;display:flex;flex-direction:column;background:var(--ch);min-width:0}
+.ch-h{height:60px;padding:0 16px;border-bottom:1px solid var(--bd);background:var(--sb);display:flex;align-items:center;justify-content:space-between}
 .abtn{background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:7px 10px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer}
 .gdraw{background:var(--sb);border-bottom:1px solid var(--bd);padding:10px 16px;display:none;gap:8px;flex-wrap:wrap;align-items:center}.gdraw.open{display:flex}
-.chip{background:#1d2847;border:1px solid #33477d;color:#fff;padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
+.chip{background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
 .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
 .msg-row{display:flex;align-items:flex-end;gap:8px;max-width:82%}
-.msg-row.out{align-self:flex-end;flex-direction:row-reverse}
-.msg-row.in{align-self:flex-start}
+.msg-row.out{align-self:flex-end;flex-direction:row-reverse}.msg-row.in{align-self:flex-start}
 .msg{padding:9px 13px;border-radius:15px;font-size:14px;line-height:1.35;word-wrap:break-word}
-.msg.in{background:var(--in);border:1px solid var(--bd)}
-.msg.out{background:var(--out)}
-.tm{font-size:10px;opacity:.6;text-align:right;margin-top:3px}
-.gcard{background:#101626;border:1px solid #2e406e;border-radius:12px;padding:11px;margin-top:5px;min-width:220px}
+.msg.in{background:var(--in);border:1px solid var(--bd)}.msg.out{background:var(--out);color:#fff}
+.bbl-neon{border:1.5px solid #00f2fe!important;box-shadow:0 0 10px rgba(0,242,254,.35)}
+.bbl-grad{background:linear-gradient(135deg,#667eea,#764ba2)!important;border:none!important}
+.bbl-gold{background:linear-gradient(135deg,#b8860b,#daa520)!important;color:#000!important;font-weight:600;border:1px solid #fff3b0!important}
+.tm{font-size:10px;opacity:.65;text-align:right;margin-top:3px}
+.gcard{background:#101626;border:1px solid #2e406e;border-radius:12px;padding:11px;margin-top:5px;min-width:220px;color:#fff}
 .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
 .cell{height:48px;background:#1b2540;border:1px solid #2f406e;border-radius:8px;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .ibtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .mbtn{flex:1;min-width:36px;padding:8px;background:#1e2947;border:1px solid #35497d;border-radius:8px;color:#fff;font-weight:700;cursor:pointer}
 .cbtn{width:100%;padding:12px;margin-top:8px;border-radius:10px;border:none;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;font-weight:800;cursor:pointer}
 .inp-a{padding:12px 16px;background:var(--sb);border-top:1px solid var(--bd);display:flex;gap:8px;align-items:center}
-.inp{flex:1;background:var(--cd);border:1px solid var(--bd);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;outline:none}
+.inp{flex:1;background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:10px 14px;border-radius:12px;font-size:14px;outline:none}
 .sbtn{background:var(--ac);color:#fff;border:none;width:42px;height:42px;border-radius:12px;font-size:17px;cursor:pointer}
 .mod{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:99;padding:16px}.mod.open{display:flex}
-.mbox{background:var(--sb);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:460px;display:flex;flex-direction:column;gap:10px;max-height:88vh;overflow-y:auto}
-.mbox input,.mbox select{background:var(--cd);border:1px solid var(--bd);color:#fff;padding:10px;border-radius:9px;outline:none;width:100%}
+.mbox{background:var(--sb);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:470px;display:flex;flex-direction:column;gap:10px;max-height:88vh;overflow-y:auto}
+.mbox input,.mbox select{background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:10px;border-radius:9px;outline:none;width:100%}
 .acard{background:var(--cd);border:1px solid var(--bd);padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--on);color:#000;font-weight:700;padding:8px 16px;border-radius:10px;font-size:13px;display:none;z-index:200}
-.bk{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+.bk{display:none;background:none;border:none;color:var(--tx);font-size:20px;cursor:pointer}
 @media(max-width:768px){.sb{width:100%;position:absolute;inset:0;z-index:20}.sb.hide{transform:translateX(-100%)}.bk{display:block}}
 </style>
 </head>
-<body>
-<div class="toast" id="toast"></div>
-<aside class="sb" id="sb">
-  <div class="sb-h">
-    <div class="row">
       <div style="display:flex;align-items:center;gap:7px;font-weight:800"><div class="logo">MSG</div>msgmsg-4</div>
       <div style="display:flex;gap:4px">
-        <span class="coin-pill" id="coinBadge" onclick="openMod('payMod')" title="Редкая валюта MSGOIN">🪙 0.00</span>
-        <span class="stix-pill" id="stixBadge" onclick="openMod('payMod')" title="Ежедневная валюта MSTIX">🎟️ 0</span>
+        <span class="coin-pill" id="coinBadge" onclick="openMod('payMod')">🪙 0.00</span>
+        <span class="stix-pill" id="stixBadge" onclick="openMod('payMod')">🎟️ 0</span>
       </div>
     </div>
     <div class="prof" id="profBox">
-      <span>Вход только через Google</span>
-      <button class="btn" onclick="googleSignIn()">🔵 Войти через Google</button>
+      <span>Вход через Google</span>
+      <button class="btn" onclick="googleSignIn()">🔵 Войти</button>
     </div>
     <div class="row">
-      <button class="btn" style="flex:1" onclick="openMod('dmMod')">+ ЛС по ID</button>
-      <button class="btn" style="flex:1" onclick="openMod('chMod')">+ Канал (2)</button>
-      <button class="btn btn-g" id="admBtn" style="display:none" onclick="openAdmin()">👑 Админ</button>
+      <button class="btn" style="flex:1" onclick="openMod('dmMod')">+ ЛС</button>
+      <button class="btn" style="flex:1" onclick="openMod('chMod')">+ Канал</button>
+      <button class="btn btn-c" style="flex:1" onclick="openShop()">🛒 Магазин</button>
+      <button class="btn btn-g" id="admBtn" style="display:none" onclick="openAdmin()">👑</button>
     </div>
   </div>
   <div class="list" id="clist"></div>
@@ -102,7 +104,7 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
     <div style="display:flex;gap:6px">
       <button class="abtn" id="leaveBtn" style="display:none;color:#ff6b81" onclick="leaveChannel()">Выйти</button>
       <button class="abtn" onclick="openMod('payMod')">💸 Перевод</button>
-      <button class="abtn" id="gamesBtn" onclick="togG()">🎮 Игры</button>
+      <button class="abtn" onclick="togG()">🎮 Игры</button>
     </div>
   </header>
   <div class="gdraw" id="gdraw">
@@ -119,14 +121,49 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
     <button type="submit" class="sbtn">➤</button>
   </form>
 </main>
-
 <div class="mod" id="regMod">
   <div class="mbox">
-    <h3>Завершение регистрации в MSG</h3>
-    <p style="font-size:12px;color:var(--mt)">Google привязан! Выбери уникальный никнейм. Стартовый бонус: <b>50 MSTIX 🎟️</b> (редкие <b>MSGOIN 🪙</b> добываются в играх или выдаются Админом).</p>
+    <h3>Регистрация в MSG</h3>
+    <p style="font-size:12px;color:var(--mt)">Выбери уникальный никнейм. Стартовый бонус: <b>50 MSTIX 🎟️</b> (1 акк на 1 IP раз в 2 дня).</p>
     <input id="rNick" placeholder="Уникальный никнейм">
-    <input id="rAva" placeholder="Ссылка на аватарку (или оставь фото Google)">
+    <input id="rAva" placeholder="Ссылка на аватарку">
     <button class="btn" onclick="completeGoogleReg()">Создать аккаунт</button>
+  </div>
+</div>
+
+<div class="mod" id="profMod">
+  <div class="mbox">
+    <h3>👤 Мой профиль и кастомизация</h3>
+    <input id="pBio" placeholder="Статус / О себе (макс. 60 символов)">
+    <input id="pAva" placeholder="Ссылка на аватарку">
+    <label style="font-size:12px;color:var(--mt)">Цвет твоего ника в чате:</label>
+    <select id="pColor">
+      <option value="">Стандартный</option>
+      <option value="#00e676">Изумрудный неон</option>
+      <option value="#ff4081">Розовый</option>
+      <option value="#f1c40f">Золотой</option>
+      <option value="#38bdf8">Ледяной голубой</option>
+    </select>
+    <div class="row">
+      <button class="btn" style="flex:1" onclick="saveProfile()">Сохранить профиль</button>
+      <button class="abtn" onclick="closeMods()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="mod" id="viewUserMod">
+  <div class="mbox" id="viewUserBody"></div>
+</div>
+
+<div class="mod" id="shopMod">
+  <div class="mbox">
+    <h3>🛒 Магазин тем и чат-баблов</h3>
+    <p style="font-size:12px;color:var(--mt)">Не хватает валюты? Купить можно у <b>nekotlay</b> в ЛС (<b>ID 1</b>) 👑</p>
+    <b style="font-size:13px">🎨 Темы оформления:</b>
+    <div id="shopThemes" style="display:flex;flex-direction:column;gap:6px"></div>
+    <b style="font-size:13px;margin-top:6px">💬 Стиль чат-баблов:</b>
+    <div id="shopBubbles" style="display:flex;flex-direction:column;gap:6px"></div>
+    <button class="abtn" onclick="closeMods()">Закрыть</button>
   </div>
 </div>
 
@@ -137,21 +174,10 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
       <option value="coins">🪙 MSGOIN (редкая премиум-валюта)</option>
       <option value="mstix">🎟️ MSTIX (ежедневная валюта)</option>
     </select>
-    <input id="payToId" type="number" placeholder="ID получателя (например: 2)">
-    <input id="payAmount" type="number" step="0.01" placeholder="Сумма (например: 0.05 или 10)">
+    <input id="payToId" type="number" placeholder="ID получателя">
+    <input id="payAmount" type="number" step="0.01" placeholder="Сумма">
     <div class="row">
       <button class="btn btn-g" style="flex:1" onclick="sendCurrency()">Перевести</button>
-      <button class="abtn" onclick="closeMods()">Отмена</button>
-    </div>
-  </div>
-</div>
-
-<div class="mod" id="avaMod">
-  <div class="mbox">
-    <h3>Сменить аватарку</h3>
-    <input id="newAvaUrl" placeholder="Вставь прямую ссылку на картинку (https://...)">
-    <div class="row">
-      <button class="btn" style="flex:1" onclick="saveAvatar()">Сохранить</button>
       <button class="abtn" onclick="closeMods()">Отмена</button>
     </div>
   </div>
@@ -160,7 +186,7 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 <div class="mod" id="dmMod">
   <div class="mbox">
     <h3>Написать по ID</h3>
-    <input id="dmId" type="number" placeholder="Введи ID (например: 2)">
+    <input id="dmId" type="number" placeholder="Введи ID">
     <div class="row">
       <button class="btn" style="flex:1" onclick="openDM()">Открыть чат</button>
       <button class="abtn" onclick="closeMods()">Отмена</button>
@@ -183,6 +209,16 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 <div class="mod" id="admMod">
   <div class="mbox">
     <h3>👑 Админ-панель MSG (ID 1)</h3>
+    <b style="font-size:13px">🎉 Праздничный ивент (автовыдача темы всем зашедшим):</b>
+    <div class="row">
+      <select id="admEventSel">
+        <option value="">Нет активного праздника</option>
+        <option value="bday">🎂 День рождения MSG (Лимитированная)</option>
+        <option value="winter">❄️ Зима / Новый год (Лимитированная)</option>
+        <option value="halloween">🎃 Хэллоуин (Лимитированная)</option>
+      </select>
+      <button class="btn btn-g" onclick="setGlobalEvent()">Применить</button>
+    </div>
     <b style="font-size:13px">Каналы (startchannel):</b>
     <div id="admChannels" style="display:flex;flex-direction:column;gap:6px"></div>
     <b style="font-size:13px;margin-top:6px">Юзеры, IP-журнал, Баны и Валюта:</b>
@@ -195,7 +231,7 @@ const P = "msgmsg-4";
 const firebaseConfig = {
   apiKey: "AIzaSyAxklr89xat11VhHriMXmsbOJadWdkZ8L0",
   authDomain: P + ".firebaseapp.com",
-  databaseURL: "https://" + P + "-default-rtdb.firebaseio.com",
+  databaseURL: "https://" + P + "://firebaseio.com",
   projectId: P,
   storageBucket: P + ".firebasestorage.app",
   messagingSenderId: "55140283377",
@@ -203,38 +239,42 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const FB_URL = "https://" + P + "-default-rtdb.firebaseio.com";
-const TITIK_AVA = ["https://i.oneme.ru/i?r=B1NHQN0Qr3SEKX3_pN3PSSI72NlvNhoM5dg9JIS2thJ-xc5DJGPC6mEF8gW57RR2VCfd90aI7lFwmPJXNqWYikaORBLZVhlSmt1gwhGxY6lksgqr", "fn=sqr_96"].join("&");
-const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const FB_URL = "https://" + P + "://firebaseio.com";
+const TITIK_AVA = ["https://oneme.ru", "fn=sqr_96"].join("&");
+const TWO_DAYS_MS = 172800000;
+const ONE_DAY_MS = 86400000;
+
+const THEMES_CATALOG = [
+  { id: "default", name: "🌌 Космос (Базовая)", cur: "free", price: 0 },
+  { id: "matrix", name: "💚 Матрица", cur: "mstix", price: 50 },
+  { id: "cyber", name: "💜 Киберпанк", cur: "mstix", price: 120 },
+  { id: "gold", name: "👑 Золотой VIP", cur: "coins", price: 0.15 },
+  { id: "bday", name: "🎂 День рождения MSG", cur: "event", price: 0 },
+  { id: "winter", name: "❄️ Зима / Новый год", cur: "event", price: 0 },
+  { id: "halloween", name: "🎃 Хэллоуин", cur: "event", price: 0 }
+];
+
+const BUBBLES_CATALOG = [
+  { id: "default", name: "💬 Классический бабл", cur: "free", price: 0 },
+  { id: "neon", name: "💠 Неоновая рамка", cur: "mstix", price: 40 },
+  { id: "grad", name: "🔮 Фиолетовый градиент", cur: "mstix", price: 80 },
+  { id: "gold", name: "🏆 Золотой слиток", cur: "coins", price: 0.10 }
+];
 
 let DB = {
-  nextId: 1,
-  users: {},
-  google_map: {},
-  nicks: {},
-  ip_cooldowns: {},
-  banned_ips: {},
+  eventTheme: "", nextId: 1, users: {}, google_map: {}, nicks: {}, ip_cooldowns: {}, banned_ips: {},
   channels: {
     ch_main: {
-      id: "ch_main",
-      title: "MSG Official",
-      ownerId: 1,
-      startchannel: true,
+      id: "ch_main", title: "MSG Official", ownerId: 1, startchannel: true,
       msgs: { m0: { s: "Система", uid: 0, t: "Добро пожаловать в мессенджер MSG (msgmsg-4)! Первый аккаунт получит ID 1 (Админ) 👑", tm: tm() } }
     }
   },
   dms: {}
 };
 
-let fbUser = null;
-let idToken = "";
-let curUserId = 0;
-let clientIP = "unknown";
-let act = "bot";
-let lastGameTime = 0;
+let fbUser = null, idToken = "", curUserId = 0, clientIP = "unknown", act = "bot", lastGameTime = 0;
 const games = {};
-const botMsgs = [{ f: "in", s: "Мем-Бот MSG", t: "Входи через Google! За ежедневный вход капает +25 MSTIX 🎟️, а за победы в играх — редкие +0.01 MSGOIN 🪙 (перезарядка 30 сек).", tm: tm() }];
+const botMsgs = [{ f: "in", s: "Мем-Бот MSG", t: "Входи через Google! Заходи в 🛒 Магазин за темами и чат-баблами, а за вход во время праздника тема даётся навсегда!", tm: tm() }];
 
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function tm(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
@@ -246,35 +286,15 @@ function togSb(s){document.getElementById("sb").classList.toggle("hide",!s)}
 function togG(){document.getElementById("gdraw").classList.toggle("open")}
 
 function isTitik(nick){return /t[1i]t[1i]k/i.test(String(nick||""))}
-function getUserAvatar(u){
-  if(!u)return"";
-  if(isTitik(u.nick))return TITIK_AVA;
-  return u.avatar||"";
-}
-function renderAvatarInner(u, fallbackText){
-  const url = getUserAvatar(u);
-  if(url) return '<img src="'+esc(url)+'" alt="ava">';
-  return esc(fallbackText);
-}
+function getUserAvatar(u){if(!u)return"";if(isTitik(u.nick))return TITIK_AVA;return u.avatar||""}
+function renderAvatarInner(u,fb){const url=getUserAvatar(u);return url?'<img src="'+esc(url)+'" alt="ava">':esc(fb)}
 
-function toObj(val){
-  if(!val)return{};
-  if(Array.isArray(val)){const o={};val.forEach((v,i)=>{if(v)o[v.id||i]=v});return o}
-  return val;
-}
-function toArr(val){
-  if(!val)return[];
-  if(Array.isArray(val))return val.filter(Boolean);
-  return Object.values(val);
-}
+function toObj(val){if(!val)return{};if(Array.isArray(val)){const o={};val.forEach((v,i)=>{if(v)o[v.id||i]=v});return o}return val}
+function toArr(val){if(!val)return[];if(Array.isArray(val))return val.filter(Boolean);return Object.values(val)}
 function ipToKey(ip){return String(ip||"unknown").replace(/[.:]/g,"_")}
 
 async function detectIP(){
-  try{
-    const r = await fetch("https://ipify.org");
-    const j = await r.json();
-    if(j && j.ip) clientIP = j.ip;
-  }catch(e){}
+  try{const r=await fetch("https://ipify.org");const j=await r.json();if(j&&j.ip)clientIP=j.ip}catch(e){}
 }
 
 async function fbReq(path, method="GET", body=null){
@@ -284,60 +304,52 @@ async function fbReq(path, method="GET", body=null){
   const r = await fetch(FB_URL + "/msg_db/" + path + ".json" + query, opts);
   return await r.json();
 }
-
 async function logIPAccess(uid, nick, action){
   if(!clientIP || clientIP==="unknown" || !idToken) return;
   const logId = "l_" + Date.now() + "_" + Math.floor(Math.random()*999);
-  const entry = { uid, nick, ip: clientIP, action, date: new Date().toLocaleString("ru-RU") };
-  await fbReq("ip_logs/" + logId, "PUT", entry);
+  await fbReq("ip_logs/" + logId, "PUT", { uid, nick, ip: clientIP, action, date: new Date().toLocaleString("ru-RU") });
   const u = DB.users[uid];
   if(u){
     const ips = toArr(u.ips);
-    if(!ips.includes(clientIP)){
-      ips.push(clientIP);
-      u.ips = ips;
-      await fbReq("users/" + uid + "/ips", "PUT", ips);
+    if(!ips.includes(clientIP)){ips.push(clientIP);u.ips=ips;await fbReq("users/"+uid+"/ips","PUT",ips)}
+  }
+}
+
+async function checkDailyAndEvents(uid){
+  const u = DB.users[uid];
+  if(!u || !idToken) return;
+  if(Date.now() - Number(u.lastDaily || 0) >= ONE_DAY_MS){
+    const now = Date.now(), nextM = (Number(u.mstix) || 0) + 25;
+    u.lastDaily = now; u.mstix = nextM;
+    await fbReq("users/"+uid+"/lastDaily", "PUT", now);
+    await fbReq("users/"+uid+"/mstix", "PUT", nextM);
+    toast("🎁 Ежедневный бонус: +25 MSTIX 🎟️!");
+  }
+  if(DB.eventTheme){
+    const themes = toArr(u.themes);
+    if(!themes.includes(DB.eventTheme)){
+      themes.push(DB.eventTheme); u.themes = themes;
+      await fbReq("users/"+uid+"/themes", "PUT", themes);
+      const tObj = THEMES_CATALOG.find(x=>x.id===DB.eventTheme);
+      toast("🎉 Вы получили праздничную тему «"+(tObj?tObj.name:DB.eventTheme)+"» навсегда!");
     }
   }
 }
 
-async function checkDailyMstix(uid){
-  const u = DB.users[uid];
-  if(!u || !idToken) return;
-  const lastDaily = Number(u.lastDaily || 0);
-  if(Date.now() - lastDaily >= ONE_DAY_MS){
-    const now = Date.now();
-    const nextMstix = (Number(u.mstix) || 0) + 25;
-    u.lastDaily = now;
-    u.mstix = nextMstix;
-    await fbReq("users/"+uid+"/lastDaily", "PUT", now);
-    await fbReq("users/"+uid+"/mstix", "PUT", nextMstix);
-    toast("🎁 Ежедневный бонус за вход: +25 MSTIX 🎟️!");
-  }
-}
 async function pullDB(){
   try{
-    const [nid, users, gmap, nicks, ipCd, bannedIps, chs, dms] = await Promise.all([
-      fbReq("nextId"),
-      fbReq("users"),
-      fbReq("google_map"),
-      fbReq("nicks"),
-      fbReq("ip_cooldowns"),
-      fbReq("banned_ips"),
-      fbReq("channels"),
-      fbReq("dms")
+    const [evTh, nid, users, gmap, nicks, ipCd, bannedIps, chs, dms] = await Promise.all([
+      fbReq("eventTheme"), fbReq("nextId"), fbReq("users"), fbReq("google_map"), fbReq("nicks"),
+      fbReq("ip_cooldowns"), fbReq("banned_ips"), fbReq("channels"), fbReq("dms")
     ]);
     if(nid === null && users === null && idToken){
       await fbReq("nextId", "PUT", 1);
       await fbReq("channels/ch_main", "PUT", DB.channels.ch_main);
       return;
     }
-    DB.nextId = Number(nid) || 1;
-    DB.users = toObj(users);
-    DB.google_map = toObj(gmap);
-    DB.nicks = toObj(nicks);
-    DB.ip_cooldowns = toObj(ipCd);
-    DB.banned_ips = toObj(bannedIps);
+    DB.eventTheme = evTh || ""; DB.nextId = Number(nid) || 1;
+    DB.users = toObj(users); DB.google_map = toObj(gmap); DB.nicks = toObj(nicks);
+    DB.ip_cooldowns = toObj(ipCd); DB.banned_ips = toObj(bannedIps);
 
     if(clientIP !== "unknown" && DB.banned_ips[ipToKey(clientIP)] && curUserId !== 1){
       document.body.innerHTML = '<div style="margin:auto;text-align:center;padding:20px"><h1>⛔ Ваш IP ('+esc(clientIP)+') заблокирован в MSG</h1></div>';
@@ -345,21 +357,19 @@ async function pullDB(){
     }
 
     Object.values(DB.users).forEach(u=>{
-      u.joined = toArr(u.joined);
-      u.left = toArr(u.left);
-      u.ips = toArr(u.ips);
+      u.joined = toArr(u.joined); u.left = toArr(u.left); u.ips = toArr(u.ips);
+      u.themes = toArr(u.themes); if(!u.themes.includes("default")) u.themes.unshift("default");
+      u.bubbles = toArr(u.bubbles); if(!u.bubbles.includes("default")) u.bubbles.unshift("default");
       if(typeof u.coins !== "number") u.coins = 0;
       if(typeof u.mstix !== "number") u.mstix = 50;
     });
 
-    if(fbUser && DB.google_map[fbUser.uid]){
-      curUserId = Number(DB.google_map[fbUser.uid]);
-    }
-
+    if(fbUser && DB.google_map[fbUser.uid]) curUserId = Number(DB.google_map[fbUser.uid]);
     const rawCh = toObj(chs);
     if(Object.keys(rawCh).length > 0) DB.channels = rawCh;
     DB.dms = toObj(dms);
     await applyStartChannels();
+    if(curUserId) await checkDailyAndEvents(curUserId);
     renderAll();
   }catch(e){}
 }
@@ -370,287 +380,305 @@ async function applyStartChannels(){
   if(!u || !idToken)return;
   let changed = false;
   startIds.forEach(cid=>{
-    if(!u.joined.includes(cid)&&!u.left.includes(cid)){
-      u.joined.push(cid);
-      changed = true;
-    }
+    if(!u.joined.includes(cid)&&!u.left.includes(cid)){u.joined.push(cid);changed=true}
   });
   if(changed) await fbReq("users/"+u.id+"/joined", "PUT", u.joined);
 }
 
 async function googleSignIn(){
-  try{
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  }catch(e){
-    toast("Ошибка входа Google: " + e.message);
-  }
+  try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}
+  catch(e){toast("Ошибка входа Google: " + e.message)}
 }
 
 function googleSignOut(){
-  auth.signOut();
-  fbUser = null;
-  idToken = "";
-  curUserId = 0;
-  renderAll();
-  toast("Вы вышли из аккаунта");
+  auth.signOut(); fbUser = null; idToken = ""; curUserId = 0;
+  document.body.removeAttribute("data-theme"); renderAll(); toast("Вы вышли из аккаунта");
 }
 
 auth.onAuthStateChanged(async (user)=>{
   fbUser = user;
   if(user){
     idToken = await user.getIdToken();
-    await detectIP();
-    await pullDB();
+    await detectIP(); await pullDB();
     if(DB.google_map[user.uid]){
       curUserId = Number(DB.google_map[user.uid]);
       await logIPAccess(curUserId, DB.users[curUserId]?.nick || "user", "google_login");
-      await checkDailyMstix(curUserId);
+      await checkDailyAndEvents(curUserId);
       renderAll();
     }else{
       document.getElementById("rNick").value = (user.displayName || "").replace(/\s+/g, "_").slice(0, 20);
       document.getElementById("rAva").value = user.photoURL || "";
       openMod("regMod");
     }
-  }else{
-    idToken = "";
-    curUserId = 0;
-    renderAll();
-  }
+  }else{idToken = ""; curUserId = 0; renderAll()}
 });
 
 async function completeGoogleReg(){
   if(!fbUser)return toast("Сначала войдите через Google!");
-  await detectIP();
-  await pullDB();
-
+  await detectIP(); await pullDB();
   const nick = document.getElementById("rNick").value.trim();
   let ava = document.getElementById("rAva").value.trim();
-  if(!nick)return toast("Введи уникальный никнейм!");
-  if(nick.length > 24)return toast("Ник максимум 24 символа!");
-
+  if(!nick || nick.length > 24)return toast("Введи ник от 1 до 24 символов!");
   if(clientIP !== "unknown" && DB.banned_ips[ipToKey(clientIP)])return toast("Ваш IP забанен!");
 
   const ipKey = ipToKey(clientIP);
   if(clientIP !== "unknown" && DB.ip_cooldowns[ipKey]){
-    const lastTs = Number(DB.ip_cooldowns[ipKey]);
-    const diff = Date.now() - lastTs;
-    if(diff < TWO_DAYS_MS){
-      const hoursLeft = Math.ceil((TWO_DAYS_MS - diff) / (1000 * 60 * 60));
-      return toast("Лимит IP: новый аккаунт доступен через " + hoursLeft + " ч.");
-    }
+    const diff = Date.now() - Number(DB.ip_cooldowns[ipKey]);
+    if(diff < TWO_DAYS_MS)return toast("Лимит IP: новый аккаунт через " + Math.ceil((TWO_DAYS_MS - diff) / 3600000) + " ч.");
   }
 
   const nickKey = nick.toLowerCase().replace(/[.#$\[\]\/]/g, "_");
-  if(DB.nicks[nickKey] || Object.values(DB.users).some(x=>x&&x.nick.toLowerCase()===nick.toLowerCase())){
-    return toast("Ник «"+nick+"» уже занят!");
-  }
-
+  if(DB.nicks[nickKey] || Object.values(DB.users).some(x=>x&&x.nick.toLowerCase()===nick.toLowerCase()))return toast("Ник уже занят!");
   if(isTitik(nick)) ava = TITIK_AVA;
 
   const id = DB.nextId;
   const resNick = await fbReq("nicks/" + nickKey, "PUT", id);
-  if(resNick && resNick.error)return toast("Этот ник только что заняли!");
-
+  if(resNick && resNick.error)return toast("Ник только что заняли!");
   if(clientIP !== "unknown"){
     const resCd = await fbReq("ip_cooldowns/" + ipKey, "PUT", Date.now());
-    if(resCd && resCd.error)return toast("С этого IP ещё не прошло 2 дня с прошлой регистрации!");
+    if(resCd && resCd.error)return toast("С этого IP ещё не прошло 2 дня!");
   }
 
   await fbReq("google_map/" + fbUser.uid, "PUT", id);
   await fbReq("nextId", "PUT", id + 1);
-
   const startIds = Object.values(DB.channels).filter(c=>c&&c.startchannel).map(c=>c.id);
+  const initThemes = ["default"];
+  if(DB.eventTheme) initThemes.push(DB.eventTheme);
+
   const userObj = {
-    id,
-    nick,
-    googleUid: fbUser.uid,
-    email: fbUser.email || "",
-    avatar: ava,
-    coins: 0,
-    mstix: 50,
-    lastDaily: Date.now(),
-    ips: [clientIP],
-    joined: startIds,
-    left: []
+    id, nick, googleUid: fbUser.uid, email: fbUser.email || "", avatar: ava,
+    bio: "Новичок в MSG", nickColor: "", activeTheme: DB.eventTheme || "default", activeBubble: "default",
+    themes: initThemes, bubbles: ["default"],
+    coins: 0, mstix: 50, lastDaily: Date.now(), ips: [clientIP], joined: startIds, left: []
   };
   await fbReq("users/" + id, "PUT", userObj);
   await logIPAccess(id, nick, "register");
 
-  DB.users[id] = userObj;
-  curUserId = id;
-  closeMods();renderAll();
-  toast("Добро пожаловать в MSG! Ваш ID "+id+" (+50 MSTIX 🎟️)");
+  DB.users[id] = userObj; curUserId = id; closeMods(); renderAll();
+  toast("Добро пожаловать в MSG! ID "+id+" (+50 MSTIX 🎟️)");
 }
-async function addCurrency(uid, dCoins, dMstix){
+function openMyProfile(){
+  const u = DB.users[curUserId];
+  if(!u) return toast("Сначала войдите через Google!");
+  document.getElementById("pBio").value = u.bio || "";
+  document.getElementById("pAva").value = u.avatar || "";
+  document.getElementById("pColor").value = u.nickColor || "";
+  openMod("profMod");
+}
+
+async function saveProfile(){
+  const u = DB.users[curUserId]; if(!u) return;
+  u.bio = document.getElementById("pBio").value.trim().slice(0, 60);
+  u.nickColor = document.getElementById("pColor").value;
+  if(!isTitik(u.nick)) u.avatar = document.getElementById("pAva").value.trim();
+  await fbReq("users/"+u.id+"/bio", "PUT", u.bio);
+  await fbReq("users/"+u.id+"/nickColor", "PUT", u.nickColor);
+  await fbReq("users/"+u.id+"/avatar", "PUT", u.avatar);
+  closeMods(); renderAll(); toast("Профиль сохранён!");
+}
+
+function viewUserProfile(uid){
   const u = DB.users[uid];
-  if(!u || !idToken) return;
-  if(dCoins){
-    const nextC = Math.max(0, Math.round(((Number(u.coins)||0) + dCoins)*100)/100);
-    u.coins = nextC;
-    await fbReq("users/"+uid+"/coins", "PUT", nextC);
+  if(!u) return;
+  const av = '<div class="av av-lg" style="background:#4c82fb">'+renderAvatarInner(u,(u.nick||"U").slice(0,2).toUpperCase())+'</div>';
+  const dmBtn = (curUserId && curUserId !== uid) ? '<button class="btn" onclick="closeMods();openDMById('+uid+')">💬 Написать в ЛС</button>' : '';
+  document.getElementById("viewUserBody").innerHTML = av +
+    '<h3 style="text-align:center;color:'+esc(u.nickColor||"var(--tx)")+'">'+esc(u.nick)+(uid===1?' 👑':'')+' <span class="tag">ID '+uid+'</span></h3>' +
+    '<p style="text-align:center;font-size:13px;color:var(--mt)">'+esc(u.bio||"Нет статуса")+'</p>' +
+    '<div class="acard"><span>Баланс:</span><b>🪙 '+fmtCoin(u.coins)+' MSGOIN | 🎟️ '+(u.mstix||0)+' MSTIX</b></div>' +
+    '<div class="acard"><span>Тем в коллекции:</span><b>'+toArr(u.themes).length+'</b></div>' +
+    dmBtn + '<button class="abtn" onclick="closeMods()">Закрыть</button>';
+  openMod("viewUserMod");
+}
+
+function openShop(){
+  const u = DB.users[curUserId];
+  if(!u) return toast("Войди через Google, чтобы открыть магазин!");
+  const ownedT = toArr(u.themes), ownedB = toArr(u.bubbles);
+
+  document.getElementById("shopThemes").innerHTML = THEMES_CATALOG.map(t=>{
+    const has = ownedT.includes(t.id), active = (u.activeTheme||"default") === t.id;
+    let btn = "";
+    if(active) btn = '<button class="btn" disabled style="opacity:.6">Надето ✓</button>';
+    else if(has) btn = '<button class="btn" onclick="equipItem(\'theme\',\''+t.id+'\')">Надеть</button>';
+    else if(t.cur === "event") btn = '<span class="tag">Только по праздникам</span>';
+    else {
+      const label = t.cur === "coins" ? (fmtCoin(t.price)+" 🪙") : (t.price+" 🎟️");
+      btn = '<button class="btn btn-g" onclick="buyItem(\'theme\',\''+t.id+'\')">Купить ('+label+')</button>';
+    }
+    return '<div class="acard"><b>'+t.name+'</b>'+btn+'</div>';
+  }).join("");
+
+  document.getElementById("shopBubbles").innerHTML = BUBBLES_CATALOG.map(b=>{
+    const has = ownedB.includes(b.id), active = (u.activeBubble||"default") === b.id;
+    let btn = "";
+    if(active) btn = '<button class="btn" disabled style="opacity:.6">Надето ✓</button>';
+    else if(has) btn = '<button class="btn" onclick="equipItem(\'bubble\',\''+b.id+'\')">Надеть</button>';
+    else {
+      const label = b.cur === "coins" ? (fmtCoin(b.price)+" 🪙") : (b.price+" 🎟️");
+      btn = '<button class="btn btn-c" onclick="buyItem(\'bubble\',\''+b.id+'\')">Купить ('+label+')</button>';
+    }
+    return '<div class="acard"><b>'+b.name+'</b>'+btn+'</div>';
+  }).join("");
+
+  openMod("shopMod");
+}
+
+async function buyItem(kind, itemId){
+  const u = DB.users[curUserId]; if(!u) return;
+  const list = kind === "theme" ? THEMES_CATALOG : BUBBLES_CATALOG;
+  const item = list.find(x=>x.id===itemId);
+  if(!item || item.cur === "event") return;
+
+  if(item.cur === "coins"){
+    if((u.coins||0) < item.price){
+      closeMods();
+      toast("❌ Не хватает MSGOIN! Купить можно у nekotlay в ЛС (ID 1) 👑");
+      return;
+    }
+    await addCurrency(u.id, -item.price, 0);
+  }else if(item.cur === "mstix"){
+    if((u.mstix||0) < item.price){
+      closeMods();
+      toast("❌ Не хватает MSTIX! Купить можно у nekotlay в ЛС (ID 1) 👑");
+      return;
+    }
+    await addCurrency(u.id, 0, -item.price);
   }
-  if(dMstix){
-    const nextM = Math.max(0, Math.floor((Number(u.mstix)||0) + dMstix));
-    u.mstix = nextM;
-    await fbReq("users/"+uid+"/mstix", "PUT", nextM);
+
+  if(kind === "theme"){
+    u.themes.push(itemId); await fbReq("users/"+u.id+"/themes", "PUT", u.themes);
+  }else{
+    u.bubbles.push(itemId); await fbReq("users/"+u.id+"/bubbles", "PUT", u.bubbles);
   }
+  await equipItem(kind, itemId);
+  toast("Куплено навсегда: " + item.name);
+}
+
+async function equipItem(kind, itemId){
+  const u = DB.users[curUserId]; if(!u) return;
+  if(kind === "theme"){
+    u.activeTheme = itemId; await fbReq("users/"+u.id+"/activeTheme", "PUT", itemId);
+  }else{
+    u.activeBubble = itemId; await fbReq("users/"+u.id+"/activeBubble", "PUT", itemId);
+  }
+  renderAll(); openShop();
+}
+
+async function addCurrency(uid, dCoins, dMstix){
+  const u = DB.users[uid]; if(!u || !idToken) return;
+  if(dCoins){const nextC=Math.max(0,Math.round(((Number(u.coins)||0)+dCoins)*100)/100);u.coins=nextC;await fbReq("users/"+uid+"/coins","PUT",nextC)}
+  if(dMstix){const nextM=Math.max(0,Math.floor((Number(u.mstix)||0)+dMstix));u.mstix=nextM;await fbReq("users/"+uid+"/mstix","PUT",nextM)}
   renderAll();
 }
 
 async function sendCurrency(){
-  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
+  if(!curUserId||!DB.users[curUserId])return toast("Войдите через Google!");
   await pullDB();
-  const curType = document.getElementById("payCurrency").value;
-  const tid = Number(document.getElementById("payToId").value);
-  let amt = Number(document.getElementById("payAmount").value);
-  if(!tid || tid===curUserId)return toast("Введи чужой ID!");
-  if(!DB.users[tid])return toast("Юзер с ID "+tid+" не найден!");
-  if(!amt || amt <= 0)return toast("Введи сумму больше 0!");
-
-  if(curType === "coins"){
-    amt = Math.round(amt * 100) / 100;
-    if((DB.users[curUserId].coins||0) < amt)return toast("Недостаточно MSGOIN 🪙!");
-    await addCurrency(curUserId, -amt, 0);
-    await addCurrency(tid, amt, 0);
-    toast("Переведено "+fmtCoin(amt)+" MSGOIN для ID "+tid+" 🪙");
+  const curType=document.getElementById("payCurrency").value, tid=Number(document.getElementById("payToId").value);
+  let amt=Number(document.getElementById("payAmount").value);
+  if(!tid||tid===curUserId||!DB.users[tid]||!amt||amt<=0)return toast("Проверь ID и сумму!");
+  if(curType==="coins"){
+    amt=Math.round(amt*100)/100;if((DB.users[curUserId].coins||0)<amt)return toast("Недостаточно MSGOIN!");
+    await addCurrency(curUserId,-amt,0);await addCurrency(tid,amt,0);toast("Переведено "+fmtCoin(amt)+" MSGOIN!");
   }else{
-    amt = Math.floor(amt);
-    if(amt <= 0)return toast("Минимум 1 MSTIX!");
-    if((DB.users[curUserId].mstix||0) < amt)return toast("Недостаточно MSTIX 🎟️!");
-    await addCurrency(curUserId, 0, -amt);
-    await addCurrency(tid, 0, amt);
-    toast("Переведено "+amt+" MSTIX для ID "+tid+" 🎟️");
+    amt=Math.floor(amt);if(amt<=0||(DB.users[curUserId].mstix||0)<amt)return toast("Недостаточно MSTIX!");
+    await addCurrency(curUserId,0,-amt);await addCurrency(tid,0,amt);toast("Переведено "+amt+" MSTIX!");
   }
   closeMods();
 }
 
-async function saveAvatar(){
-  if(!curUserId||!DB.users[curUserId])return;
-  const u = DB.users[curUserId];
-  if(isTitik(u.nick))return toast("Для ников titik/t1tik аватарка закреплена навсегда!");
-  const url = document.getElementById("newAvaUrl").value.trim();
-  u.avatar = url;
-  await fbReq("users/"+u.id+"/avatar", "PUT", url);
-  closeMods();renderAll();toast("Аватарка обновлена!");
-}
-
 async function createChannel(){
-  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
+  if(!curUserId||!DB.users[curUserId])return toast("Войдите через Google!");
   await pullDB();
-  const ownedCount = Object.values(DB.channels).filter(c=>c&&c.ownerId===curUserId).length;
-  if(ownedCount >= 2)return toast("Лимит: максимум 2 канала на 1 аккаунт!");
-
-  const title=document.getElementById("chTitle").value.trim();
-  const desc=document.getElementById("chDesc").value.trim();
+  const ownedCount=Object.values(DB.channels).filter(c=>c&&c.ownerId===curUserId).length;
+  if(ownedCount>=2)return toast("Лимит: максимум 2 канала!");
+  const title=document.getElementById("chTitle").value.trim(), desc=document.getElementById("chDesc").value.trim();
   if(!title)return toast("Введи название!");
   const id="ch_"+Date.now();
-  const chObj={
-    id,title,ownerId:curUserId,startchannel:false,
-    msgs:{ m0:{s:DB.users[curUserId].nick,uid:curUserId,t:desc||("Канал «"+title+"» создан в MSG!"),tm:tm()} }
-  };
-  await fbReq("channels/"+id, "PUT", chObj);
-  DB.channels[id]=chObj;
-  DB.users[curUserId].joined.push(id);
-  await fbReq("users/"+curUserId+"/joined", "PUT", DB.users[curUserId].joined);
-  closeMods();sel(id);toast("Канал создан ("+(ownedCount+1)+"/2)!");
+  const chObj={id,title,ownerId:curUserId,startchannel:false,msgs:{m0:{s:DB.users[curUserId].nick,uid:curUserId,t:desc||("Канал «"+title+"» создан!"),tm:tm()}}};
+  await fbReq("channels/"+id,"PUT",chObj);DB.channels[id]=chObj;DB.users[curUserId].joined.push(id);
+  await fbReq("users/"+curUserId+"/joined","PUT",DB.users[curUserId].joined);
+  closeMods();sel(id);toast("Канал создан!");
 }
 
 async function leaveChannel(){
   if(!curUserId||!DB.channels[act]||!DB.users[curUserId])return;
-  const u=DB.users[curUserId];
-  u.joined=u.joined.filter(x=>x!==act);
-  if(!u.left.includes(act))u.left.push(act);
-  await fbReq("users/"+curUserId+"/joined", "PUT", u.joined);
-  await fbReq("users/"+curUserId+"/left", "PUT", u.left);
+  const u=DB.users[curUserId];u.joined=u.joined.filter(x=>x!==act);if(!u.left.includes(act))u.left.push(act);
+  await fbReq("users/"+curUserId+"/joined","PUT",u.joined);await fbReq("users/"+curUserId+"/left","PUT",u.left);
   sel("bot");toast("Вы вышли из канала");
 }
 
 function openAdmin(){
-  if(curUserId!==1)return toast("Доступно только для ID 1!");
-  const box=document.getElementById("admChannels");
-  box.innerHTML=Object.values(DB.channels).filter(Boolean).map(c=>{
+  if(curUserId!==1)return toast("Только для ID 1!");
+  document.getElementById("admEventSel").value = DB.eventTheme || "";
+  document.getElementById("admChannels").innerHTML=Object.values(DB.channels).filter(Boolean).map(c=>{
     const st=!!c.startchannel;
-    return'<div class="acard"><div><b># '+esc(c.title)+'</b><div style="font-size:11px;color:var(--mt)">startchannel: <b style="color:'+(st?'var(--on)':'#ff6b81')+'">'+st+'</b></div></div><button class="btn '+(st?'btn-d':'btn-g')+'" onclick="toggleStartChannel(\''+c.id+'\')">'+(st?'Выкл':'Сделать стартовым')+'</button></div>';
+    return'<div class="acard"><div><b># '+esc(c.title)+'</b><div style="font-size:11px;color:var(--mt)">startchannel: <b>'+st+'</b></div></div><button class="btn '+(st?'btn-d':'btn-g')+'" onclick="toggleStartChannel(\''+c.id+'\')">'+(st?'Выкл':'Стартовый')+'</button></div>';
   }).join("");
-
-  const ubox=document.getElementById("admUsers");
-  ubox.innerHTML=Object.values(DB.users).filter(Boolean).map(u=>{
-    const ips = toArr(u.ips);
-    const lastIp = ips[ips.length-1] || "нет IP";
-    const isBanned = lastIp !== "нет IP" && !!DB.banned_ips[ipToKey(lastIp)];
-    const banBtn = (u.id!==1 && lastIp!=="нет IP")
-      ? '<button class="btn '+(isBanned?'':'btn-d')+'" onclick="banUserIP(\''+esc(lastIp)+'\','+u.id+')">'+(isBanned?'Забанен':'Бан')+'</button>'
-      : '';
-    const giftCoin = '<button class="btn btn-g" onclick="adminGive('+u.id+',1,0)">+1 🪙</button>';
-    const giftStix = '<button class="btn btn-c" onclick="adminGive('+u.id+',0,100)">+100 🎟️</button>';
-    return'<div class="acard"><div><b>ID '+u.id+' • '+esc(u.nick)+'</b><div style="font-size:11px;color:var(--gd)">🪙 '+fmtCoin(u.coins)+' | 🎟️ '+(u.mstix||0)+'</div><div style="font-size:10px;color:var(--mt)">IP: '+esc(ips.join(", ")||"—")+'</div></div><div style="display:flex;gap:4px;flex-wrap:wrap">'+giftCoin+giftStix+banBtn+'</div></div>';
+  document.getElementById("admUsers").innerHTML=Object.values(DB.users).filter(Boolean).map(u=>{
+    const ips=toArr(u.ips), lastIp=ips[ips.length-1]||"нет IP";
+    const isBanned=lastIp!=="нет IP"&&!!DB.banned_ips[ipToKey(lastIp)];
+    const banBtn=(u.id!==1&&lastIp!=="нет IP")?'<button class="btn '+(isBanned?'':'btn-d')+'" onclick="banUserIP(\''+esc(lastIp)+'\','+u.id+')">'+(isBanned?'Забанен':'Бан')+'</button>':'';
+    return'<div class="acard"><div><b>ID '+u.id+' • '+esc(u.nick)+'</b><div style="font-size:11px;color:var(--gd)">🪙 '+fmtCoin(u.coins)+' | 🎟️ '+(u.mstix||0)+'</div><div style="font-size:10px;color:var(--mt)">IP: '+esc(ips.join(", ")||"—")+'</div></div><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="btn btn-g" onclick="adminGive('+u.id+',1,0)">+1 🪙</button><button class="btn btn-c" onclick="adminGive('+u.id+',0,100)">+100 🎟️</button>'+banBtn+'</div></div>';
   }).join("");
-
   openMod("admMod");
 }
 
-async function adminGive(uid, dc, dm){
+async function setGlobalEvent(){
   if(curUserId!==1)return;
-  await addCurrency(uid, dc, dm);
-  toast(dc ? "Выдано +"+dc+" MSGOIN для ID "+uid : "Выдано +"+dm+" MSTIX для ID "+uid);
-  openAdmin();
+  const val = document.getElementById("admEventSel").value;
+  DB.eventTheme = val;
+  await fbReq("eventTheme", "PUT", val);
+  await checkDailyAndEvents(1);
+  renderAll(); toast(val ? "Праздник включён! Тема выдаётся всем зашедшим!" : "Праздничный ивент выключен");
 }
-
-async function banUserIP(ip, uid){
-  if(curUserId!==1)return;
-  await fbReq("banned_ips/"+ipToKey(ip), "PUT", { ip, uid, date: new Date().toLocaleString("ru-RU") });
-  DB.banned_ips[ipToKey(ip)] = { ip, uid };
-  toast("IP "+ip+" забанен!");
-  openAdmin();
-}
-
-async function toggleStartChannel(cid){
-  if(curUserId!==1)return;
-  const c=DB.channels[cid];if(!c)return;
-  const nextVal = !c.startchannel;
-  await fbReq("channels/"+cid, "PATCH", { startchannel: nextVal });
-  c.startchannel = nextVal;
-  toast(nextVal ? "Канал «"+c.title+"» стал стартовым для всех!" : "startchannel: false");
-  openAdmin();renderAll();
-}
+async function adminGive(uid,dc,dm){if(curUserId!==1)return;await addCurrency(uid,dc,dm);toast("Выдано!");openAdmin()}
+async function banUserIP(ip,uid){if(curUserId!==1)return;await fbReq("banned_ips/"+ipToKey(ip),"PUT",{ip,uid,date:new Date().toLocaleString("ru-RU")});DB.banned_ips[ipToKey(ip)]={ip,uid};toast("IP забанен!");openAdmin()}
+async function toggleStartChannel(cid){if(curUserId!==1)return;const c=DB.channels[cid];if(!c)return;c.startchannel=!c.startchannel;await fbReq("channels/"+cid,"PATCH",{startchannel:c.startchannel});openAdmin();renderAll()}
+const MSG_FACTS = [
+  "💡 Факт: MSGOIN — самая редкая валюта в MSG, купить её можно только у nekotlay в ЛС (ID 1) или выфармить по +0.01 в играх!",
+  "💡 Факт: Если войти в MSG во время праздника, лимитированная тема останется в твоём профиле НАВСЕГДА без подписок.",
+  "💡 Факт: Пользователи с ником titik или t1tik (в любом регистре) получают секретную эксклюзивную аватарку.",
+  "💡 Факт: За ежедневный вход в MSG раз в 24 часа автоматически начисляется +25 MSTIX 🎟️.",
+  "💡 Факт: Чтобы защитить мессенджер от ботов, с одного IP можно создать только 1 аккаунт раз в 2 дня.",
+  "💡 Факт: Каждый пользователь может создать максимум 2 собственных канала, а писать в них может только создатель и ID 1."
+];
 
 async function openDM(){
-  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
-  await pullDB();
   const tid=Number(document.getElementById("dmId").value);
-  if(!tid||tid===curUserId)return toast("Введи чужой ID!");
-  if(!DB.users[tid])return toast("Юзер с ID "+tid+" не найден!");
-  const key=dmKey(curUserId,tid);
-  if(!DB.dms[key]){
-    const m0={s:"Система",uid:0,t:"Личный чат MSG между ID "+curUserId+" и ID "+tid,tm:tm()};
-    await fbReq("dms/"+key+"/m0", "PUT", m0);
-    DB.dms[key]={m0};
-  }
-  closeMods();sel("dm_"+tid);
+  closeMods(); openDMById(tid);
 }
-
+async function openDMById(tid){
+  if(!curUserId||!DB.users[curUserId])return toast("Войдите через Google!");
+  await pullDB();
+  if(!tid||tid===curUserId||!DB.users[tid])return toast("Юзер не найден!");
+  const key=dmKey(curUserId,tid);
+  if(!DB.dms[key]){const m0={s:"Система",uid:0,t:"Личный чат MSG между ID "+curUserId+" и ID "+tid,tm:tm()};await fbReq("dms/"+key+"/m0","PUT",m0);DB.dms[key]={m0}}
+  sel("dm_"+tid);
+}
 function dmKey(a,b){return a<b?a+"_"+b:b+"_"+a}
 
 function renderAll(){
-  const u=DB.users[curUserId];
-  const pbox=document.getElementById("profBox");
-  const admBtn=document.getElementById("admBtn");
-  const coinBadge=document.getElementById("coinBadge");
-  const stixBadge=document.getElementById("stixBadge");
+  const u=DB.users[curUserId], pbox=document.getElementById("profBox"), admBtn=document.getElementById("admBtn");
   if(u){
-    const avaHtml = '<div class="av av-sm" style="background:#4c82fb">'+renderAvatarInner(u, u.nick.slice(0,2).toUpperCase())+'</div>';
-    pbox.innerHTML='<div style="display:flex;align-items:center;gap:6px">'+avaHtml+'<span><b>ID '+u.id+'</b> • '+esc(u.nick)+(u.id===1?' 👑':'')+'</span></div><div style="display:flex;gap:4px"><button class="abtn" onclick="openMod(\'avaMod\')" title="Сменить аватарку">🖼️</button><button class="abtn" onclick="googleSignOut()" title="Выйти">🚪</button></div>';
+    const th = u.activeTheme || "default";
+    if(th === "default") document.body.removeAttribute("data-theme");
+    else document.body.setAttribute("data-theme", th);
+
+    const avaHtml='<div class="av av-sm" style="background:#4c82fb" onclick="openMyProfile()">'+renderAvatarInner(u,u.nick.slice(0,2).toUpperCase())+'</div>';
+    pbox.innerHTML='<div style="display:flex;align-items:center;gap:6px;cursor:pointer" onclick="openMyProfile()">'+avaHtml+'<span><b>ID '+u.id+'</b> • <span style="color:'+esc(u.nickColor||"inherit")+'">'+esc(u.nick)+'</span>'+(u.id===1?' 👑':'')+'</span></div><div style="display:flex;gap:4px"><button class="abtn" onclick="openMyProfile()" title="Мой профиль">✏️</button><button class="abtn" onclick="googleSignOut()" title="Выйти">🚪</button></div>';
     admBtn.style.display=u.id===1?"inline-block":"none";
-    coinBadge.textContent="🪙 "+fmtCoin(u.coins);
-    stixBadge.textContent="🎟️ "+(u.mstix||0);
+    document.getElementById("coinBadge").textContent="🪙 "+fmtCoin(u.coins);
+    document.getElementById("stixBadge").textContent="🎟️ "+(u.mstix||0);
   }else{
+    document.body.removeAttribute("data-theme");
     pbox.innerHTML='<span>Вход через Google</span><button class="btn" onclick="googleSignIn()">🔵 Войти</button>';
     admBtn.style.display="none";
-    coinBadge.textContent="🪙 0.00";
-    stixBadge.textContent="🎟️ 0";
+    document.getElementById("coinBadge").textContent="🪙 0.00";
+    document.getElementById("stixBadge").textContent="🎟️ 0";
   }
-  rList();rHeader();rMsgs();
+  rList(); rHeader(); rMsgs();
 }
 
 function rList(){
@@ -660,8 +688,7 @@ function rList(){
   (u.joined||[]).forEach(cid=>{
     const c=DB.channels[cid];if(!c)return;
     const msgs=toArr(c.msgs),lm=msgs[msgs.length-1];
-    const badge=c.startchannel?'<span class="tag tag-s">START</span>':'<span class="tag">Канал</span>';
-    addChatItem(l,c.id,"#","#8c52ff",esc(c.title)+" "+badge,lm?lm.tm:"",lm?lm.t:"Нет постов");
+    addChatItem(l,c.id,"#","#8c52ff",esc(c.title)+(c.startchannel?' <span class="tag tag-s">START</span>':' <span class="tag">Канал</span>'),lm?lm.tm:"",lm?lm.t:"Нет постов");
   });
   Object.values(DB.channels).forEach(c=>{
     if(c&&!(u.joined||[]).includes(c.id))addChatItem(l,c.id,"➕","#263559",esc(c.title)+' <span class="tag">Вступить</span>',"","Нажми, чтобы вернуться");
@@ -669,11 +696,7 @@ function rList(){
   Object.values(DB.users).forEach(other=>{
     if(!other||other.id===u.id)return;
     const arr=toArr(DB.dms[dmKey(u.id,other.id)]);
-    if(arr.length){
-      const lm=arr[arr.length-1];
-      const avHtml=renderAvatarInner(other, (other.nick||"U").slice(0,2).toUpperCase());
-      addChatItem(l,"dm_"+other.id,avHtml,"#2ed573",esc(other.nick)+' <span class="tag">ID '+other.id+'</span>',lm?lm.tm:"",lm?lm.t:"");
-    }
+    if(arr.length){const lm=arr[arr.length-1];addChatItem(l,"dm_"+other.id,renderAvatarInner(other,(other.nick||"U").slice(0,2).toUpperCase()),"#2ed573",esc(other.nick)+' <span class="tag">ID '+other.id+'</span>',lm?lm.tm:"",lm?lm.t:"")}
   });
 }
 
@@ -681,37 +704,30 @@ function addChatItem(parent,id,avHtml,col,titleHtml,time,prev){
   const d=document.createElement("div");d.className="item"+(act===id?" act":"");
   d.onclick=async()=>{
     if(DB.channels[id]&&curUserId&&DB.users[curUserId]&&!(DB.users[curUserId].joined||[]).includes(id)){
-      DB.users[curUserId].joined.push(id);
-      DB.users[curUserId].left=(DB.users[curUserId].left||[]).filter(x=>x!==id);
-      await fbReq("users/"+curUserId+"/joined", "PUT", DB.users[curUserId].joined);
-      await fbReq("users/"+curUserId+"/left", "PUT", DB.users[curUserId].left);
-      toast("Вы вступили в канал!");
+      DB.users[curUserId].joined.push(id); DB.users[curUserId].left=(DB.users[curUserId].left||[]).filter(x=>x!==id);
+      await fbReq("users/"+curUserId+"/joined","PUT",DB.users[curUserId].joined);
+      await fbReq("users/"+curUserId+"/left","PUT",DB.users[curUserId].left);
     }
     sel(id);
   };
   d.innerHTML='<div class="av" style="background:'+col+'">'+avHtml+'</div><div class="info"><div class="row"><span class="nm">'+titleHtml+'</span><span style="font-size:10px;color:var(--mt)">'+esc(time)+'</span></div><div class="pr">'+esc(prev)+'</div></div>';
   parent.appendChild(d);
 }
+
 function sel(id){act=id;renderAll();togSb(0)}
 
 function rHeader(){
   const leaveBtn=document.getElementById("leaveBtn"),inpForm=document.getElementById("inpForm");
   leaveBtn.style.display="none";inpForm.style.display="flex";
-  if(act==="bot"){
-    document.getElementById("hav").innerHTML="🤖";document.getElementById("hav").style.background="#4c82fb";
-    document.getElementById("hnm").textContent="Мем-Бот MSG";document.getElementById("hst").textContent="в сети • раздаёт MSGOIN";
-  }else if(DB.channels[act]){
-    const c=DB.channels[act];
-    document.getElementById("hav").innerHTML="#";document.getElementById("hav").style.background="#8c52ff";
-    document.getElementById("hnm").textContent=c.title+(c.startchannel?" (startchannel: true)":"");
-    document.getElementById("hst").textContent="Канал • Владелец ID "+c.ownerId;
-    leaveBtn.style.display="inline-block";
-    if(curUserId!==c.ownerId&&curUserId!==1)inpForm.style.display="none";
+  if(act==="bot"){document.getElementById("hav").innerHTML="🤖";document.getElementById("hav").style.background="#4c82fb";document.getElementById("hnm").textContent="Мем-Бот MSG";document.getElementById("hst").textContent="в сети • травит факты и раздаёт MSGOIN"}
+  else if(DB.channels[act]){
+    const c=DB.channels[act];document.getElementById("hav").innerHTML="#";document.getElementById("hav").style.background="#8c52ff";
+    document.getElementById("hnm").textContent=c.title+(c.startchannel?" (startchannel: true)":"");document.getElementById("hst").textContent="Канал • Владелец ID "+c.ownerId;
+    leaveBtn.style.display="inline-block";if(curUserId!==c.ownerId&&curUserId!==1)inpForm.style.display="none";
   }else if(act.startsWith("dm_")){
     const tid=Number(act.split("_")),tu=DB.users[tid]||{nick:"Юзер",id:tid};
-    document.getElementById("hav").innerHTML=renderAvatarInner(tu, (tu.nick||"U").slice(0,2).toUpperCase());
-    document.getElementById("hav").style.background="#2ed573";
-    document.getElementById("hnm").textContent=tu.nick+" (ID "+tu.id+")";document.getElementById("hst").textContent="Личный чат MSG";
+    document.getElementById("hav").innerHTML=renderAvatarInner(tu,(tu.nick||"U").slice(0,2).toUpperCase());document.getElementById("hav").style.background="#2ed573";
+    document.getElementById("hnm").textContent=tu.nick+" (ID "+tu.id+")";document.getElementById("hst").textContent=tu.bio||"Личный чат MSG";
   }
 }
 
@@ -727,16 +743,19 @@ function rMsgs(){
   getActiveMessages().forEach(m=>{
     if(!m)return;
     const isOut=m.f==="out"||(curUserId&&m.uid===curUserId);
-    const row=document.createElement("div");row.className="msg-row "+(isOut?"out":"in");
-    const senderObj = m.uid ? DB.users[m.uid] : null;
-    const avHtml = m.uid ? renderAvatarInner(senderObj, (m.s||"U").slice(0,2).toUpperCase()) : "🤖";
-    const avDiv = '<div class="av av-sm" style="background:'+(isOut?'#2b5298':'#4c82fb')+'">'+avHtml+'</div>';
+    const sender = m.uid ? DB.users[m.uid] : null;
+    const bblStyle = (sender && sender.activeBubble && sender.activeBubble !== "default") ? " bbl-" + esc(sender.activeBubble) : "";
+    const nColor = (sender && sender.nickColor) ? esc(sender.nickColor) : "#7da6ff";
 
-    let h=(!isOut&&m.s)?'<div style="font-size:11px;font-weight:700;color:#7da6ff;margin-bottom:3px">'+esc(m.s)+(m.uid?' (ID '+m.uid+')':'')+'</div>':"";
+    const row=document.createElement("div");row.className="msg-row "+(isOut?"out":"in");
+    const avHtml=m.uid?renderAvatarInner(sender,(m.s||"U").slice(0,2).toUpperCase()):"🤖";
+    const avClick=m.uid?' onclick="viewUserProfile('+m.uid+')"':'';
+
+    let h=(!isOut&&m.s)?'<div style="font-size:11px;font-weight:700;color:'+nColor+';margin-bottom:3px;cursor:pointer"'+avClick+'>'+esc(m.s)+(m.uid?' (ID '+m.uid+')':'')+'</div>':"";
     if(m.t)h+='<div>'+esc(m.t)+'</div>';
     if(m.gid&&games[m.gid])h+=rGame(m.gid);
     h+='<div class="tm">'+esc(m.tm)+'</div>';
-    row.innerHTML=avDiv+'<div class="msg '+(isOut?'out':'in')+'">'+h+'</div>';
+    row.innerHTML='<div class="av av-sm" style="background:'+(isOut?'#2b5298':'#4c82fb')+'"'+avClick+'>'+avHtml+'</div><div class="msg '+(isOut?'out':'in')+bblStyle+'">'+h+'</div>';
     b.appendChild(row);
   });
   b.scrollTop=b.scrollHeight;
@@ -747,63 +766,59 @@ async function send(e){
   const i=document.getElementById("minp"),t=i.value.trim();if(!t)return;i.value="";
   if(act==="bot"){
     botMsgs.push({f:"out",t,tm:tm()});
-    setTimeout(()=>{botMsgs.push({f:"in",s:"Мем-Бот MSG",t:"Жми «🎮 Игры» сверху, чтобы нафармить +0.01 MSGOIN 🪙 (КД 30 сек)!",tm:tm()});rMsgs();rList()},400);
+    const fact = MSG_FACTS[Math.floor(Math.random()*MSG_FACTS.length)];
+    setTimeout(()=>{botMsgs.push({f:"in",s:"Мем-Бот MSG",t:fact,tm:tm()});rMsgs();rList()},400);
     rMsgs();rList();return;
   }
   if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
   const u=DB.users[curUserId],msgId="m_"+Date.now(),msg={s:u.nick,uid:u.id,t,tm:tm()};
-  if(DB.channels[act]){
-    if(!DB.channels[act].msgs)DB.channels[act].msgs={};
-    DB.channels[act].msgs[msgId]=msg;
-    renderAll();
-    await fbReq("channels/"+act+"/msgs/"+msgId, "PUT", msg);
-  }else if(act.startsWith("dm_")){
-    const key=dmKey(u.id,Number(act.split("_")));
-    if(!DB.dms[key])DB.dms[key]={};
-    DB.dms[key][msgId]=msg;
-    renderAll();
-    await fbReq("dms/"+key+"/"+msgId, "PUT", msg);
-  }
+  if(DB.channels[act]){if(!DB.channels[act].msgs)DB.channels[act].msgs={};DB.channels[act].msgs[msgId]=msg;renderAll();await fbReq("channels/"+act+"/msgs/"+msgId,"PUT",msg)}
+  else if(act.startsWith("dm_")){const key=dmKey(u.id,Number(act.split("_")));if(!DB.dms[key])DB.dms[key]={};DB.dms[key][msgId]=msg;renderAll();await fbReq("dms/"+key+"/"+msgId,"PUT",msg)}
 }
 
-function meme(){
-  document.getElementById("minp").value=["🗿 Сигма MSG","🤡 База от ID "+(curUserId||"Гостя"),"🪙 Копим MSGOIN!","🎟️ MSTIX в кармане!"][Math.floor(Math.random()*4)];
-  send(new Event("submit"));
-}
-
+function meme(){document.getElementById("minp").value=["🎂 С Днём Рождения, создатель MSG!","🗿 Сигма MSG","🪙 Фармим MSGOIN!","🎟️ MSTIX в кармане!"][Math.floor(Math.random()*4)];send(new Event("submit"))}
 function startG(tp){
-  const now = Date.now();
-  const diff = now - lastGameTime;
-  if(diff < 30000){
-    const left = Math.ceil((30000 - diff) / 1000);
-    return toast("⏳ Перезарядка мини-игр! Подожди ещё " + left + " сек.");
-  }
-  lastGameTime = now;
-  togG();
+  const now=Date.now(), diff=now-lastGameTime;
+  if(diff<30000)return toast("⏳ Перезарядка мини-игр! Жди "+Math.ceil((30000-diff)/1000)+" сек.");
+  lastGameTime=now; togG();
   const id="g"+now,g={id,tp};
   if(tp==="ttt"){g.b=Array(9).fill("");g.turn="X";g.w=null}
   if(tp==="rps"){g.p1=null;g.p2=null}
   if(tp==="clk"){g.s1=0;g.s2=0;g.tl=10;g.st=0}
   if(tp==="gss"){g.sec=Math.floor(Math.random()*10)+1;g.tr=[];g.ok=0}
-  games[id]=g;botMsgs.push({f:"out",gid:id,t:"🎮 Мини-игра",tm:tm()});sel("bot");
+  games[id]=g; botMsgs.push({f:"out",gid:id,t:"🎮 Мини-игра",tm:tm()}); sel("bot");
 }
 
 function rewardGameWin(){
-  if(!curUserId){
-    toast("Войди через Google, чтобы получать MSGOIN за победы!");
-    return;
-  }
+  if(!curUserId)return toast("Войди через Google, чтобы получать MSGOIN!");
   addCurrency(curUserId, 0.01, 5);
   toast("🏆 Победа! +0.01 MSGOIN 🪙 и +5 MSTIX 🎟️");
 }
 
 function rGame(id){
   const g=games[id];
-  if(g.tp==="ttt"){let cs="";g.b.forEach((v,i)=>cs+='<div class="cell" onclick="pTTT(\''+id+'\','+i+')">'+v+'</div>');return'<div class="gcard"><div class="row"><b>❌⭕ Крестики-нолики</b><span>'+(g.w?"Итог: "+g.w:"Ход: "+g.turn)+'</span></div><div class="ttt">'+cs+'</div></div>'}
-  if(g.tp==="rps"){let b='<div class="ibtns">'+["🪨","✂️","📄"].map(x=>'<button class="mbtn" onclick="pRPS(\''+id+'\',\''+x+'\')">'+x+'</button>').join("")+'</div>';if(g.p1&&g.p2)b='<div style="margin-top:6px">'+g.p1+' vs '+g.p2+' → <b>'+g.res+'</b></div>';return'<div class="gcard"><b>✂️ КНБ</b>'+b+'</div>'}
-  if(g.tp==="clk"){const btn=g.tl>0?'<button class="cbtn" onclick="pCLK(\''+id+'\')">ЖМИ! 👆</button>':'<div style="color:var(--on);font-weight:700;margin-top:6px">Финиш! '+g.s1+' : '+g.s2+'</div>';return'<div class="gcard"><div class="row"><b>🔥 Кликер</b><span>⏱ '+g.tl+'с</span></div><div style="font-size:12px;margin-top:4px">Ты: <b>'+g.s1+'</b> | Бот: <b>'+g.s2+'</b></div>'+btn+'</div>'}
-  if(g.tp==="gss"){let btns="";for(let n=1;n<=10;n++)btns+='<button class="mbtn" style="opacity:'+(g.tr.includes(n)?.3:1)+'" onclick="pGSS(\''+id+'\','+n+')">'+n+'</button>';const body=g.ok?'<div style="color:var(--on);font-weight:700;margin-top:6px">🎉 Угадано: '+g.sec+'! (+0.01 🪙)</div>':'<div class="ibtns">'+btns+'</div>';return'<div class="gcard"><b>🎲 Угадай 1–10</b><div style="font-size:11px;color:var(--mt)">'+(g.h||"Выбери число:")+'</div>'+body+'</div>'}
+  if(g.tp==="ttt"){
+    let cs="";
+    g.b.forEach((v,i)=>{ cs += `<div class="cell" onclick="pTTT('${id}',${i})">${v}</div>`; });
+    return `<div class="gcard"><div class="row"><b>❌⭕ Крестики-нолики</b><span>${g.w?"Итог: "+g.w:"Ход: "+g.turn}</span></div><div class="ttt">${cs}</div></div>`;
+  }
+  if(g.tp==="rps"){
+    let b = `<div class="ibtns">` + ["🪨","✂️","📄"].map(x=>`<button class="mbtn" onclick="pRPS('${id}','${x}')">${x}</button>`).join("") + `</div>`;
+    if(g.p1&&g.p2) b = `<div style="margin-top:6px">${g.p1} vs ${g.p2} → <b>${g.res}</b></div>`;
+    return `<div class="gcard"><b>✂️ КНБ</b>${b}</div>`;
+  }
+  if(g.tp==="clk"){
+    const btn = g.tl>0 ? `<button class="cbtn" onclick="pCLK('${id}')">ЖМИ! 👆</button>` : `<div style="color:var(--on);font-weight:700;margin-top:6px">Финиш! ${g.s1} : ${g.s2}</div>`;
+    return `<div class="gcard"><div class="row"><b>🔥 Кликер</b><span>⏱ ${g.tl}с</span></div><div style="font-size:12px;margin-top:4px">Ты: <b>${g.s1}</b> | Бот: <b>${g.s2}</b></div>${btn}</div>`;
+  }
+  if(g.tp==="gss"){
+    let btns="";
+    for(let n=1;n<=10;n++) btns += `<button class="mbtn" style="opacity:${g.tr.includes(n)?.3:1}" onclick="pGSS('${id}',${n})">${n}</button>`;
+    const body = g.ok ? `<div style="color:var(--on);font-weight:700;margin-top:6px">🎉 Угадано: ${g.sec}! (+0.01 🪙)</div>` : `<div class="ibtns">${btns}</div>`;
+    return `<div class="gcard"><b>🎲 Угадай 1–10</b><div style="font-size:11px;color:var(--mt)">${g.h||"Выбери число:"}</div>${body}</div>`;
+  }
 }
+
 function pTTT(id,i){const g=games[id];if(!g||g.w||g.b[i])return;g.b[i]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g);if(!g.w){const e=g.b.map((v,x)=>v===""?x:null).filter(v=>v!==null);if(e.length){g.b[e[Math.floor(Math.random()*e.length)]]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g)}}if(g.w==="X")rewardGameWin();rMsgs()}
 function chkTTT(g){const w=["012","345","678","036","147","258","048","246"];for(const s of w){const a=+s,b=+s,c=+s;if(g.b[a]&&g.b[a]===g.b[b]&&g.b[a]===g.b[c])return g.w=g.b[a]}if(!g.b.includes(""))g.w="Ничья"}
 function pRPS(id,c){const g=games[id];if(!g||g.p1)return;g.p1=c;g.p2=["🪨","✂️","📄"][Math.floor(Math.random()*3)];const win=((g.p1==="🪨"&&g.p2==="✂️")||(g.p1==="✂️"&&g.p2==="📄")||(g.p1==="📄"&&g.p2==="🪨"));g.res=g.p1===g.p2?"Ничья!":(win?"Ты победил! (+0.01 🪙)":"Победил бот!");if(win)rewardGameWin();rMsgs()}
@@ -814,7 +829,7 @@ function pGSS(id,n){const g=games[id];if(!g||g.ok||g.tr.includes(n))return;g.tr.
   renderAll();
   await detectIP();
   await pullDB();
-  setInterval(pullDB, 2000);
+  setInterval(()=>{ if(!document.hidden) pullDB(); }, 4000);
 })();
 </script>
 </body>
