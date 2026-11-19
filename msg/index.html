@@ -3,36 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>25 непрочитанных чатов — MAX Web</title>
+<title>MSG — Мессенджер (msgmsg-4)</title>
+<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
-:root{--bg:#0b0e17;--sb:#111625;--ch:#0d111d;--cd:#182035;--hv:#1e2842;--ac:#4c82fb;--out:#2b5298;--in:#192136;--tx:#f0f4fc;--mt:#8896b3;--bd:#1f2942;--on:#2ed573;--gd:#f1c40f}
+:root{--bg:#0b0e17;--sb:#111625;--ch:#0d111d;--cd:#182035;--hv:#1e2842;--ac:#4c82fb;--out:#2b5298;--in:#192136;--tx:#f0f4fc;--mt:#8896b3;--bd:#1f2942;--on:#2ed573;--gd:#f1c40f;--cy:#00d2d3}
 body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hidden}
-.sb{width:340px;background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.sb{width:350px;background:var(--sb);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
 .sb-h{padding:14px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:6px}
-.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4c82fb,#8c52ff);display:flex;align-items:center;justify-content:center;font-weight:900}
-.pill{background:#ff4757;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px}
-.prof{background:var(--cd);border:1px solid var(--bd);padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#4c82fb,#8c52ff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px}
+.coin-pill{background:rgba(241,196,15,.15);color:var(--gd);border:1px solid rgba(241,196,15,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
+.stix-pill{background:rgba(0,210,211,.15);color:var(--cy);border:1px solid rgba(0,210,211,.35);font-size:11px;font-weight:800;padding:3px 7px;border-radius:10px;cursor:pointer}
+.prof{background:var(--cd);border:1px solid var(--bd);padding:8px 10px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px}
 .btn{background:var(--ac);color:#fff;border:none;padding:8px 10px;border-radius:9px;font-weight:600;font-size:12px;cursor:pointer}
 .btn-g{background:linear-gradient(135deg,#f39c12,#f1c40f);color:#000;font-weight:800}
+.btn-c{background:linear-gradient(135deg,#00a8ff,#00d2d3);color:#000;font-weight:800}
 .btn-d{background:#ff4757;color:#fff}
 .list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px}
 .item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;cursor:pointer}
 .item:hover{background:var(--hv)}.item.act{background:#253354}
-.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;position:relative}
+.av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av-sm{width:26px;height:26px;font-size:11px}
 .info{flex:1;min-width:0}.nm{font-weight:600;font-size:14px;display:flex;align-items:center;gap:5px}.pr{font-size:12px;color:var(--mt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag{font-size:10px;padding:1px 6px;border-radius:6px;background:#263559;color:#8ab4ff}
 .tag-s{background:rgba(241,196,15,.2);color:var(--gd);border:1px solid rgba(241,196,15,.4)}
 .main{flex:1;display:flex;flex-direction:column;background:radial-gradient(circle at top right,#141d36,var(--ch) 60%);min-width:0}
 .ch-h{height:60px;padding:0 16px;border-bottom:1px solid var(--bd);background:rgba(17,22,37,.9);display:flex;align-items:center;justify-content:space-between}
-.abtn{background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:7px 11px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer}
-.gdraw{background:var(--sb);border-bottom:1px solid var(--bd);padding:10px 16px;display:none;gap:8px;flex-wrap:wrap}.gdraw.open{display:flex}
+.abtn{background:var(--cd);border:1px solid var(--bd);color:var(--tx);padding:7px 10px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer}
+.gdraw{background:var(--sb);border-bottom:1px solid var(--bd);padding:10px 16px;display:none;gap:8px;flex-wrap:wrap;align-items:center}.gdraw.open{display:flex}
 .chip{background:#1d2847;border:1px solid #33477d;color:#fff;padding:7px 12px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
 .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-.msg{max-width:78%;padding:9px 13px;border-radius:15px;font-size:14px;line-height:1.35;word-wrap:break-word}
-.msg.in{align-self:flex-start;background:var(--in);border:1px solid var(--bd)}
-.msg.out{align-self:flex-end;background:var(--out)}
+.msg-row{display:flex;align-items:flex-end;gap:8px;max-width:82%}
+.msg-row.out{align-self:flex-end;flex-direction:row-reverse}
+.msg-row.in{align-self:flex-start}
+.msg{padding:9px 13px;border-radius:15px;font-size:14px;line-height:1.35;word-wrap:break-word}
+.msg.in{background:var(--in);border:1px solid var(--bd)}
+.msg.out{background:var(--out)}
 .tm{font-size:10px;opacity:.6;text-align:right;margin-top:3px}
 .gcard{background:#101626;border:1px solid #2e406e;border-radius:12px;padding:11px;margin-top:5px;min-width:220px}
 .ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
@@ -43,10 +52,10 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 .inp-a{padding:12px 16px;background:var(--sb);border-top:1px solid var(--bd);display:flex;gap:8px;align-items:center}
 .inp{flex:1;background:var(--cd);border:1px solid var(--bd);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;outline:none}
 .sbtn{background:var(--ac);color:#fff;border:none;width:42px;height:42px;border-radius:12px;font-size:17px;cursor:pointer}
-.mod{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:99;padding:16px}.mod.open{display:flex}
-.mbox{background:var(--sb);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow-y:auto}
-.mbox input{background:var(--cd);border:1px solid var(--bd);color:#fff;padding:10px;border-radius:9px;outline:none;width:100%}
-.acard{background:var(--cd);border:1px solid var(--bd);padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mod{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:99;padding:16px}.mod.open{display:flex}
+.mbox{background:var(--sb);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:460px;display:flex;flex-direction:column;gap:10px;max-height:88vh;overflow-y:auto}
+.mbox input,.mbox select{background:var(--cd);border:1px solid var(--bd);color:#fff;padding:10px;border-radius:9px;outline:none;width:100%}
+.acard{background:var(--cd);border:1px solid var(--bd);padding:10px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--on);color:#000;font-weight:700;padding:8px 16px;border-radius:10px;font-size:13px;display:none;z-index:200}
 .bk{display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
 @media(max-width:768px){.sb{width:100%;position:absolute;inset:0;z-index:20}.sb.hide{transform:translateX(-100%)}.bk{display:block}}
@@ -57,16 +66,19 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 <aside class="sb" id="sb">
   <div class="sb-h">
     <div class="row">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:700"><div class="logo">M</div>MAX Web</div>
-      <span class="pill">25 непрочитанных</span>
+      <div style="display:flex;align-items:center;gap:7px;font-weight:800"><div class="logo">MSG</div>msgmsg-4</div>
+      <div style="display:flex;gap:4px">
+        <span class="coin-pill" id="coinBadge" onclick="openMod('payMod')" title="Редкая валюта MSGOIN">🪙 0.00</span>
+        <span class="stix-pill" id="stixBadge" onclick="openMod('payMod')" title="Ежедневная валюта MSTIX">🎟️ 0</span>
+      </div>
     </div>
     <div class="prof" id="profBox">
-      <span>Не авторизован</span>
-      <button class="btn" onclick="openMod('authMod')">Войти / Рег</button>
+      <span>Вход только через Google</span>
+      <button class="btn" onclick="googleSignIn()">🔵 Войти через Google</button>
     </div>
     <div class="row">
       <button class="btn" style="flex:1" onclick="openMod('dmMod')">+ ЛС по ID</button>
-      <button class="btn" style="flex:1" onclick="openMod('chMod')">+ Канал</button>
+      <button class="btn" style="flex:1" onclick="openMod('chMod')">+ Канал (2)</button>
       <button class="btn btn-g" id="admBtn" style="display:none" onclick="openAdmin()">👑 Админ</button>
     </div>
   </div>
@@ -78,16 +90,18 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
       <button class="bk" onclick="togSb(1)">←</button>
       <div class="av" id="hav" style="background:#4c82fb">🤖</div>
       <div>
-        <div style="font-weight:700;font-size:14px" id="hnm">Мем-Бот MAX</div>
+        <div style="font-weight:700;font-size:14px" id="hnm">Мем-Бот MSG</div>
         <div style="font-size:11px;color:var(--on)" id="hst">в сети</div>
       </div>
     </div>
     <div style="display:flex;gap:6px">
       <button class="abtn" id="leaveBtn" style="display:none;color:#ff6b81" onclick="leaveChannel()">Выйти</button>
-      <button class="abtn" onclick="togG()">🎮 Игры</button>
+      <button class="abtn" onclick="openMod('payMod')">💸 Перевод</button>
+      <button class="abtn" id="gamesBtn" onclick="togG()">🎮 Игры</button>
     </div>
   </header>
   <div class="gdraw" id="gdraw">
+    <span style="font-size:11px;color:var(--mt)">Победа = +0.01 🪙 и +5 🎟️ (КД 30с):</span>
     <button class="chip" onclick="startG('ttt')">❌⭕ Крестики-нолики</button>
     <button class="chip" onclick="startG('rps')">✂️ КНБ</button>
     <button class="chip" onclick="startG('clk')">🔥 Кликер 10с</button>
@@ -95,24 +109,46 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
   </div>
   <div class="msgs" id="mbox"></div>
   <form class="inp-a" id="inpForm" onsubmit="send(event)">
-    <input class="inp" id="minp" placeholder="Написать сообщение..." autocomplete="off">
+    <input class="inp" id="minp" placeholder="Написать сообщение в MSG..." autocomplete="off">
     <button type="button" class="abtn" onclick="meme()">🤡</button>
     <button type="submit" class="sbtn">➤</button>
   </form>
 </main>
 
-<div class="mod" id="authMod">
+<div class="mod" id="regMod">
   <div class="mbox">
-    <h3>Аккаунт MAX Web</h3>
-    <p style="font-size:12px;color:var(--mt)">Первый аккаунт получит <b>ID 1</b> и права Админа. Следующие — ID 2, 3...</p>
-    <input id="aNick" placeholder="Никнейм">
-    <input id="aPass" type="password" placeholder="Пароль">
+    <h3>Завершение регистрации в MSG</h3>
+    <p style="font-size:12px;color:var(--mt)">Google привязан! Выбери уникальный никнейм. Стартовый бонус: <b>50 MSTIX 🎟️</b> (редкие <b>MSGOIN 🪙</b> добываются в играх или выдаются Админом).</p>
+    <input id="rNick" placeholder="Уникальный никнейм">
+    <input id="rAva" placeholder="Ссылка на аватарку (или оставь фото Google)">
+    <button class="btn" onclick="completeGoogleReg()">Создать аккаунт</button>
+  </div>
+</div>
+
+<div class="mod" id="payMod">
+  <div class="mbox">
+    <h3>💸 Перевод валюты MSG</h3>
+    <select id="payCurrency">
+      <option value="coins">🪙 MSGOIN (редкая премиум-валюта)</option>
+      <option value="mstix">🎟️ MSTIX (ежедневная валюта)</option>
+    </select>
+    <input id="payToId" type="number" placeholder="ID получателя (например: 2)">
+    <input id="payAmount" type="number" step="0.01" placeholder="Сумма (например: 0.05 или 10)">
     <div class="row">
-      <button class="btn" style="flex:1" onclick="registerAcc()">Регистрация</button>
-      <button class="abtn" style="flex:1" onclick="loginAcc()">Войти</button>
+      <button class="btn btn-g" style="flex:1" onclick="sendCurrency()">Перевести</button>
+      <button class="abtn" onclick="closeMods()">Отмена</button>
     </div>
-    <div id="quickAccs" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
-    <button class="abtn" onclick="closeMods()">Закрыть</button>
+  </div>
+</div>
+
+<div class="mod" id="avaMod">
+  <div class="mbox">
+    <h3>Сменить аватарку</h3>
+    <input id="newAvaUrl" placeholder="Вставь прямую ссылку на картинку (https://...)">
+    <div class="row">
+      <button class="btn" style="flex:1" onclick="saveAvatar()">Сохранить</button>
+      <button class="abtn" onclick="closeMods()">Отмена</button>
+    </div>
   </div>
 </div>
 
@@ -129,7 +165,7 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 
 <div class="mod" id="chMod">
   <div class="mbox">
-    <h3>Создать канал</h3>
+    <h3>Создать канал (макс. 2 на аккаунт)</h3>
     <input id="chTitle" placeholder="Название канала">
     <input id="chDesc" placeholder="Описание">
     <div class="row">
@@ -141,49 +177,84 @@ body{background:var(--bg);color:var(--tx);height:100vh;display:flex;overflow:hid
 
 <div class="mod" id="admMod">
   <div class="mbox">
-    <h3>👑 Админ-панель (ID 1)</h3>
-    <p style="font-size:12px;color:var(--mt)">Включи <b>startchannel: true</b> — канал добавится всем юзерам.</p>
-    <div id="admChannels" style="display:flex;flex-direction:column;gap:8px"></div>
+    <h3>👑 Админ-панель MSG (ID 1)</h3>
+    <b style="font-size:13px">Каналы (startchannel):</b>
+    <div id="admChannels" style="display:flex;flex-direction:column;gap:6px"></div>
+    <b style="font-size:13px;margin-top:6px">Юзеры, IP-журнал, Баны и Валюта:</b>
+    <div id="admUsers" style="display:flex;flex-direction:column;gap:6px"></div>
     <button class="abtn" onclick="closeMods()">Закрыть</button>
   </div>
 </div>
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAxklr89xat11VhHriMXmsbOJadWdkZ8L0",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebaseio.com",
+  projectId: "msgmsg-4",
+  storageBucket: "msgmsg-4.firebasestorage.app",
+  messagingSenderId: "55140283377",
+  appId: "1:55140283377:web:208454f981e881b38a4a50"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
 const FB_URL = "https://firebaseio.com";
+const TITIK_AVA = "https://oneme.ru";
+const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 let DB = {
   nextId: 1,
   users: {},
+  google_map: {},
+  nicks: {},
+  ip_cooldowns: {},
+  banned_ips: {},
   channels: {
     ch_main: {
       id: "ch_main",
-      title: "MAX Official",
+      title: "MSG Official",
       ownerId: 1,
       startchannel: true,
-      msgs: [{ s: "Система", uid: 0, t: "Добро пожаловать в MAX Web! Первый аккаунт получит ID 1 (Админ) 👑", tm: tm() }]
+      msgs: { m0: { s: "Система", uid: 0, t: "Добро пожаловать в мессенджер MSG (msgmsg-4)! Первый аккаунт получит ID 1 (Админ) 👑", tm: tm() } }
     }
   },
   dms: {}
 };
 
-let curUserId = Number(localStorage.getItem("max_cur_uid") || 0);
+let fbUser = null;
+let idToken = "";
+let curUserId = 0;
+let clientIP = "unknown";
 let act = "bot";
-let isSaving = false;
+let lastGameTime = 0;
 const games = {};
-const botMsgs = [{ f: "in", s: "Мем-Бот", t: "Нажми «Войти / Рег» слева сверху! Первый юзер станет ID 1 (Админом) 👑", tm: tm() }];
+const botMsgs = [{ f: "in", s: "Мем-Бот MSG", t: "Входи через Google! За ежедневный вход капает +25 MSTIX 🎟️, а за победы в играх — редкие +0.01 MSGOIN 🪙 (перезарядка 30 сек).", tm: tm() }];
 
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function tm(){const d=new Date();return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
-function toast(t){const e=document.getElementById("toast");if(!e)return;e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2400)}
-function openMod(id){document.getElementById(id).classList.add("open");if(id==="authMod")renderQuickAccs()}
+function fmtCoin(n){return (Math.round((Number(n)||0)*100)/100).toFixed(2)}
+function toast(t){const e=document.getElementById("toast");if(!e)return;e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2800)}
+function openMod(id){document.getElementById(id).classList.add("open")}
 function closeMods(){document.querySelectorAll(".mod").forEach(m=>m.classList.remove("open"))}
 function togSb(s){document.getElementById("sb").classList.toggle("hide",!s)}
 function togG(){document.getElementById("gdraw").classList.toggle("open")}
 
+function isTitik(nick){return /t[1i]t[1i]k/i.test(String(nick||""))}
+function getUserAvatar(u){
+  if(!u)return"";
+  if(isTitik(u.nick))return TITIK_AVA;
+  return u.avatar||"";
+}
+function renderAvatarInner(u, fallbackText){
+  const url = getUserAvatar(u);
+  if(url) return '<img src="'+esc(url)+'" alt="ava">';
+  return esc(fallbackText);
+}
+
 function toObj(val){
   if(!val)return{};
-  if(Array.isArray(val)){
-    const o={};
-    val.forEach((v,i)=>{if(v)o[v.id||i]=v});
-    return o;
-  }
+  if(Array.isArray(val)){const o={};val.forEach((v,i)=>{if(v)o[v.id||i]=v});return o}
   return val;
 }
 function toArr(val){
@@ -191,119 +262,293 @@ function toArr(val){
   if(Array.isArray(val))return val.filter(Boolean);
   return Object.values(val);
 }
+function ipToKey(ip){return String(ip||"unknown").replace(/[.:]/g,"_")}
 
-async function saveDB(){
-  isSaving = true;
-  localStorage.setItem("max_db", JSON.stringify(DB));
+async function detectIP(){
   try{
-    await fetch(FB_URL+"/max_db.json",{method:"PUT",body:JSON.stringify(DB)});
+    const r = await fetch("https://ipify.org");
+    const j = await r.json();
+    if(j && j.ip) clientIP = j.ip;
   }catch(e){}
-  setTimeout(()=>{isSaving=false}, 600);
 }
 
-async function pullDB(){
-  if(isSaving)return;
-  try{
-    const r=await fetch(FB_URL+"/max_db.json");
-    const data=await r.json();
-    if(data && typeof data === "object"){
-      DB.nextId = Number(data.nextId) || 1;
-      DB.users = toObj(data.users);
-      Object.values(DB.users).forEach(u=>{
-        u.joined = toArr(u.joined);
-        u.left = toArr(u.left);
-      });
-      const rawCh = toObj(data.channels);
-      if(Object.keys(rawCh).length > 0) DB.channels = rawCh;
-      Object.values(DB.channels).forEach(c=>{
-        c.msgs = toArr(c.msgs);
-      });
-      DB.dms = toObj(data.dms);
-      Object.keys(DB.dms).forEach(k=>{
-        DB.dms[k] = toArr(DB.dms[k]);
-      });
-      applyStartChannels();
-      localStorage.setItem("max_db", JSON.stringify(DB));
-      renderAll();
-    }else if(data === null){
-      await saveDB();
+async function fbReq(path, method="GET", body=null){
+  const query = idToken ? "?auth=" + idToken : "";
+  const opts = { method };
+  if(body !== null) opts.body = JSON.stringify(body);
+  const r = await fetch(FB_URL + "/msg_db/" + path + ".json" + query, opts);
+  return await r.json();
+}
+
+async function logIPAccess(uid, nick, action){
+  if(!clientIP || clientIP==="unknown" || !idToken) return;
+  const logId = "l_" + Date.now() + "_" + Math.floor(Math.random()*999);
+  const entry = { uid, nick, ip: clientIP, action, date: new Date().toLocaleString("ru-RU") };
+  await fbReq("ip_logs/" + logId, "PUT", entry);
+  const u = DB.users[uid];
+  if(u){
+    const ips = toArr(u.ips);
+    if(!ips.includes(clientIP)){
+      ips.push(clientIP);
+      u.ips = ips;
+      await fbReq("users/" + uid + "/ips", "PUT", ips);
     }
-  }catch(e){console.error(e)}
+  }
 }
 
-function applyStartChannels(){
-  const startIds=Object.values(DB.channels).filter(c=>c&&c.startchannel).map(c=>c.id);
-  Object.values(DB.users).forEach(u=>{
-    if(!u)return;
-    if(!Array.isArray(u.joined))u.joined=[];
-    if(!Array.isArray(u.left))u.left=[];
-    startIds.forEach(cid=>{
-      if(!u.joined.includes(cid)&&!u.left.includes(cid))u.joined.push(cid);
+async function checkDailyMstix(uid){
+  const u = DB.users[uid];
+  if(!u || !idToken) return;
+  const lastDaily = Number(u.lastDaily || 0);
+  if(Date.now() - lastDaily >= ONE_DAY_MS){
+    const now = Date.now();
+    const nextMstix = (Number(u.mstix) || 0) + 25;
+    u.lastDaily = now;
+    u.mstix = nextMstix;
+    await fbReq("users/"+uid+"/lastDaily", "PUT", now);
+    await fbReq("users/"+uid+"/mstix", "PUT", nextMstix);
+    toast("🎁 Ежедневный бонус за вход: +25 MSTIX 🎟️!");
+  }
+}
+async function pullDB(){
+  try{
+    const [nid, users, gmap, nicks, ipCd, bannedIps, chs, dms] = await Promise.all([
+      fbReq("nextId"),
+      fbReq("users"),
+      fbReq("google_map"),
+      fbReq("nicks"),
+      fbReq("ip_cooldowns"),
+      fbReq("banned_ips"),
+      fbReq("channels"),
+      fbReq("dms")
+    ]);
+    if(nid === null && users === null && idToken){
+      await fbReq("nextId", "PUT", 1);
+      await fbReq("channels/ch_main", "PUT", DB.channels.ch_main);
+      return;
+    }
+    DB.nextId = Number(nid) || 1;
+    DB.users = toObj(users);
+    DB.google_map = toObj(gmap);
+    DB.nicks = toObj(nicks);
+    DB.ip_cooldowns = toObj(ipCd);
+    DB.banned_ips = toObj(bannedIps);
+
+    if(clientIP !== "unknown" && DB.banned_ips[ipToKey(clientIP)] && curUserId !== 1){
+      document.body.innerHTML = '<div style="margin:auto;text-align:center;padding:20px"><h1>⛔ Ваш IP ('+esc(clientIP)+') заблокирован в MSG</h1></div>';
+      return;
+    }
+
+    Object.values(DB.users).forEach(u=>{
+      u.joined = toArr(u.joined);
+      u.left = toArr(u.left);
+      u.ips = toArr(u.ips);
+      if(typeof u.coins !== "number") u.coins = 0;
+      if(typeof u.mstix !== "number") u.mstix = 50;
     });
+
+    if(fbUser && DB.google_map[fbUser.uid]){
+      curUserId = Number(DB.google_map[fbUser.uid]);
+    }
+
+    const rawCh = toObj(chs);
+    if(Object.keys(rawCh).length > 0) DB.channels = rawCh;
+    DB.dms = toObj(dms);
+    await applyStartChannels();
+    renderAll();
+  }catch(e){}
+}
+
+async function applyStartChannels(){
+  const startIds = Object.values(DB.channels).filter(c=>c&&c.startchannel).map(c=>c.id);
+  const u = DB.users[curUserId];
+  if(!u || !idToken)return;
+  let changed = false;
+  startIds.forEach(cid=>{
+    if(!u.joined.includes(cid)&&!u.left.includes(cid)){
+      u.joined.push(cid);
+      changed = true;
+    }
   });
+  if(changed) await fbReq("users/"+u.id+"/joined", "PUT", u.joined);
 }
 
-async function registerAcc(){
+async function googleSignIn(){
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  }catch(e){
+    toast("Ошибка входа Google: " + e.message);
+  }
+}
+
+function googleSignOut(){
+  auth.signOut();
+  fbUser = null;
+  idToken = "";
+  curUserId = 0;
+  renderAll();
+  toast("Вы вышли из аккаунта");
+}
+
+auth.onAuthStateChanged(async (user)=>{
+  fbUser = user;
+  if(user){
+    idToken = await user.getIdToken();
+    await detectIP();
+    await pullDB();
+    if(DB.google_map[user.uid]){
+      curUserId = Number(DB.google_map[user.uid]);
+      await logIPAccess(curUserId, DB.users[curUserId]?.nick || "user", "google_login");
+      await checkDailyMstix(curUserId);
+      renderAll();
+    }else{
+      document.getElementById("rNick").value = (user.displayName || "").replace(/\s+/g, "_").slice(0, 20);
+      document.getElementById("rAva").value = user.photoURL || "";
+      openMod("regMod");
+    }
+  }else{
+    idToken = "";
+    curUserId = 0;
+    renderAll();
+  }
+});
+
+async function completeGoogleReg(){
+  if(!fbUser)return toast("Сначала войдите через Google!");
+  await detectIP();
   await pullDB();
-  const nick=document.getElementById("aNick").value.trim();
-  const pass=document.getElementById("aPass").value.trim();
-  if(!nick||!pass)return toast("Введи ник и пароль!");
-  const id=DB.nextId++;
-  DB.users[id]={id,nick,pass,joined:[],left:[]};
-  applyStartChannels();
-  curUserId=id;
-  localStorage.setItem("max_cur_uid",id);
-  await saveDB();
-  closeMods();
+
+  const nick = document.getElementById("rNick").value.trim();
+  let ava = document.getElementById("rAva").value.trim();
+  if(!nick)return toast("Введи уникальный никнейм!");
+  if(nick.length > 24)return toast("Ник максимум 24 символа!");
+
+  if(clientIP !== "unknown" && DB.banned_ips[ipToKey(clientIP)])return toast("Ваш IP забанен!");
+
+  const ipKey = ipToKey(clientIP);
+  if(clientIP !== "unknown" && DB.ip_cooldowns[ipKey]){
+    const lastTs = Number(DB.ip_cooldowns[ipKey]);
+    const diff = Date.now() - lastTs;
+    if(diff < TWO_DAYS_MS){
+      const hoursLeft = Math.ceil((TWO_DAYS_MS - diff) / (1000 * 60 * 60));
+      return toast("Лимит IP: новый аккаунт доступен через " + hoursLeft + " ч.");
+    }
+  }
+
+  const nickKey = nick.toLowerCase().replace(/[.#$\[\]\/]/g, "_");
+  if(DB.nicks[nickKey] || Object.values(DB.users).some(x=>x&&x.nick.toLowerCase()===nick.toLowerCase())){
+    return toast("Ник «"+nick+"» уже занят!");
+  }
+
+  if(isTitik(nick)) ava = TITIK_AVA;
+
+  const id = DB.nextId;
+  const resNick = await fbReq("nicks/" + nickKey, "PUT", id);
+  if(resNick && resNick.error)return toast("Этот ник только что заняли!");
+
+  if(clientIP !== "unknown"){
+    const resCd = await fbReq("ip_cooldowns/" + ipKey, "PUT", Date.now());
+    if(resCd && resCd.error)return toast("С этого IP ещё не прошло 2 дня с прошлой регистрации!");
+  }
+
+  await fbReq("google_map/" + fbUser.uid, "PUT", id);
+  await fbReq("nextId", "PUT", id + 1);
+
+  const startIds = Object.values(DB.channels).filter(c=>c&&c.startchannel).map(c=>c.id);
+  const userObj = {
+    id,
+    nick,
+    googleUid: fbUser.uid,
+    email: fbUser.email || "",
+    avatar: ava,
+    coins: 0,
+    mstix: 50,
+    lastDaily: Date.now(),
+    ips: [clientIP],
+    joined: startIds,
+    left: []
+  };
+  await fbReq("users/" + id, "PUT", userObj);
+  await logIPAccess(id, nick, "register");
+
+  DB.users[id] = userObj;
+  curUserId = id;
+  closeMods();renderAll();
+  toast("Добро пожаловать в MSG! Ваш ID "+id+" (+50 MSTIX 🎟️)");
+}
+async function addCurrency(uid, dCoins, dMstix){
+  const u = DB.users[uid];
+  if(!u || !idToken) return;
+  if(dCoins){
+    const nextC = Math.max(0, Math.round(((Number(u.coins)||0) + dCoins)*100)/100);
+    u.coins = nextC;
+    await fbReq("users/"+uid+"/coins", "PUT", nextC);
+  }
+  if(dMstix){
+    const nextM = Math.max(0, Math.floor((Number(u.mstix)||0) + dMstix));
+    u.mstix = nextM;
+    await fbReq("users/"+uid+"/mstix", "PUT", nextM);
+  }
   renderAll();
-  toast("Создан аккаунт ID "+id+(id===1?" (Вы Админ 👑)":""));
 }
 
-async function loginAcc(){
+async function sendCurrency(){
+  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
   await pullDB();
-  const nick=document.getElementById("aNick").value.trim();
-  const pass=document.getElementById("aPass").value.trim();
-  const u=Object.values(DB.users).find(x=>x&&x.nick.toLowerCase()===nick.toLowerCase()&&x.pass===pass);
-  if(!u)return toast("Неверный ник или пароль!");
-  curUserId=u.id;
-  localStorage.setItem("max_cur_uid",u.id);
-  applyStartChannels();
-  await saveDB();
+  const curType = document.getElementById("payCurrency").value;
+  const tid = Number(document.getElementById("payToId").value);
+  let amt = Number(document.getElementById("payAmount").value);
+  if(!tid || tid===curUserId)return toast("Введи чужой ID!");
+  if(!DB.users[tid])return toast("Юзер с ID "+tid+" не найден!");
+  if(!amt || amt <= 0)return toast("Введи сумму больше 0!");
+
+  if(curType === "coins"){
+    amt = Math.round(amt * 100) / 100;
+    if((DB.users[curUserId].coins||0) < amt)return toast("Недостаточно MSGOIN 🪙!");
+    await addCurrency(curUserId, -amt, 0);
+    await addCurrency(tid, amt, 0);
+    toast("Переведено "+fmtCoin(amt)+" MSGOIN для ID "+tid+" 🪙");
+  }else{
+    amt = Math.floor(amt);
+    if(amt <= 0)return toast("Минимум 1 MSTIX!");
+    if((DB.users[curUserId].mstix||0) < amt)return toast("Недостаточно MSTIX 🎟️!");
+    await addCurrency(curUserId, 0, -amt);
+    await addCurrency(tid, 0, amt);
+    toast("Переведено "+amt+" MSTIX для ID "+tid+" 🎟️");
+  }
   closeMods();
-  renderAll();
-  toast("Вход выполнен: ID "+u.id);
 }
 
-function switchAcc(id){
-  curUserId=id;
-  localStorage.setItem("max_cur_uid",id);
-  applyStartChannels();
-  renderAll();
-  closeMods();
-  toast("Переключено на ID "+id);
+async function saveAvatar(){
+  if(!curUserId||!DB.users[curUserId])return;
+  const u = DB.users[curUserId];
+  if(isTitik(u.nick))return toast("Для ников titik/t1tik аватарка закреплена навсегда!");
+  const url = document.getElementById("newAvaUrl").value.trim();
+  u.avatar = url;
+  await fbReq("users/"+u.id+"/avatar", "PUT", url);
+  closeMods();renderAll();toast("Аватарка обновлена!");
 }
 
-function renderQuickAccs(){
-  const box=document.getElementById("quickAccs");
-  const list=Object.values(DB.users).filter(Boolean);
-  if(!list.length){box.innerHTML="";return}
-  box.innerHTML='<div style="font-size:11px;color:var(--mt)">Аккаунты в базе:</div>'+list.map(u=>'<div class="acard"><span><b>ID '+u.id+'</b> • '+u.nick+(u.id===1?' 👑':'')+'</span><button class="btn" onclick="switchAcc('+u.id+')">Войти</button></div>').join("");
-}
 async function createChannel(){
-  if(!curUserId||!DB.users[curUserId])return openMod("authMod");
+  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
+  await pullDB();
+  const ownedCount = Object.values(DB.channels).filter(c=>c&&c.ownerId===curUserId).length;
+  if(ownedCount >= 2)return toast("Лимит: максимум 2 канала на 1 аккаунт!");
+
   const title=document.getElementById("chTitle").value.trim();
   const desc=document.getElementById("chDesc").value.trim();
   if(!title)return toast("Введи название!");
   const id="ch_"+Date.now();
-  DB.channels[id]={
+  const chObj={
     id,title,ownerId:curUserId,startchannel:false,
-    msgs:[{s:DB.users[curUserId].nick,uid:curUserId,t:desc||("Канал «"+title+"» создан!"),tm:tm()}]
+    msgs:{ m0:{s:DB.users[curUserId].nick,uid:curUserId,t:desc||("Канал «"+title+"» создан в MSG!"),tm:tm()} }
   };
+  await fbReq("channels/"+id, "PUT", chObj);
+  DB.channels[id]=chObj;
   DB.users[curUserId].joined.push(id);
-  await saveDB();
-  closeMods();
-  sel(id);
-  toast("Канал создан!");
+  await fbReq("users/"+curUserId+"/joined", "PUT", DB.users[curUserId].joined);
+  closeMods();sel(id);toast("Канал создан ("+(ownedCount+1)+"/2)!");
 }
 
 async function leaveChannel(){
@@ -311,9 +556,9 @@ async function leaveChannel(){
   const u=DB.users[curUserId];
   u.joined=u.joined.filter(x=>x!==act);
   if(!u.left.includes(act))u.left.push(act);
-  await saveDB();
-  sel("bot");
-  toast("Вы вышли из канала");
+  await fbReq("users/"+curUserId+"/joined", "PUT", u.joined);
+  await fbReq("users/"+curUserId+"/left", "PUT", u.left);
+  sel("bot");toast("Вы вышли из канала");
 }
 
 function openAdmin(){
@@ -321,92 +566,125 @@ function openAdmin(){
   const box=document.getElementById("admChannels");
   box.innerHTML=Object.values(DB.channels).filter(Boolean).map(c=>{
     const st=!!c.startchannel;
-    return'<div class="acard"><div><b># '+c.title+'</b><div style="font-size:11px;color:var(--mt)">startchannel: <b style="color:'+(st?'var(--on)':'#ff6b81')+'">'+st+'</b></div></div><button class="btn '+(st?'btn-d':'btn-g')+'" onclick="toggleStartChannel(\''+c.id+'\')">'+(st?'Выкл':'Сделать стартовым')+'</button></div>';
+    return'<div class="acard"><div><b># '+esc(c.title)+'</b><div style="font-size:11px;color:var(--mt)">startchannel: <b style="color:'+(st?'var(--on)':'#ff6b81')+'">'+st+'</b></div></div><button class="btn '+(st?'btn-d':'btn-g')+'" onclick="toggleStartChannel(\''+c.id+'\')">'+(st?'Выкл':'Сделать стартовым')+'</button></div>';
   }).join("");
+
+  const ubox=document.getElementById("admUsers");
+  ubox.innerHTML=Object.values(DB.users).filter(Boolean).map(u=>{
+    const ips = toArr(u.ips);
+    const lastIp = ips[ips.length-1] || "нет IP";
+    const isBanned = lastIp !== "нет IP" && !!DB.banned_ips[ipToKey(lastIp)];
+    const banBtn = (u.id!==1 && lastIp!=="нет IP")
+      ? '<button class="btn '+(isBanned?'':'btn-d')+'" onclick="banUserIP(\''+esc(lastIp)+'\','+u.id+')">'+(isBanned?'Забанен':'Бан')+'</button>'
+      : '';
+    const giftCoin = '<button class="btn btn-g" onclick="adminGive('+u.id+',1,0)">+1 🪙</button>';
+    const giftStix = '<button class="btn btn-c" onclick="adminGive('+u.id+',0,100)">+100 🎟️</button>';
+    return'<div class="acard"><div><b>ID '+u.id+' • '+esc(u.nick)+'</b><div style="font-size:11px;color:var(--gd)">🪙 '+fmtCoin(u.coins)+' | 🎟️ '+(u.mstix||0)+'</div><div style="font-size:10px;color:var(--mt)">IP: '+esc(ips.join(", ")||"—")+'</div></div><div style="display:flex;gap:4px;flex-wrap:wrap">'+giftCoin+giftStix+banBtn+'</div></div>';
+  }).join("");
+
   openMod("admMod");
+}
+
+async function adminGive(uid, dc, dm){
+  if(curUserId!==1)return;
+  await addCurrency(uid, dc, dm);
+  toast(dc ? "Выдано +"+dc+" MSGOIN для ID "+uid : "Выдано +"+dm+" MSTIX для ID "+uid);
+  openAdmin();
+}
+
+async function banUserIP(ip, uid){
+  if(curUserId!==1)return;
+  await fbReq("banned_ips/"+ipToKey(ip), "PUT", { ip, uid, date: new Date().toLocaleString("ru-RU") });
+  DB.banned_ips[ipToKey(ip)] = { ip, uid };
+  toast("IP "+ip+" забанен!");
+  openAdmin();
 }
 
 async function toggleStartChannel(cid){
   if(curUserId!==1)return;
-  const c=DB.channels[cid];
-  if(!c)return;
-  c.startchannel=!c.startchannel;
-  if(c.startchannel){
-    Object.values(DB.users).forEach(u=>{if(u&&u.left)u.left=u.left.filter(x=>x!==cid)});
-    applyStartChannels();
-    toast("Канал «"+c.title+"» добавлен всем юзерам!");
-  }else toast("startchannel: false");
-  await saveDB();
-  openAdmin();
-  renderAll();
+  const c=DB.channels[cid];if(!c)return;
+  const nextVal = !c.startchannel;
+  await fbReq("channels/"+cid, "PATCH", { startchannel: nextVal });
+  c.startchannel = nextVal;
+  toast(nextVal ? "Канал «"+c.title+"» стал стартовым для всех!" : "startchannel: false");
+  openAdmin();renderAll();
 }
 
 async function openDM(){
-  if(!curUserId||!DB.users[curUserId])return openMod("authMod");
+  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
   await pullDB();
   const tid=Number(document.getElementById("dmId").value);
   if(!tid||tid===curUserId)return toast("Введи чужой ID!");
   if(!DB.users[tid])return toast("Юзер с ID "+tid+" не найден!");
   const key=dmKey(curUserId,tid);
-  if(!DB.dms[key])DB.dms[key]=[{s:"Система",uid:0,t:"Личный чат между ID "+curUserId+" и ID "+tid,tm:tm()}];
-  await saveDB();
-  closeMods();
-  sel("dm_"+tid);
+  if(!DB.dms[key]){
+    const m0={s:"Система",uid:0,t:"Личный чат MSG между ID "+curUserId+" и ID "+tid,tm:tm()};
+    await fbReq("dms/"+key+"/m0", "PUT", m0);
+    DB.dms[key]={m0};
+  }
+  closeMods();sel("dm_"+tid);
 }
 
 function dmKey(a,b){return a<b?a+"_"+b:b+"_"+a}
 
 function renderAll(){
-  try{
-    const u=DB.users[curUserId];
-    const pbox=document.getElementById("profBox");
-    const admBtn=document.getElementById("admBtn");
-    if(u){
-      pbox.innerHTML='<span><b>ID '+u.id+'</b> • '+u.nick+(u.id===1?' 👑':'')+'</span><button class="abtn" onclick="openMod(\'authMod\')">Сменить</button>';
-      admBtn.style.display=u.id===1?"inline-block":"none";
-    }else{
-      pbox.innerHTML='<span>Не авторизован</span><button class="btn" onclick="openMod(\'authMod\')">Войти / Рег</button>';
-      admBtn.style.display="none";
-    }
-    rList();rHeader();rMsgs();
-  }catch(e){console.error(e)}
+  const u=DB.users[curUserId];
+  const pbox=document.getElementById("profBox");
+  const admBtn=document.getElementById("admBtn");
+  const coinBadge=document.getElementById("coinBadge");
+  const stixBadge=document.getElementById("stixBadge");
+  if(u){
+    const avaHtml = '<div class="av av-sm" style="background:#4c82fb">'+renderAvatarInner(u, u.nick.slice(0,2).toUpperCase())+'</div>';
+    pbox.innerHTML='<div style="display:flex;align-items:center;gap:6px">'+avaHtml+'<span><b>ID '+u.id+'</b> • '+esc(u.nick)+(u.id===1?' 👑':'')+'</span></div><div style="display:flex;gap:4px"><button class="abtn" onclick="openMod(\'avaMod\')" title="Сменить аватарку">🖼️</button><button class="abtn" onclick="googleSignOut()" title="Выйти">🚪</button></div>';
+    admBtn.style.display=u.id===1?"inline-block":"none";
+    coinBadge.textContent="🪙 "+fmtCoin(u.coins);
+    stixBadge.textContent="🎟️ "+(u.mstix||0);
+  }else{
+    pbox.innerHTML='<span>Вход через Google</span><button class="btn" onclick="googleSignIn()">🔵 Войти</button>';
+    admBtn.style.display="none";
+    coinBadge.textContent="🪙 0.00";
+    stixBadge.textContent="🎟️ 0";
+  }
+  rList();rHeader();rMsgs();
 }
 
 function rList(){
   const l=document.getElementById("clist");if(!l)return;l.innerHTML="";
-  const lastBot = botMsgs[botMsgs.length-1];
-  addChatItem(l,"bot","🤖","#4c82fb","Мем-Бот MAX","онлайн",lastBot?lastBot.t:"");
-  const u=DB.users[curUserId];
-  if(!u)return;
+  addChatItem(l,"bot","🤖","#4c82fb","Мем-Бот MSG","онлайн",botMsgs[botMsgs.length-1].t);
+  const u=DB.users[curUserId];if(!u)return;
   (u.joined||[]).forEach(cid=>{
     const c=DB.channels[cid];if(!c)return;
-    const msgs=toArr(c.msgs);
-    const lm=msgs[msgs.length-1];
+    const msgs=toArr(c.msgs),lm=msgs[msgs.length-1];
     const badge=c.startchannel?'<span class="tag tag-s">START</span>':'<span class="tag">Канал</span>';
-    addChatItem(l,c.id,"#","#8c52ff",c.title+" "+badge,lm?lm.tm:"",lm?lm.t:"Нет постов");
+    addChatItem(l,c.id,"#","#8c52ff",esc(c.title)+" "+badge,lm?lm.tm:"",lm?lm.t:"Нет постов");
   });
   Object.values(DB.channels).forEach(c=>{
-    if(c&&!(u.joined||[]).includes(c.id))addChatItem(l,c.id,"➕","#263559",c.title+' <span class="tag">Вступить</span>',"","Нажми, чтобы вернуться");
+    if(c&&!(u.joined||[]).includes(c.id))addChatItem(l,c.id,"➕","#263559",esc(c.title)+' <span class="tag">Вступить</span>',"","Нажми, чтобы вернуться");
   });
   Object.values(DB.users).forEach(other=>{
     if(!other||other.id===u.id)return;
     const arr=toArr(DB.dms[dmKey(u.id,other.id)]);
-    if(arr.length){const lm=arr[arr.length-1];addChatItem(l,"dm_"+other.id,(other.nick||"U").slice(0,2).toUpperCase(),"#2ed573",other.nick+' <span class="tag">ID '+other.id+'</span>',lm?lm.tm:"",lm?lm.t:"");}
+    if(arr.length){
+      const lm=arr[arr.length-1];
+      const avHtml=renderAvatarInner(other, (other.nick||"U").slice(0,2).toUpperCase());
+      addChatItem(l,"dm_"+other.id,avHtml,"#2ed573",esc(other.nick)+' <span class="tag">ID '+other.id+'</span>',lm?lm.tm:"",lm?lm.t:"");
+    }
   });
 }
 
-function addChatItem(parent,id,av,col,titleHtml,time,prev){
+function addChatItem(parent,id,avHtml,col,titleHtml,time,prev){
   const d=document.createElement("div");d.className="item"+(act===id?" act":"");
-  d.onclick=()=>{
+  d.onclick=async()=>{
     if(DB.channels[id]&&curUserId&&DB.users[curUserId]&&!(DB.users[curUserId].joined||[]).includes(id)){
       DB.users[curUserId].joined.push(id);
       DB.users[curUserId].left=(DB.users[curUserId].left||[]).filter(x=>x!==id);
-      saveDB();toast("Вы вступили в канал!");
+      await fbReq("users/"+curUserId+"/joined", "PUT", DB.users[curUserId].joined);
+      await fbReq("users/"+curUserId+"/left", "PUT", DB.users[curUserId].left);
+      toast("Вы вступили в канал!");
     }
     sel(id);
   };
-  const safePrev = String(prev||"").replace(/</g,"&lt;");
-  d.innerHTML='<div class="av" style="background:'+col+'">'+av+'</div><div class="info"><div class="row"><span class="nm">'+titleHtml+'</span><span style="font-size:10px;color:var(--mt)">'+(time||"")+'</span></div><div class="pr">'+safePrev+'</div></div>';
+  d.innerHTML='<div class="av" style="background:'+col+'">'+avHtml+'</div><div class="info"><div class="row"><span class="nm">'+titleHtml+'</span><span style="font-size:10px;color:var(--mt)">'+esc(time)+'</span></div><div class="pr">'+esc(prev)+'</div></div>';
   parent.appendChild(d);
 }
 function sel(id){act=id;renderAll();togSb(0)}
@@ -415,33 +693,27 @@ function rHeader(){
   const leaveBtn=document.getElementById("leaveBtn"),inpForm=document.getElementById("inpForm");
   leaveBtn.style.display="none";inpForm.style.display="flex";
   if(act==="bot"){
-    document.getElementById("hav").textContent="🤖";document.getElementById("hav").style.background="#4c82fb";
-    document.getElementById("hnm").textContent="Мем-Бот MAX";document.getElementById("hst").textContent="в сети";
+    document.getElementById("hav").innerHTML="🤖";document.getElementById("hav").style.background="#4c82fb";
+    document.getElementById("hnm").textContent="Мем-Бот MSG";document.getElementById("hst").textContent="в сети • раздаёт MSGOIN";
   }else if(DB.channels[act]){
     const c=DB.channels[act];
-    document.getElementById("hav").textContent="#";document.getElementById("hav").style.background="#8c52ff";
+    document.getElementById("hav").innerHTML="#";document.getElementById("hav").style.background="#8c52ff";
     document.getElementById("hnm").textContent=c.title+(c.startchannel?" (startchannel: true)":"");
     document.getElementById("hst").textContent="Канал • Владелец ID "+c.ownerId;
     leaveBtn.style.display="inline-block";
     if(curUserId!==c.ownerId&&curUserId!==1)inpForm.style.display="none";
   }else if(act.startsWith("dm_")){
     const tid=Number(act.split("_")),tu=DB.users[tid]||{nick:"Юзер",id:tid};
-    document.getElementById("hav").textContent=(tu.nick||"U").slice(0,2).toUpperCase();document.getElementById("hav").style.background="#2ed573";
-    document.getElementById("hnm").textContent=tu.nick+" (ID "+tu.id+")";document.getElementById("hst").textContent="Личный чат";
+    document.getElementById("hav").innerHTML=renderAvatarInner(tu, (tu.nick||"U").slice(0,2).toUpperCase());
+    document.getElementById("hav").style.background="#2ed573";
+    document.getElementById("hnm").textContent=tu.nick+" (ID "+tu.id+")";document.getElementById("hst").textContent="Личный чат MSG";
   }
 }
 
 function getActiveMessages(){
   if(act==="bot")return botMsgs;
-  if(DB.channels[act]){
-    DB.channels[act].msgs = toArr(DB.channels[act].msgs);
-    return DB.channels[act].msgs;
-  }
-  if(act.startsWith("dm_")&&curUserId){
-    const k = dmKey(curUserId,Number(act.split("_")));
-    DB.dms[k] = toArr(DB.dms[k]);
-    return DB.dms[k];
-  }
+  if(DB.channels[act])return toArr(DB.channels[act].msgs);
+  if(act.startsWith("dm_")&&curUserId)return toArr(DB.dms[dmKey(curUserId,Number(act.split("_")))]);
   return [];
 }
 
@@ -450,12 +722,17 @@ function rMsgs(){
   getActiveMessages().forEach(m=>{
     if(!m)return;
     const isOut=m.f==="out"||(curUserId&&m.uid===curUserId);
-    const d=document.createElement("div");d.className="msg "+(isOut?"out":"in");
-    let h=(!isOut&&m.s)?'<div style="font-size:11px;font-weight:700;color:#7da6ff;margin-bottom:3px">'+m.s+(m.uid?' (ID '+m.uid+')':'')+'</div>':"";
-    if(m.t)h+='<div>'+String(m.t).replace(/</g,"&lt;")+'</div>';
+    const row=document.createElement("div");row.className="msg-row "+(isOut?"out":"in");
+    const senderObj = m.uid ? DB.users[m.uid] : null;
+    const avHtml = m.uid ? renderAvatarInner(senderObj, (m.s||"U").slice(0,2).toUpperCase()) : "🤖";
+    const avDiv = '<div class="av av-sm" style="background:'+(isOut?'#2b5298':'#4c82fb')+'">'+avHtml+'</div>';
+
+    let h=(!isOut&&m.s)?'<div style="font-size:11px;font-weight:700;color:#7da6ff;margin-bottom:3px">'+esc(m.s)+(m.uid?' (ID '+m.uid+')':'')+'</div>':"";
+    if(m.t)h+='<div>'+esc(m.t)+'</div>';
     if(m.gid&&games[m.gid])h+=rGame(m.gid);
-    h+='<div class="tm">'+(m.tm||"")+'</div>';
-    d.innerHTML=h;b.appendChild(d);
+    h+='<div class="tm">'+esc(m.tm)+'</div>';
+    row.innerHTML=avDiv+'<div class="msg '+(isOut?'out':'in')+'">'+h+'</div>';
+    b.appendChild(row);
   });
   b.scrollTop=b.scrollHeight;
 }
@@ -465,46 +742,75 @@ async function send(e){
   const i=document.getElementById("minp"),t=i.value.trim();if(!t)return;i.value="";
   if(act==="bot"){
     botMsgs.push({f:"out",t,tm:tm()});
-    setTimeout(()=>{botMsgs.push({f:"in",s:"Мем-Бот",t:"Регай акк сверху, чтобы получить ID 1, 2, 3! 🔥",tm:tm()});rMsgs();rList()},400);
+    setTimeout(()=>{botMsgs.push({f:"in",s:"Мем-Бот MSG",t:"Жми «🎮 Игры» сверху, чтобы нафармить +0.01 MSGOIN 🪙 (КД 30 сек)!",tm:tm()});rMsgs();rList()},400);
     rMsgs();rList();return;
   }
-  if(!curUserId||!DB.users[curUserId])return openMod("authMod");
-  const u=DB.users[curUserId],msg={s:u.nick,uid:u.id,t,tm:tm()};
-  getActiveMessages().push(msg);
-  renderAll();
-  await saveDB();
+  if(!curUserId||!DB.users[curUserId])return toast("Сначала войдите через Google!");
+  const u=DB.users[curUserId],msgId="m_"+Date.now(),msg={s:u.nick,uid:u.id,t,tm:tm()};
+  if(DB.channels[act]){
+    if(!DB.channels[act].msgs)DB.channels[act].msgs={};
+    DB.channels[act].msgs[msgId]=msg;
+    renderAll();
+    await fbReq("channels/"+act+"/msgs/"+msgId, "PUT", msg);
+  }else if(act.startsWith("dm_")){
+    const key=dmKey(u.id,Number(act.split("_")));
+    if(!DB.dms[key])DB.dms[key]={};
+    DB.dms[key][msgId]=msg;
+    renderAll();
+    await fbReq("dms/"+key+"/"+msgId, "PUT", msg);
+  }
 }
 
 function meme(){
-  document.getElementById("minp").value=["🗿 Сигма активирован","🤡 База от ID "+(curUserId||"Гостя"),"👑 Админ ID 1 в здании","🔥 Газ в пол!"][Math.floor(Math.random()*4)];
+  document.getElementById("minp").value=["🗿 Сигма MSG","🤡 База от ID "+(curUserId||"Гостя"),"🪙 Копим MSGOIN!","🎟️ MSTIX в кармане!"][Math.floor(Math.random()*4)];
   send(new Event("submit"));
 }
 
 function startG(tp){
-  togG();const id="g"+Date.now(),g={id,tp};
+  const now = Date.now();
+  const diff = now - lastGameTime;
+  if(diff < 30000){
+    const left = Math.ceil((30000 - diff) / 1000);
+    return toast("⏳ Перезарядка мини-игр! Подожди ещё " + left + " сек.");
+  }
+  lastGameTime = now;
+  togG();
+  const id="g"+now,g={id,tp};
   if(tp==="ttt"){g.b=Array(9).fill("");g.turn="X";g.w=null}
   if(tp==="rps"){g.p1=null;g.p2=null}
   if(tp==="clk"){g.s1=0;g.s2=0;g.tl=10;g.st=0}
   if(tp==="gss"){g.sec=Math.floor(Math.random()*10)+1;g.tr=[];g.ok=0}
-  games[id]=g;getActiveMessages().push({f:"out",s:curUserId&&DB.users[curUserId]?DB.users[curUserId].nick:"Я",uid:curUserId,gid:id,t:"🎮 Мини-игра",tm:tm()});rMsgs();
+  games[id]=g;botMsgs.push({f:"out",gid:id,t:"🎮 Мини-игра",tm:tm()});sel("bot");
 }
+
+function rewardGameWin(){
+  if(!curUserId){
+    toast("Войди через Google, чтобы получать MSGOIN за победы!");
+    return;
+  }
+  addCurrency(curUserId, 0.01, 5);
+  toast("🏆 Победа! +0.01 MSGOIN 🪙 и +5 MSTIX 🎟️");
+}
+
 function rGame(id){
   const g=games[id];
   if(g.tp==="ttt"){let cs="";g.b.forEach((v,i)=>cs+='<div class="cell" onclick="pTTT(\''+id+'\','+i+')">'+v+'</div>');return'<div class="gcard"><div class="row"><b>❌⭕ Крестики-нолики</b><span>'+(g.w?"Итог: "+g.w:"Ход: "+g.turn)+'</span></div><div class="ttt">'+cs+'</div></div>'}
   if(g.tp==="rps"){let b='<div class="ibtns">'+["🪨","✂️","📄"].map(x=>'<button class="mbtn" onclick="pRPS(\''+id+'\',\''+x+'\')">'+x+'</button>').join("")+'</div>';if(g.p1&&g.p2)b='<div style="margin-top:6px">'+g.p1+' vs '+g.p2+' → <b>'+g.res+'</b></div>';return'<div class="gcard"><b>✂️ КНБ</b>'+b+'</div>'}
   if(g.tp==="clk"){const btn=g.tl>0?'<button class="cbtn" onclick="pCLK(\''+id+'\')">ЖМИ! 👆</button>':'<div style="color:var(--on);font-weight:700;margin-top:6px">Финиш! '+g.s1+' : '+g.s2+'</div>';return'<div class="gcard"><div class="row"><b>🔥 Кликер</b><span>⏱ '+g.tl+'с</span></div><div style="font-size:12px;margin-top:4px">Ты: <b>'+g.s1+'</b> | Бот: <b>'+g.s2+'</b></div>'+btn+'</div>'}
-  if(g.tp==="gss"){let btns="";for(let n=1;n<=10;n++)btns+='<button class="mbtn" style="opacity:'+(g.tr.includes(n)?.3:1)+'" onclick="pGSS(\''+id+'\','+n+')">'+n+'</button>';const body=g.ok?'<div style="color:var(--on);font-weight:700;margin-top:6px">🎉 Угадано: '+g.sec+'!</div>':'<div class="ibtns">'+btns+'</div>';return'<div class="gcard"><b>🎲 Угадай 1–10</b><div style="font-size:11px;color:var(--mt)">'+(g.h||"Выбери число:")+'</div>'+body+'</div>'}
+  if(g.tp==="gss"){let btns="";for(let n=1;n<=10;n++)btns+='<button class="mbtn" style="opacity:'+(g.tr.includes(n)?.3:1)+'" onclick="pGSS(\''+id+'\','+n+')">'+n+'</button>';const body=g.ok?'<div style="color:var(--on);font-weight:700;margin-top:6px">🎉 Угадано: '+g.sec+'! (+0.01 🪙)</div>':'<div class="ibtns">'+btns+'</div>';return'<div class="gcard"><b>🎲 Угадай 1–10</b><div style="font-size:11px;color:var(--mt)">'+(g.h||"Выбери число:")+'</div>'+body+'</div>'}
 }
-function pTTT(id,i){const g=games[id];if(!g||g.w||g.b[i])return;g.b[i]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g);if(!g.w){const e=g.b.map((v,x)=>v===""?x:null).filter(v=>v!==null);if(e.length){g.b[e[Math.floor(Math.random()*e.length)]]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g)}}rMsgs()}
+function pTTT(id,i){const g=games[id];if(!g||g.w||g.b[i])return;g.b[i]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g);if(!g.w){const e=g.b.map((v,x)=>v===""?x:null).filter(v=>v!==null);if(e.length){g.b[e[Math.floor(Math.random()*e.length)]]=g.turn;g.turn=g.turn==="X"?"O":"X";chkTTT(g)}}if(g.w==="X")rewardGameWin();rMsgs()}
 function chkTTT(g){const w=["012","345","678","036","147","258","048","246"];for(const s of w){const a=+s,b=+s,c=+s;if(g.b[a]&&g.b[a]===g.b[b]&&g.b[a]===g.b[c])return g.w=g.b[a]}if(!g.b.includes(""))g.w="Ничья"}
-function pRPS(id,c){const g=games[id];if(!g||g.p1)return;g.p1=c;g.p2=["🪨","✂️","📄"][Math.floor(Math.random()*3)];g.res=g.p1===g.p2?"Ничья!":((g.p1==="🪨"&&g.p2==="✂️")||(g.p1==="✂️"&&g.p2==="📄")||(g.p1==="📄"&&g.p2==="🪨"))?"Ты победил!":"Победил бот!";rMsgs()}
-function pCLK(id){const g=games[id];if(!g||g.tl<=0)return;if(!g.st){g.st=1;const t=setInterval(()=>{g.tl--;g.s2+=Math.floor(Math.random()*5)+2;if(g.tl<=0)clearInterval(t);rMsgs()},1000)}g.s1++;rMsgs()}
-function pGSS(id,n){const g=games[id];if(!g||g.ok||g.tr.includes(n))return;g.tr.push(n);if(n===g.sec)g.ok=1;else g.h=n<g.sec?"Больше "+n+" ⬆️":"Меньше "+n+" ⬇️";rMsgs()}
+function pRPS(id,c){const g=games[id];if(!g||g.p1)return;g.p1=c;g.p2=["🪨","✂️","📄"][Math.floor(Math.random()*3)];const win=((g.p1==="🪨"&&g.p2==="✂️")||(g.p1==="✂️"&&g.p2==="📄")||(g.p1==="📄"&&g.p2==="🪨"));g.res=g.p1===g.p2?"Ничья!":(win?"Ты победил! (+0.01 🪙)":"Победил бот!");if(win)rewardGameWin();rMsgs()}
+function pCLK(id){const g=games[id];if(!g||g.tl<=0)return;if(!g.st){g.st=1;const t=setInterval(()=>{g.tl--;g.s2+=Math.floor(Math.random()*5)+2;if(g.tl<=0){clearInterval(t);if(g.s1>g.s2)rewardGameWin()}rMsgs()},1000)}g.s1++;rMsgs()}
+function pGSS(id,n){const g=games[id];if(!g||g.ok||g.tr.includes(n))return;g.tr.push(n);if(n===g.sec){g.ok=1;rewardGameWin()}else g.h=n<g.sec?"Больше "+n+" ⬆️":"Меньше "+n+" ⬇️";rMsgs()}
 
-applyStartChannels();
-renderAll();
-pullDB();
-setInterval(pullDB, 1500);
+(async()=>{
+  renderAll();
+  await detectIP();
+  await pullDB();
+  setInterval(pullDB, 2000);
+})();
 </script>
 </body>
 </html>
