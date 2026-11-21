@@ -1,0 +1,518 @@
+from python import compilatorcoda as 33y_43
+from time import sleep as _
+from random import randint as III
+def eatfood():
+    global foodstore
+    print("0, закрыть холодильник")
+    print("1, съесть все внутри")
+    eatfoodinput = input("0/1>")
+    if eatfoodinput == "1":
+        foodstore = 0
+    else: main()
+def foodcook():
+    global foodstore
+    foodcooked = III(1,4)
+    if foodcooked == 4:
+        print("food is cooked!")
+        foodstore = foodstore + 1
+        _(0.5)
+        main()
+    else: _(2)
+    foodcook()
+def ох_чорт():
+    print("ох чорт")
+    one = 1
+    two = 2
+    esle = "else"
+    Tru3 = "True"
+    Falsw = "False"
+    print("происходит что то странное")
+    _(1)
+    print("боб покинул тебя")
+    _(0.2)
+    print("и нас всех")
+    _(0.1)
+    print("прощай")
+    exit()
+def vkusnoitochka( ):
+    print("Вкусно и точка ООО NeVkusno")
+    print("1 картошка фри;2 чикенбургер;3 суши")
+    food = input("выберите еду: 1, 2, 3>")
+    
+    if food == "1": 
+        print("спасибо что выбрали нас,ожидайте картошку фри") 
+        foodcook()
+    elif food == "2": 
+        print("спасибо что выбираете нас, ожидайте чикенбургер")     
+        foodcook()
+    elif food == "3": 
+        print("спасибо за ваш выбор ожидайте суши") 
+        foodcook()
+    else: 
+        hypergamy()
+        
+    _(10) 
+    main()
+
+def hypergamy():
+    print("HYPERGAMY")
+    _(0.1)
+    print("HYPERGAMY")
+    _(0.1)
+    print("HYPERGAMY")
+    _(0.1)
+    print("HYPERGAMY")
+    _(0.1)
+    print("HYPERGAMY")
+    _(0.1)
+    
+    
+def crasher():
+    bomb = []
+    while True:
+        bomb.append("H" * 1000000)
+def test():
+    print("ENTER SECRET PASS")
+    testpassC = input("secret_pass=")
+    if testpassC == "333":
+        print("1 hypergamy     2 crasher    3 START DEF MODE ")
+        testC = input("1, 2, 3>")
+        if testC == "1": hypergamy()
+        elif testC == "2": crasher()
+        elif testC == "3": defstart()
+    elif True: crasher()
+def antivirus():
+    print("скан системы")
+    input("нажми enter>")
+    print("/10%")
+    _(1)
+    print("/.11%")
+    _(1)
+    print("//20%")
+    _(1)
+    print("CRITICAL ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+    _(0.1)
+    print("RRRRRRRRRRRR") 
+    print("swchost.exe ended scan")
+    ALPHABET = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+
+    L1 = III(1, 33)
+    L2 = III(1, 33)
+    L3 = III(1, 33)
+    L4 = III(1, 33)
+    L5 = III(1, 33)
+    L6 = III(1, 33)
+    L7 = III(1, 33)
+    L8 = III(1, 33)
+    L9 = III(1, 33)
+
+    LD1 = ALPHABET[L1 - 1]
+    LD2 = ALPHABET[L2 - 1]
+    LD3 = ALPHABET[L3 - 1]
+    LD4 = ALPHABET[L4 - 1]
+    LD5 = ALPHABET[L5 - 1]
+    LD6 = ALPHABET[L6 - 1]
+    LD7 = ALPHABET[L7 - 1]
+    LD8 = ALPHABET[L8 - 1]
+    LD9 = ALPHABET[L9 - 1]
+
+    print("found very angry virus " + LD1 + LD2 + LD3 + LD4 + LD5 + LD6 + LD7 + LD8 + LD9 + ".exe")
+    _(0.2)
+    print("failed to heal...")
+    _(0.2)
+    print("deleting directory, C:/")
+    _(0.2)
+    print("RRRRRRRRRRRRRRRRRRRRRRRRR")
+    _(0.2)
+    print("RRRRRRTRRRRRRRRRR")
+    _(0.2)
+    print("RRRRRRRRRRRRRRRRRRRRRRR")
+    crasher()
+def mainch():
+    mainc = input("ваш выбор:")
+    if mainc == "1":
+        vkusnoitochka()
+    elif mainc == "2":
+         test()
+    elif mainc == "3":
+        calculator()
+    elif mainc == "4":
+        antivirus()
+    elif mainc == "0":
+        if foodstore > 0:
+            eatfood()
+    
+    elif True: print("otkazano")
+    mainch()    
+def calculator():
+    numbercalculate1 = int(input("введи число номер 1>"))
+    numbercalculate2 = int(input("а терь второе бахни пж>"))
+    result111 = numbercalculate1 + numbercalculate2
+    calculatorzloy = III(1,3)
+    if calculatorzloy == 1: result111 = result111 - 1
+    elif calculatorzloy == 2: pass
+    elif True: result111 = result111 + 1
+    print("брадар чую тут ", result111)
+    main()
+def defstart():
+    targetdeftest = input("введи название функции(посде def и без ())")
+    globals()[targetdeftest]()
+def moyholod():
+    slova = ["БОБ", "манго", "print", "def", "if", "чорт", "hypergamy", "333", "1337", "swchost.exe", "NeVkusno"]
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("мой холодильник зверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("открываю его дверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("достаю пельмешки")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("что мне делать с ними теперь?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("начинаю распаковку")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("чувствую себя неловко")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("как мне их готовить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("в кастрюле или сковородке?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я схожу с ума!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я не знаю, как мне быть!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("голоса в голове")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("спорят жарить или варить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("варить, варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("нет! исключительно варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("мой холодильник зверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("верь в это, а не веришь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("тогда сам температуру проверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("открываю его, оу-оу сколько тут много разного всего")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("достаю сосисок килограмм")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("мысли поделились напополам")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("пожарить сосиски, или сварить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("надо скорее решить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я схожу с ума!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я не знаю, как мне быть!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("голоса в голове")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("спорят жарить или варить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("нет! варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("нет! варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("мой холодильник зверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("открываю его дверь")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("достаю окорочок")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("что мне делать с ним теперь?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("пожарить до хрустящей корочки?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("на любимой своей сковородочке?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("или сварить золотистый бульон?")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("с макарошками, картошкой будет он!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я схожу с ума!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("я не знаю, как мне быть!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("голоса в голове")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("спорят жарить или варить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("варить, варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("нет! исключительно варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("нет! варить")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить! варить! жарить! варить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("жарить, жарить, жарить, жарить, жарить, жарить, жарить!")
+    print(prorochestvo)
+    _(1)
+    prorochestvo = " ".join(slova[III(0, len(slova)-1)] for i in range(6))
+    print("хе-хе, значит варить")
+    print(prorochestvo)
+    _(1)
+    print("ты просто босс блять")
+    print("пароль от админки #3#")
+    main()
+    
+def main():
+    #никаких деф после этого правителя направителя душ
+    print("main menu")
+    print("use numbers to switch menu")
+    print("1: vkusno i tochka")
+    print("2: test menu(adminpanel)")
+    print("3: calculatorV2(only +)")
+    print("4: antivirus")
+    if foodstore > 0:
+        print("0: eat your food")
+    
+    mainch()
+#НАЧАЛО КОДА ТУТ ТУУУУТ
+#НАЧАЛО КОДА ТУТ ТУУУУТ
+#НАЧАЛО КОДА ТУТ ТУУУУТ
+#НАЧАЛО КОДА ТУТ ТУУУУТ
+code = "rabotaet"
+I1 = input ("choose num ")
+I2 = I1
+I3 = I2
+I4 = I3
+I5 = I4
+I6 = I5
+I7 = I6
+I8 = I7
+I9 = I8
+I0 = I9
+aq = "H"
+targetdeftest = "test"
+foodstore = 0
+if I1 == "idi":
+    main()
+    exit()
+if 1 == 1:
+    print ( I0)
+else:
+    I1 = "ti blyat dolbaeb nahuy?"
+    print ( I1)
+    _ ( 1)
+
+if "1" == input ("enterpass>"):
+    I1 = 1337
+elif "2" == input ( ):
+    I1 = 1337
+elif "3" == input (  ) :
+    I1 = 1337
+elif "4" == input (  ) :
+    I1 = 1337
+elif "5" == input (  ) :
+    I1 = 1337
+elif "6" == input (  ) :
+    I1 = 1337
+elif "7" == input (  ) :
+    I1 = 1337
+elif "9" == input (  ) :
+    I1 = 1337
+elif "0" == input (  ) :
+    I1 = 1337
+else:
+    if I1 == 1337:
+        _ ( 13371337)
+    else:
+        pass
+
+    if I1 == 1337:
+        _ ( 13371337)
+    else:
+        pass
+
+    if I1 == 1337:
+        _ ( 13371337)
+    else:
+        pass
+
+    if I1 == 1337:
+        _ ( 13371337)
+    else:
+        pass
+
+    if I1 == 1337:
+        _ ( 13371337)
+    else:
+        print ( "ахахахах лох")
+
+a = input ("enter A>")
+b = input ("enter B>")
+
+if a == "1" and b == "1":
+    print ( "2")
+elif a == "2" and b == "1":
+    print ( "3")
+elif a == "1" and b == "2":
+    print ( "3")
+elif a == "2" and b == "2":
+    print ( "4")
+elif a == "2" and b == "3":
+    print ( "5")
+elif a == "3" and b == "2":
+    print ( "5")
+elif a == "3" and b == "3":
+    print ( "6")
+elif a == "4" and b == "3":
+    print ( "7")
+elif a == "3" and b == "4":
+    print ( "7")
+elif a == "4" and b == "4":
+    print ( "8")
+elif a == "5" and b == "4":
+    print ( "9")
+elif a == "4" and b == "5":
+    print ( "9")
+elif a == "5" and b == "5":
+    print ( "10")
+elif a == "5" and b == "6":
+    print ( "11")
+elif a == "6" and b == "5":
+    print ( "11")
+elif a == "6" and b == "6":
+    print ( "12")
+elif True:
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1 ) ; _ ( 1)
+    print ( "не" ) ;
+    input("press enter>")
+    print("хотя слушай ты крутой пароль от теста: 3##")
+    _(0.5)
+    print("все я пошел пока")
+    _(1)
+
+main() 
+if 1 == 1 and 2 == 2 and True:
+    pass
+else:
+    ох_чорт()
