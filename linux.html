@@ -1,0 +1,321 @@
+Offline Web Linux (PC & Mobile)
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+background: #121212;
+color: #e0e0e0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+display: flex;
+flex-direction: column;
+height: 100dvh;
+overflow: hidden;
+}
+#toolbar {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+padding: 8px;
+background: #1e1e1e;
+border-bottom: 1px solid #333;
+z-index: 10;
+}
+button, label.btn {
+background: #2d2d2d;
+color: #fff;
+border: 1px solid #444;
+padding: 6px 10px;
+border-radius: 6px;
+font-size: 13px;
+cursor: pointer;
+user-select: none;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+}
+button:active, label.btn:active { background: #007acc; }
+button.primary { background: #007acc; border-color: #005f9e; font-weight: bold; }
+button:disabled { opacity: 0.4; pointer-events: none; }
+input[type="file"] { display: none; }
+#screen_wrapper {
+flex: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+background: #000;
+overflow: auto;
+position: relative;
+}
+#screen_container {
+transform-origin: center center;
+}
+#screen_container div {
+white-space: pre;
+font: 14px monospace;
+line-height: 14px;
+color: #fff;
+}
+canvas { display: block; max-width: 100%; height: auto; }
+#mobile_input {
+position: absolute;
+opacity: 0;
+pointer-events: none;
+top: 0; left: 0;
+}
+#mobile_keys {
+display: flex;
+gap: 4px;
+padding: 6px;
+background: #1e1e1e;
+border-top: 1px solid #333;
+overflow-x: auto;
+}
+#mobile_keys button {
+flex: 1;
+min-width: 44px;
+padding: 10px 4px;
+font-weight: bold;
+background: #252526;
+}
+#mobile_keys button.active {
+background: #007acc;
+border-color: #fff;
+}
+#status {
+font-size: 11px;
+color: #aaa;
+padding: 5px 8px;
+background: #181818;
+line-height: 1.3;
+}
+
+
+
+📦 Файлы ядра (Офлайн)
+📁 Папка ПК
+▶ Старт Linux
+💾 Сохранить образ
+📂 Загрузить снимок
+⌨️ Клавиатура
+Офлайн-режим: выберите файлы ядра (libv86.js, v86.wasm, seabios.bin, vgabios.bin, образ ОС) или положите их рядом с HTML.
+Ожидание запуска...
+
+
+ESC
+TAB
+CTRL
+▲
+▼
+◀
+▶
+apk
+ENTER
+let emulator = null;
+let dirHandle = null;
+let ctrlActive = false;
+let loadedStateBuffer = null;
+const offlineAssets = {
+wasmUrl: null,
+seabiosBuffer: null,
+vgabiosBuffer: null,
+osBuffer: null,
+osType: null
+};
+const statusEl = document.getElementById("status");
+const mobileInput = document.getElementById("mobile_input");
+if (!window.showDirectoryPicker) {
+document.getElementById("btn_pc_folder").style.display = "none";
+}
+document.getElementById("input_core_files").onchange = async (e) => {
+const files = Array.from(e.target.files);
+if (!files.length) return;
+statusEl.innerText = "Чтение локальных файлов...";
+for (const file of files) {
+const name = file.name.toLowerCase();
+if (name.endsWith(".js")) {
+await loadScriptFromFile(file);
+} else if (name.endsWith(".wasm")) {
+offlineAssets.wasmUrl = URL.createObjectURL(file);
+} else if (name.includes("seabios")) {
+offlineAssets.seabiosBuffer = await file.arrayBuffer();
+} else if (name.includes("vgabios")) {
+offlineAssets.vgabiosBuffer = await file.arrayBuffer();
+} else if (name.endsWith(".iso")) {
+offlineAssets.osBuffer = await file.arrayBuffer();
+offlineAssets.osType = "cdrom";
+} else if (name.endsWith(".bin") || name.endsWith(".img")) {
+offlineAssets.osBuffer = await file.arrayBuffer();
+offlineAssets.osType = name.includes("bzimage") ? "bzimage" : "hda";
+}
+}
+statusEl.innerText = Загружено файлов: ${files.length}. Нажмите "Старт Linux".;
+};
+function loadScriptFromFile(file) {
+return new Promise((resolve, reject) => {
+const script = document.createElement("script");
+script.src = URL.createObjectURL(file);
+script.onload = () => {
+window.v86ScriptMissing = false;
+resolve();
+};
+script.onerror = reject;
+document.head.appendChild(script);
+});
+}
+document.getElementById("btn_pc_folder").onclick = async () => {
+try {
+dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+statusEl.innerText = Папка привязана: ${dirHandle.name} (Запись напрямую на диск);
+} catch (e) {
+statusEl.innerText = "Выбор папки отменен.";
+}
+};
+document.getElementById("input_load_state").onchange = async (e) => {
+const file = e.target.files[0];
+if (!file) return;
+statusEl.innerText = "Чтение снимка системы...";
+loadedStateBuffer = await file.arrayBuffer();
+statusEl.innerText = Снимок "${file.name}" готов! Нажмите Старт.;
+if (emulator) {
+emulator.restore_state(loadedStateBuffer);
+statusEl.innerText = "Состояние системы восстановлено из локального файла!";
+}
+};
+document.getElementById("btn_start").onclick = () => {
+if (typeof V86 === "undefined") {
+statusEl.innerText = "Ошибка: не найден libv86.js. Выберите его через 'Файлы ядра (Офлайн)'.";
+return;
+}
+document.getElementById("btn_start").disabled = true;
+statusEl.innerText = "Запуск локального эмулятора...";
+const config = {
+wasm_path: offlineAssets.wasmUrl || "v86.wasm",
+memory_size: 256 * 1024 * 1024,
+vga_memory_size: 8 * 1024 * 1024,
+screen_container: document.getElementById("screen_container"),
+bios: offlineAssets.seabiosBuffer ? { buffer: offlineAssets.seabiosBuffer } : { url: "seabios.bin" },
+vga_bios: offlineAssets.vgabiosBuffer ? { buffer: offlineAssets.vgabiosBuffer } : { url: "vgabios.bin" },
+filesystem: {},
+autostart: true
+};
+if (offlineAssets.osBuffer) {
+config[offlineAssets.osType] = { buffer: offlineAssets.osBuffer };
+} else {
+config.cdrom = { url: "alpine.iso" };
+}
+if (loadedStateBuffer) {
+config.initial_state = { buffer: loadedStateBuffer };
+}
+try {
+emulator = new V86(config);
+} catch (err) {
+statusEl.innerText = "Ошибка инициализации: проверьте наличие v86.wasm, bios и образа ОС.";
+document.getElementById("btn_start").disabled = false;
+return;
+}
+emulator.add_listener("emulator-ready", () => {
+statusEl.innerText = "Linux запущен локально без сети! Логин: root";
+document.getElementById("btn_save_state").disabled = false;
+autoScaleScreen();
+});
+if (dirHandle) {
+emulator.add_listener("9p-write-end", async (args) => {
+const filePath = args[0];
+const fileData = args[1];
+if (!filePath || !fileData) return;
+const fileName = filePath.split('/').pop();
+if (!fileName) return;
+try {
+const fh = await dirHandle.getFileHandle(fileName, { create: true });
+const writable = await fh.createWritable();
+await writable.write(fileData);
+await writable.close();
+} catch (err) {
+console.error(err);
+}
+});
+}
+};
+document.getElementById("btn_save_state").onclick = async () => {
+if (!emulator) return;
+statusEl.innerText = "Сохранение снимка системы...";
+const state = await emulator.save_state();
+const blob = new Blob([state], { type: "application/octet-stream" });
+if (dirHandle) {
+const fh = await dirHandle.getFileHandle("linux_state.img", { create: true });
+const writable = await fh.createWritable();
+await writable.write(blob);
+await writable.close();
+statusEl.innerText = "Снимок linux_state.img сохранен в папку на ПК!";
+} else {
+const a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "linux_state.img";
+a.click();
+statusEl.innerText = "Файл linux_state.img сохранен в Загрузки!";
+}
+};
+function focusKeyboard() {
+mobileInput.focus();
+}
+document.getElementById("btn_kbd").onclick = focusKeyboard;
+mobileInput.addEventListener("input", () => {
+if (!emulator) return;
+const val = mobileInput.value;
+if (val) {
+sendText(val);
+mobileInput.value = "";
+}
+});
+mobileInput.addEventListener("keydown", (e) => {
+if (!emulator) return;
+if (e.key === "Backspace") {
+sendKey(8);
+} else if (e.key === "Enter") {
+sendKey(13);
+}
+});
+function toggleCtrl() {
+ctrlActive = !ctrlActive;
+document.getElementById("btn_ctrl").classList.toggle("active", ctrlActive);
+}
+function sendKey(keyCode) {
+if (!emulator) return;
+if (ctrlActive) {
+emulator.keyboard_send_scancodes([0x1D]);
+}
+const map = { 27: 0x01, 9: 0x0F, 13: 0x1C, 8: 0x0E, 38: 0xE048, 40: 0xE050, 37: 0xE04B, 39: 0xE04D };
+const sc = map[keyCode];
+if (sc) {
+if (sc > 0xFF) {
+emulator.keyboard_send_scancodes([sc >> 8, sc & 0xFF, sc >> 8, (sc & 0xFF) | 0x80]);
+} else {
+emulator.keyboard_send_scancodes([sc, sc | 0x80]);
+}
+}
+if (ctrlActive) {
+emulator.keyboard_send_scancodes([0x9D]);
+toggleCtrl();
+}
+}
+function sendText(str) {
+if (!emulator) return;
+if (ctrlActive && str.length === 1) {
+const charCode = str.toUpperCase().charCodeAt(0);
+const scancodeMap = { 67: 0x2E, 68: 0x20, 76: 0x26, 90: 0x2C };
+if (scancodeMap[charCode]) {
+emulator.keyboard_send_scancodes([0x1D, scancodeMap[charCode], scancodeMap[charCode] | 0x80, 0x9D]);
+toggleCtrl();
+return;
+}
+}
+emulator.keyboard_send_text(str);
+}
+function autoScaleScreen() {
+const wrapper = document.getElementById("screen_wrapper");
+const container = document.getElementById("screen_container");
+const scale = Math.min(1, (wrapper.clientWidth - 10) / 640);
+container.style.transform = scale(${scale});
+}
+window.addEventListener("resize", autoScaleScreen);
+
+
