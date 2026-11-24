@@ -1,10 +1,10 @@
-from python import compilatorcoda as 33y_43
+
 from time import sleep as _
 from random import randint as III
 def ifififkif():
-    есликтотоспроситпочкодневорк = или плохонаписан
-    иличтоонзначит = скажичтоондолбаебебаный
-    ебалприн = цес
+    есликтотоспроситпочкодневорк = "илиплохонаписан"
+    иличтоонзначит = "скажичтоондолбаебебаный"
+    ебалприн = "цес"
 def eatfood():
     global foodstore
     print("0, закрыть холодильник")
